@@ -1,3 +1,5 @@
+import { Socket } from 'socket.io'
+
 interface Player {
   id: string
   x: number
@@ -11,9 +13,11 @@ interface Ball {
   velocityY: number
 }
 
-class Game {
+export class Game {
   players: Player[] = []
   ball: Ball = { x: 400, y: 300, velocityX: 2, velocityY: 2 }
+
+  constructor() {}
 
   addPlayer(id: string) {
     const newPlayer: Player = {
@@ -30,5 +34,3 @@ class Game {
     // Handle collisions and update player/ball positions
   }
 }
-
-export default Game

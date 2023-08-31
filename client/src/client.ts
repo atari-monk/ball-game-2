@@ -12,13 +12,33 @@ if (!ctx) {
   throw new Error('Canvas 2d context not available.')
 }
 
+interface Player {
+  id: string
+  x: number
+  y: number
+}
+
+interface GameState {
+  players: Record<string, Player>
+  ball: {
+    x: number
+    y: number
+  }
+}
+
 const players: Record<string, { x: number; y: number }> = {}
+
+socket.on('connect', () => {
+  console.log('Connected to server')
+})
 
 socket.on('playerInfo', (player: { id: string; x: number; y: number }) => {
   players[player.id] = { x: player.x, y: player.y }
 })
 
-socket.on('gameState', (gameState: any) => {
+socket.on('gameState', (gameState: GameState) => {
+  const { players, ball } = gameState
+
   // Update and render the game state on the canvas
   ctx.clearRect(0, 0, canvas.width, canvas.height)
 
@@ -29,8 +49,20 @@ socket.on('gameState', (gameState: any) => {
     ctx.arc(player.x, player.y, 10, 0, 2 * Math.PI)
     ctx.fill()
   }
+
+  ctx.fillStyle = 'red' // Change color or style for the ball
+  ctx.beginPath()
+  ctx.arc(ball.x, ball.y, 10, 0, 2 * Math.PI)
+  ctx.fill()
 })
 
 document.addEventListener('keydown', (event: KeyboardEvent) => {
-  // Send input to the server using socket.emit('input', input);
+  const input = {
+    up: event.key === 'ArrowUp',
+    down: event.key === 'ArrowDown',
+    left: event.key === 'ArrowLeft',
+    right: event.key === 'ArrowRight',
+  }
+  console.log('input: ', input)
+  socket.emit('input', input)
 })

@@ -1,7 +1,7 @@
 import express from 'express'
 import http from 'http'
 import { Server } from 'socket.io'
-import Game from './Game'
+import { Game } from './Game'
 import cors from 'cors'
 
 const app = express()
@@ -23,7 +23,6 @@ app.use(
 // Serve static files (e.g., HTML, CSS, JS)
 //app.use(express.static(__dirname + '/public'))
 
-//
 const game = new Game()
 
 io.on('connection', (socket) => {
@@ -37,6 +36,14 @@ io.on('connection', (socket) => {
   // Handle player input
   socket.on('input', (input) => {
     // Update player's state based on input
+    const player = game.players.find((p) => p.id === socket.id)
+    if (player) {
+      if (input.up) player.y -= 5
+      if (input.down) player.y += 5
+      if (input.left) player.x -= 5
+      if (input.right) player.x += 5
+      console.log('player', player);
+    }
   })
 
   // Handle disconnection
@@ -54,7 +61,6 @@ setInterval(() => {
   // Emit updated game state to all connected clients
   io.emit('gameState', game)
 }, 1000 / 30)
-//
 
 // Start the server
 const PORT = process.env.PORT || 3001
