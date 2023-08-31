@@ -28,9 +28,11 @@ const game = new Game()
 
 io.on('connection', (socket) => {
   // Handle player connection
-  socket.on('join', () => {
-    // Add player to the game
-  })
+  const player = game.addPlayer(socket.id)
+  console.log(`Player ${player.id} connected.`)
+
+  // Emit player information to the connected client
+  socket.emit('playerInfo', player)
 
   // Handle player input
   socket.on('input', (input) => {
@@ -39,7 +41,9 @@ io.on('connection', (socket) => {
 
   // Handle disconnection
   socket.on('disconnect', () => {
+    console.log(`Player ${player.id} disconnected.`)
     // Remove player from the game
+    game.players = game.players.filter((p) => p.id !== socket.id)
   })
 })
 
