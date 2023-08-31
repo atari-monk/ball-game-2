@@ -2,13 +2,26 @@ import express from 'express'
 import http from 'http'
 import { Server } from 'socket.io'
 import Game from './Game'
+import cors from 'cors'
 
 const app = express()
 const server = http.createServer(app)
-const io = new Server(server)
+const io = new Server(server, {
+  cors: {
+    origin: '*',
+    methods: ['GET', 'POST'],
+    allowedHeaders: ['Content-Type'],
+  },
+})
+
+app.use(
+  cors({
+    origin: 'http://127.0.0.1:3000',
+  })
+)
 
 // Serve static files (e.g., HTML, CSS, JS)
-app.use(express.static(__dirname + '/public'))
+//app.use(express.static(__dirname + '/public'))
 
 //
 const game = new Game()
@@ -40,7 +53,7 @@ setInterval(() => {
 //
 
 // Start the server
-const PORT = process.env.PORT || 3000
+const PORT = process.env.PORT || 3001
 server.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`)
 })
