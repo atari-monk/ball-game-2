@@ -16,6 +16,7 @@ interface Player {
   id: string
   x: number
   y: number
+  radius: number
 }
 
 interface GameState {
@@ -23,6 +24,7 @@ interface GameState {
   ball: {
     x: number
     y: number
+    radius: number
   }
 }
 
@@ -46,13 +48,13 @@ socket.on('gameState', (gameState: GameState) => {
     const player = players[playerId]
     ctx.fillStyle = 'blue' // Change color or style as needed
     ctx.beginPath()
-    ctx.arc(player.x, player.y, 10, 0, 2 * Math.PI)
+    ctx.arc(player.x, player.y, player.radius, 0, 2 * Math.PI)
     ctx.fill()
   }
 
   ctx.fillStyle = 'red' // Change color or style for the ball
   ctx.beginPath()
-  ctx.arc(ball.x, ball.y, 10, 0, 2 * Math.PI)
+  ctx.arc(ball.x, ball.y, ball.radius, 0, 2 * Math.PI)
   ctx.fill()
 })
 
