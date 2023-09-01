@@ -17,6 +17,7 @@ interface Player {
   x: number
   y: number
   radius: number
+  mass: number
 }
 
 interface GameState {
@@ -25,6 +26,7 @@ interface GameState {
     x: number
     y: number
     radius: number
+    mass: number
   }
 }
 

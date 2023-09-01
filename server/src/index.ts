@@ -38,11 +38,11 @@ io.on('connection', (socket) => {
     // Update player's state based on input
     const player = game.players.find((p) => p.id === socket.id)
     if (player) {
-      if (input.up) player.y -= 5
-      if (input.down) player.y += 5
-      if (input.left) player.x -= 5
-      if (input.right) player.x += 5
-      console.log('player', player);
+      if (input.up) player.speed = Math.min(player.speed + 5, player.maxSpeed)
+      if (input.down) player.speed = Math.max(player.speed - 5, 0)
+      if (input.left) player.direction -= 0.1
+      if (input.right) player.direction += 0.1
+      console.log('player', player)
     }
   })
 
