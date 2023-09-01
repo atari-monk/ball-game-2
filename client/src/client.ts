@@ -28,6 +28,10 @@ interface GameState {
     radius: number
     mass: number
   }
+  field: {
+    width: number
+    height: number
+  }
 }
 
 const players: Record<string, { x: number; y: number }> = {}
@@ -37,14 +41,20 @@ socket.on('connect', () => {
 })
 
 socket.on('playerInfo', (player: { id: string; x: number; y: number }) => {
+  console.log('Received playerInfo:', player)
   players[player.id] = { x: player.x, y: player.y }
 })
 
 socket.on('gameState', (gameState: GameState) => {
-  const { players, ball } = gameState
+  console.log('Received gameState:', gameState)
+  const { players, ball, field } = gameState
 
   // Update and render the game state on the canvas
   ctx.clearRect(0, 0, canvas.width, canvas.height)
+
+  // Draw the field as a rectangle
+  ctx.fillStyle = 'green'
+  ctx.fillRect(0, 0, field.width, field.height)
 
   for (const playerId in players) {
     const player = players[playerId]

@@ -21,6 +21,11 @@ interface Ball {
   mass: number
 }
 
+interface Field {
+  width: number
+  height: number
+}
+
 export class Game {
   players: Player[] = []
   ball: Ball = {
@@ -31,6 +36,7 @@ export class Game {
     radius: 5,
     mass: 5,
   }
+  field: Field = { width: 800, height: 600 }
 
   constructor() {}
 
@@ -87,6 +93,59 @@ export class Game {
             player.collisionDisabled = false // Re-enable after a delay
           }, 2000) // Adjust the delay as needed
         }
+      }
+    }
+
+    for (const player of this.players) {
+      //
+      const newX = player.x + player.velocityX
+      const newY = player.y + player.velocityY
+
+      let directionChanged = false
+
+      // Check if the player hits the left or right wall
+      if (newX - player.radius < 0 || newX + player.radius > this.field.width) {
+        // Move the player slightly away from the wall to prevent re-collision
+        if (newX - player.radius < 0) {
+          player.x = player.radius // Adjust this value as needed
+        } else {
+          player.x = this.field.width - player.radius // Adjust this value as needed
+        }
+
+        // Reverse the player's direction (horizontal)
+        player.direction = Math.PI - player.direction
+        directionChanged = true
+
+        console.log('player', player)
+      }
+
+      // Check if the player hits the top or bottom wall
+      if (
+        newY - player.radius < 0 ||
+        newY + player.radius > this.field.height
+      ) {
+        // Move the player slightly away from the wall to prevent re-collision
+        if (newY - player.radius < 0) {
+          player.y = player.radius // Adjust this value as needed
+        } else {
+          player.y = this.field.height - player.radius // Adjust this value as needed
+        }
+
+        // Reverse the player's direction (vertical)
+        player.direction = -player.direction
+        directionChanged = true
+
+        console.log('player', player)
+      }
+
+      // If direction was changed, normalize it
+      if (directionChanged) {
+        const length = Math.sqrt(
+          player.velocityX * player.velocityX +
+            player.velocityY * player.velocityY
+        )
+        player.velocityX /= length
+        player.velocityY /= length
       }
     }
   }
