@@ -70,6 +70,8 @@ export class Game {
 
     // Check collision with walls
     this.checkWallCollision()
+
+    this.checkWallCollisionForBall()
   }
 
   updateBallPosition() {
@@ -160,6 +162,43 @@ export class Game {
 
       if (directionChanged) {
         this.normalizePlayerDirection(player)
+      }
+    }
+  }
+
+  checkWallCollisionForBall() {
+    const newX = this.ball.x + this.ball.velocityX
+    const newY = this.ball.y + this.ball.velocityY
+
+    // Check if the ball hits the left or right wall
+    if (
+      newX - this.ball.radius < 0 ||
+      newX + this.ball.radius > this.field.width
+    ) {
+      // Reverse the ball's horizontal velocity
+      this.ball.velocityX *= -1
+
+      // Move the ball slightly away from the wall to prevent re-collision
+      if (newX - this.ball.radius < 0) {
+        this.ball.x = this.ball.radius // Adjust this value as needed
+      } else {
+        this.ball.x = this.field.width - this.ball.radius // Adjust this value as needed
+      }
+    }
+
+    // Check if the ball hits the top or bottom wall
+    if (
+      newY - this.ball.radius < 0 ||
+      newY + this.ball.radius > this.field.height
+    ) {
+      // Reverse the ball's vertical velocity
+      this.ball.velocityY *= -1
+
+      // Move the ball slightly away from the wall to prevent re-collision
+      if (newY - this.ball.radius < 0) {
+        this.ball.y = this.ball.radius // Adjust this value as needed
+      } else {
+        this.ball.y = this.field.height - this.ball.radius // Adjust this value as needed
       }
     }
   }
