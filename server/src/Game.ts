@@ -26,6 +26,13 @@ interface Field {
   height: number
 }
 
+interface Gate {
+  x: number
+  y: number
+  width: number
+  height: number
+}
+
 export class Game {
   players: Player[] = []
   ball: Ball = {
@@ -37,8 +44,51 @@ export class Game {
     mass: 5,
   }
   field: Field = { width: 800, height: 600 }
+  gates: {
+    left: Gate
+    right: Gate
+  }
 
-  constructor() {}
+  constructor() {
+    this.gates = {
+      left: {
+        x: 0,
+        y: this.field.height / 2 - 50, // Adjust position as needed
+        width: 10,
+        height: 100,
+      },
+      right: {
+        x: this.field.width - 10, // Adjust position as needed
+        y: this.field.height / 2 - 50, // Adjust position as needed
+        width: 10,
+        height: 100,
+      },
+    }
+  }
+
+  checkGateCollision() {
+    // Check if the ball hits the left gate
+    if (
+      this.ball.x >= this.gates.left.x &&
+      this.ball.x <= this.gates.left.x + this.gates.left.width &&
+      this.ball.y >= this.gates.left.y &&
+      this.ball.y <= this.gates.left.y + this.gates.left.height
+    ) {
+      console.log('Ball hit the left gate')
+      // Handle left gate collision here
+    }
+
+    // Check if the ball hits the right gate
+    if (
+      this.ball.x >= this.gates.right.x &&
+      this.ball.x <= this.gates.right.x + this.gates.right.width &&
+      this.ball.y >= this.gates.right.y &&
+      this.ball.y <= this.gates.right.y + this.gates.right.height
+    ) {
+      console.log('Ball hit the right gate')
+      // Handle right gate collision here
+    }
+  }
 
   addPlayer(id: string) {
     const newPlayer: Player = {
@@ -72,6 +122,8 @@ export class Game {
     this.checkWallCollision()
 
     this.checkWallCollisionForBall()
+
+    this.checkGateCollision()
   }
 
   updateBallPosition() {

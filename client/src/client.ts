@@ -20,6 +20,13 @@ interface Player {
   mass: number
 }
 
+interface Gate {
+  x: number
+  y: number
+  width: number
+  height: number
+}
+
 interface GameState {
   players: Record<string, Player>
   ball: {
@@ -31,6 +38,10 @@ interface GameState {
   field: {
     width: number
     height: number
+  }
+  gates: {
+    left: Gate
+    right: Gate
   }
 }
 
@@ -46,8 +57,8 @@ socket.on('playerInfo', (player: { id: string; x: number; y: number }) => {
 })
 
 socket.on('gameState', (gameState: GameState) => {
-  console.log('Received gameState:', gameState)
-  const { players, ball, field } = gameState
+  //console.log('Received gameState:', gameState)
+  const { players, ball, field, gates } = gameState
 
   // Update and render the game state on the canvas
   ctx.clearRect(0, 0, canvas.width, canvas.height)
@@ -55,6 +66,16 @@ socket.on('gameState', (gameState: GameState) => {
   // Draw the field as a rectangle
   ctx.fillStyle = 'green'
   ctx.fillRect(0, 0, field.width, field.height)
+
+  // Draw the gates
+  ctx.fillStyle = 'gray' // Set the gate color
+  ctx.fillRect(gates.left.x, gates.left.y, gates.left.width, gates.left.height)
+  ctx.fillRect(
+    gates.right.x,
+    gates.right.y,
+    gates.right.width,
+    gates.right.height
+  )
 
   for (const playerId in players) {
     const player = players[playerId]
@@ -77,6 +98,6 @@ document.addEventListener('keydown', (event: KeyboardEvent) => {
     left: event.key === 'ArrowLeft',
     right: event.key === 'ArrowRight',
   }
-  console.log('input: ', input)
+  //console.log('input: ', input)
   socket.emit('input', input)
 })
