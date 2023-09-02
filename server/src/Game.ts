@@ -60,92 +60,49 @@ export class Game {
 
   update() {
     // Update ball position based on its velocity
+    this.updateBallPosition()
+
+    // Update player positions based on their velocity
+    this.updatePlayerPositions()
+
+    // Check collision with players
+    this.checkPlayerBallCollision()
+
+    // Check collision with walls
+    this.checkWallCollision()
+  }
+
+  updateBallPosition() {
     this.ball.x += this.ball.velocityX
     this.ball.y += this.ball.velocityY
+  }
 
+  updatePlayerPositions() {
     for (const player of this.players) {
       const speed = player.speed
       player.velocityX = speed * Math.cos(player.direction)
       player.velocityY = speed * Math.sin(player.direction)
 
-      // Update player positions based on their velocity
       player.x += player.velocityX
       player.y += player.velocityY
     }
+  }
 
-    // Check collision with players
+  checkPlayerBallCollision() {
     for (const player of this.players) {
-      // Check if collision detection is enabled for this player
       if (!player.collisionDisabled) {
         const dx = this.ball.x - player.x
         const dy = this.ball.y - player.y
         const distance = Math.sqrt(dx * dx + dy * dy)
 
-        // Assuming players and ball have a radius property
         if (distance < player.radius + this.ball.radius) {
-          // Collision detected; handle the collision here
-          // For example, reverse the ball's direction and give it some speed
           this.handleCollision(player, this.ball)
-          console.log('ball:', this.ball)
-          // Disable collision detection for this player
+
           player.collisionDisabled = true
           setTimeout(() => {
-            player.collisionDisabled = false // Re-enable after a delay
-          }, 2000) // Adjust the delay as needed
+            player.collisionDisabled = false
+          }, 2000)
         }
-      }
-    }
-
-    for (const player of this.players) {
-      //
-      const newX = player.x + player.velocityX
-      const newY = player.y + player.velocityY
-
-      let directionChanged = false
-
-      // Check if the player hits the left or right wall
-      if (newX - player.radius < 0 || newX + player.radius > this.field.width) {
-        // Move the player slightly away from the wall to prevent re-collision
-        if (newX - player.radius < 0) {
-          player.x = player.radius // Adjust this value as needed
-        } else {
-          player.x = this.field.width - player.radius // Adjust this value as needed
-        }
-
-        // Reverse the player's direction (horizontal)
-        player.direction = Math.PI - player.direction
-        directionChanged = true
-
-        console.log('player', player)
-      }
-
-      // Check if the player hits the top or bottom wall
-      if (
-        newY - player.radius < 0 ||
-        newY + player.radius > this.field.height
-      ) {
-        // Move the player slightly away from the wall to prevent re-collision
-        if (newY - player.radius < 0) {
-          player.y = player.radius // Adjust this value as needed
-        } else {
-          player.y = this.field.height - player.radius // Adjust this value as needed
-        }
-
-        // Reverse the player's direction (vertical)
-        player.direction = -player.direction
-        directionChanged = true
-
-        console.log('player', player)
-      }
-
-      // If direction was changed, normalize it
-      if (directionChanged) {
-        const length = Math.sqrt(
-          player.velocityX * player.velocityX +
-            player.velocityY * player.velocityY
-        )
-        player.velocityX /= length
-        player.velocityY /= length
       }
     }
   }
@@ -177,5 +134,62 @@ export class Game {
     player.velocityY = newV1y
     ball.velocityX = newV2x
     ball.velocityY = newV2y
+  }
+
+  checkWallCollision() {
+    for (const player of this.players) {
+      const newX = player.x + player.velocityX
+      const newY = player.y + player.velocityY
+
+      let directionChanged = false
+
+      if (newX - player.radius < 0 || newX + player.radius > this.field.width) {
+        this.adjustHorizontalWallCollision(player, newX)
+
+        directionChanged = true
+      }
+
+      if (
+        newY - player.radius < 0 ||
+        newY + player.radius > this.field.height
+      ) {
+        this.adjustVerticalWallCollision(player, newY)
+
+        directionChanged = true
+      }
+
+      if (directionChanged) {
+        this.normalizePlayerDirection(player)
+      }
+    }
+  }
+
+  adjustHorizontalWallCollision(player: Player, newX: number) {
+    if (newX - player.radius < 0) {
+      player.x = player.radius
+    } else {
+      player.x = this.field.width - player.radius
+    }
+
+    player.direction = Math.PI - player.direction
+  }
+
+  adjustVerticalWallCollision(player: Player, newY: number) {
+    if (newY - player.radius < 0) {
+      player.y = player.radius
+    } else {
+      player.y = this.field.height - player.radius
+    }
+
+    player.direction = -player.direction
+  }
+
+  normalizePlayerDirection(player: Player) {
+    const length = Math.sqrt(
+      player.velocityX * player.velocityX + player.velocityY * player.velocityY
+    )
+
+    player.velocityX /= length
+    player.velocityY /= length
   }
 }
