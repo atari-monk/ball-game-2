@@ -45,7 +45,12 @@ interface Message {
   text: string
 }
 
-export class Game {
+interface Match {
+  matchDuration: number
+  matchStartTime: number | null
+}
+
+export class Game implements Match {
   players: Player[] = []
   ball: Ball = {
     x: 400,
@@ -65,6 +70,8 @@ export class Game {
     { name: 'Team B', color: 'blue', playerIds: [] },
   ]
   messages: Message[] = []
+  matchDuration: number = 5 * 60 * 1000 // 5 minutes in milliseconds
+  matchStartTime: number | null = null
 
   constructor() {
     this.gates = {
@@ -133,7 +140,20 @@ export class Game {
       team: null,
     }
     this.assignPlayerToTeam(newPlayer)
+
     this.players.push(newPlayer)
+
+    this.sendServerMessage('server', `Player ${newPlayer.id} connected.`)
+
+    if (this.matchStartTime === null && this.players.length === 2) {
+      // Start the match timer when there are two players
+      this.matchStartTime = Date.now()
+      this.sendServerMessage(
+        'server',
+        `Game starts at ${new Date(this.matchStartTime)}`
+      )
+    }
+
     return newPlayer
   }
 
@@ -154,7 +174,29 @@ export class Game {
     }
   }
 
-  update() {
+  update(deltaTime: number) {
+    // Calculate the remaining time if the match has started
+    if (this.matchStartTime !== null) {
+      const currentTime = Date.now()
+      const elapsedTime = currentTime - this.matchStartTime
+      const remainingTimeMinutes = (this.matchDuration - elapsedTime) / 60000 // Convert milliseconds to minutes
+
+      // Log the remaining time every minute
+      if (elapsedTime % 60000 <= deltaTime && remainingTimeMinutes >= 0) {
+        // Check if it's been a minute
+        this.sendServerMessage(
+          'server',
+          `Remaining time: ${remainingTimeMinutes.toFixed(1)} minutes`
+        )
+      }
+
+      // Check if the match has ended
+      if (elapsedTime >= this.matchDuration) {
+        this.sendServerMessage('server', 'Match over!')
+        this.matchStartTime = null // Add a method to stop the timer when the match is over
+      }
+    }
+
     // Update ball position based on its velocity
     this.updateBallPosition()
 

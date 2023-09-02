@@ -28,21 +28,21 @@ const game = new Game()
 io.on('connection', (socket) => {
   // Handle player connection
   const player = game.addPlayer(socket.id)
-  console.log(`Player ${player.id} connected.`)
-  game.sendServerMessage('server', `Player ${player.id} connected.`)
+  //console.log(`Player ${player.id} connected.`)
+
   // Emit player information to the connected client
-  socket.emit('playerInfo', player)
+  //socket.emit('playerInfo', player)
 
   // Handle player input
   socket.on('input', (input) => {
     // Update player's state based on input
     const player = game.players.find((p) => p.id === socket.id)
     if (player) {
-      if (input.up) player.speed = Math.min(player.speed + .5, player.maxSpeed)
-      if (input.down) player.speed = Math.max(player.speed - .5, 0)
+      if (input.up) player.speed = Math.min(player.speed + 0.5, player.maxSpeed)
+      if (input.down) player.speed = Math.max(player.speed - 0.5, 0)
       if (input.left) player.direction -= 0.2
       if (input.right) player.direction += 0.2
-      console.log('player', player)
+      //console.log('player', player)
     }
   })
 
@@ -54,13 +54,22 @@ io.on('connection', (socket) => {
   })
 })
 
+const frameRate = 30 // Frames per second (adjust as needed)
+const frameInterval = 1000 / frameRate // Interval in milliseconds
+let lastFrameTime = Date.now()
+
 // Game loop
 setInterval(() => {
-  game.update()
+  const currentTime = Date.now()
+  const deltaTime = currentTime - lastFrameTime
+
+  game.update(deltaTime)
 
   // Emit updated game state to all connected clients
   io.emit('gameState', game)
-}, 1000 / 30)
+
+  lastFrameTime = currentTime
+}, frameInterval)
 
 // Start the server
 const PORT = process.env.PORT || 3001

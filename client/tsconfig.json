@@ -5,6 +5,7 @@
     "rootDir": "./src",
     "module": "ESNext",
     "moduleResolution": "node",
-    "strict": true
+    "strict": true,
+    "declaration": true
   }
 }

@@ -79,16 +79,16 @@ interface GameState {
   messages: Message[]
 }
 
-const players: Record<string, { x: number; y: number }> = {}
+//const players: Record<string, { x: number; y: number }> = {}
 
-socket.on('connect', () => {
-  console.log('Connected to server')
-})
+// socket.on('connect', () => {
+//   console.log('Connected to server')
+// })
 
-socket.on('playerInfo', (player: { id: string; x: number; y: number }) => {
-  console.log('Received playerInfo:', player)
-  players[player.id] = { x: player.x, y: player.y }
-})
+// socket.on('playerInfo', (player: { id: string; x: number; y: number }) => {
+//   console.log('Received playerInfo:', player)
+//   players[player.id] = { x: player.x, y: player.y }
+// })
 
 socket.on('gameState', (gameState: GameState) => {
   //console.log('Received gameState:', gameState)
