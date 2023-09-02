@@ -10,6 +10,7 @@ interface Player {
   direction: number
   speed: number
   maxSpeed: number
+  team: Team | null
 }
 
 interface Ball {
@@ -33,6 +34,12 @@ interface Gate {
   height: number
 }
 
+interface Team {
+  name: string
+  color: string
+  playerIds: string[]
+}
+
 export class Game {
   players: Player[] = []
   ball: Ball = {
@@ -48,6 +55,10 @@ export class Game {
     left: Gate
     right: Gate
   }
+  teams: Team[] = [
+    { name: 'Team A', color: 'red', playerIds: [] },
+    { name: 'Team B', color: 'blue', playerIds: [] },
+  ]
 
   constructor() {
     this.gates = {
@@ -103,9 +114,28 @@ export class Game {
       direction: 0,
       speed: 0,
       maxSpeed: 10,
+      team: null,
     }
+    this.assignPlayerToTeam(newPlayer)
     this.players.push(newPlayer)
     return newPlayer
+  }
+
+  assignPlayerToTeam(player: Player) {
+    if (player.team === null) {
+      // Find the team with fewer players
+      const teamA = this.teams[0]
+      const teamB = this.teams[1]
+
+      // Choose the team with fewer players
+      const selectedTeam =
+        teamA.playerIds.length <= teamB.playerIds.length ? teamA : teamB
+
+      // Assign the player to the selected team
+      player.team = selectedTeam
+      // Add the player's ID to the team's list of player IDs
+      selectedTeam.playerIds.push(player.id)
+    }
   }
 
   update() {

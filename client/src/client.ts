@@ -18,6 +18,16 @@ interface Player {
   y: number
   radius: number
   mass: number
+  direction: number
+  speed: number
+  maxSpeed: number
+  team: Team | null
+}
+
+interface Team {
+  name: string
+  color: string
+  playerIds: string[]
 }
 
 interface Gate {
@@ -79,13 +89,13 @@ socket.on('gameState', (gameState: GameState) => {
 
   for (const playerId in players) {
     const player = players[playerId]
-    ctx.fillStyle = 'blue' // Change color or style as needed
+    ctx.fillStyle = player.team?.color ?? 'blue' // Change color or style as needed
     ctx.beginPath()
     ctx.arc(player.x, player.y, player.radius, 0, 2 * Math.PI)
     ctx.fill()
   }
 
-  ctx.fillStyle = 'red' // Change color or style for the ball
+  ctx.fillStyle = 'yellow' // Change color or style for the ball
   ctx.beginPath()
   ctx.arc(ball.x, ball.y, ball.radius, 0, 2 * Math.PI)
   ctx.fill()
