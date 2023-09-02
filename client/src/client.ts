@@ -12,6 +12,24 @@ if (!ctx) {
   throw new Error('Canvas 2d context not available.')
 }
 
+const logTextarea = document.getElementById('log') as HTMLTextAreaElement | null
+if (!logTextarea) {
+  throw new Error('log Text area not available.')
+}
+
+const printedMessages: Set<string> = new Set<string>()
+
+function addMessageToLog(message: Message) {
+  const messageText = `${message.sender}: ${message.text}`
+  if (logTextarea && !printedMessages.has(messageText)) {
+    logTextarea.value += messageText + '\n'
+    logTextarea.scrollTop = logTextarea.scrollHeight
+
+    // Add the message text to the set of printed messages
+    printedMessages.add(messageText)
+  }
+}
+
 interface Player {
   id: string
   x: number
@@ -37,6 +55,11 @@ interface Gate {
   height: number
 }
 
+interface Message {
+  sender: string
+  text: string
+}
+
 interface GameState {
   players: Record<string, Player>
   ball: {
@@ -53,6 +76,7 @@ interface GameState {
     left: Gate
     right: Gate
   }
+  messages: Message[]
 }
 
 const players: Record<string, { x: number; y: number }> = {}
@@ -99,7 +123,15 @@ socket.on('gameState', (gameState: GameState) => {
   ctx.beginPath()
   ctx.arc(ball.x, ball.y, ball.radius, 0, 2 * Math.PI)
   ctx.fill()
+
+  updateMessageBoard(gameState.messages)
 })
+
+function updateMessageBoard(messages: Message[]) {
+  messages.forEach((message) => {
+    addMessageToLog(message)
+  })
+}
 
 document.addEventListener('keydown', (event: KeyboardEvent) => {
   const input = {

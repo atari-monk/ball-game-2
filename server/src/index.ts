@@ -29,7 +29,7 @@ io.on('connection', (socket) => {
   // Handle player connection
   const player = game.addPlayer(socket.id)
   console.log(`Player ${player.id} connected.`)
-
+  game.sendServerMessage('server', `Player ${player.id} connected.`)
   // Emit player information to the connected client
   socket.emit('playerInfo', player)
 

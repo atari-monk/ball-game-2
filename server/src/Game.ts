@@ -40,6 +40,11 @@ interface Team {
   playerIds: string[]
 }
 
+interface Message {
+  sender: string
+  text: string
+}
+
 export class Game {
   players: Player[] = []
   ball: Ball = {
@@ -59,6 +64,7 @@ export class Game {
     { name: 'Team A', color: 'red', playerIds: [] },
     { name: 'Team B', color: 'blue', playerIds: [] },
   ]
+  messages: Message[] = []
 
   constructor() {
     this.gates = {
@@ -75,6 +81,16 @@ export class Game {
         height: 100,
       },
     }
+  }
+
+  sendServerMessage(sender: string, messageText: string) {
+    const message: Message = {
+      sender,
+      text: messageText,
+    }
+
+    // Add the message to the game state
+    this.messages.push(message)
   }
 
   checkGateCollision() {
