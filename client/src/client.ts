@@ -79,17 +79,6 @@ interface GameState {
   messages: Message[]
 }
 
-//const players: Record<string, { x: number; y: number }> = {}
-
-// socket.on('connect', () => {
-//   console.log('Connected to server')
-// })
-
-// socket.on('playerInfo', (player: { id: string; x: number; y: number }) => {
-//   console.log('Received playerInfo:', player)
-//   players[player.id] = { x: player.x, y: player.y }
-// })
-
 socket.on('gameState', (gameState: GameState) => {
   //console.log('Received gameState:', gameState)
   const { players, ball, field, gates } = gameState
@@ -114,9 +103,19 @@ socket.on('gameState', (gameState: GameState) => {
   for (const playerId in players) {
     const player = players[playerId]
     ctx.fillStyle = player.team?.color ?? 'blue' // Change color or style as needed
+    ctx.strokeStyle = 'yellow' // Change color or style as needed
+    ctx.lineWidth = 2 // Set the line width as needed
     ctx.beginPath()
     ctx.arc(player.x, player.y, player.radius, 0, 2 * Math.PI)
     ctx.fill()
+
+    // Draw direction vector line
+    ctx.beginPath()
+    ctx.moveTo(player.x, player.y)
+    const directionX = player.x + player.radius * Math.cos(player.direction)
+    const directionY = player.y + player.radius * Math.sin(player.direction)
+    ctx.lineTo(directionX, directionY)
+    ctx.stroke()
   }
 
   ctx.fillStyle = 'yellow' // Change color or style for the ball
