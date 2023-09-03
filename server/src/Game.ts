@@ -136,7 +136,7 @@ export class Game implements Match {
       velocityY: 0,
       direction: 0,
       speed: 0,
-      maxSpeed: 10,
+      maxSpeed: 0.3,
       team: null,
     }
     this.assignPlayerToTeam(newPlayer)
@@ -198,35 +198,47 @@ export class Game implements Match {
     }
 
     // Update ball position based on its velocity
-    this.updateBallPosition()
+    this.updateBallPosition(deltaTime)
 
     // Update player positions based on their velocity
-    this.updatePlayerPositions()
+    this.updatePlayerPositions(deltaTime)
 
     // Check collision with players
     this.checkPlayerBallCollision()
 
-    // Check collision with walls
-    this.checkWallCollision()
+    for (const player of this.players) {
+      // Check collision with walls
+      this.checkWallCollision(player, deltaTime)
+    }
 
     this.checkWallCollisionForBall()
 
     this.checkGateCollision()
   }
 
-  updateBallPosition() {
-    this.ball.x += this.ball.velocityX
-    this.ball.y += this.ball.velocityY
+  updateBallPosition(deltaTime: number) {
+    // Calculate the displacement based on velocity and deltaTime
+    const displacementX = this.ball.velocityX * deltaTime
+    const displacementY = this.ball.velocityY * deltaTime
+
+    // Update the ball's position
+    this.ball.x += displacementX
+    this.ball.y += displacementY
   }
 
-  updatePlayerPositions() {
+  updatePlayerPositions(deltaTime: number) {
     for (const player of this.players) {
       const speed = player.speed
       player.velocityX = speed * Math.cos(player.direction)
       player.velocityY = speed * Math.sin(player.direction)
 
-      player.x += player.velocityX
-      player.y += player.velocityY
+      // Calculate the displacement based on velocity and deltaTime
+      const displacementX = player.velocityX * deltaTime
+      const displacementY = player.velocityY * deltaTime
+
+      // Update the player's position
+      player.x += displacementX
+      player.y += displacementY
     }
   }
 
@@ -243,7 +255,7 @@ export class Game implements Match {
           player.collisionDisabled = true
           setTimeout(() => {
             player.collisionDisabled = false
-          }, 2000)
+          }, 1000)
         }
       }
     }
@@ -278,31 +290,23 @@ export class Game implements Match {
     ball.velocityY = newV2y
   }
 
-  checkWallCollision() {
-    for (const player of this.players) {
-      const newX = player.x + player.velocityX
-      const newY = player.y + player.velocityY
+  checkWallCollision(player: Player, deltaTime: number) {
+    const newX = player.x + player.velocityX * deltaTime
+    const newY = player.y + player.velocityY * deltaTime
+    let directionChanged = false
 
-      let directionChanged = false
+    if (newX - player.radius < 0 || newX + player.radius > this.field.width) {
+      this.adjustHorizontalWallCollision(player, newX)
+      directionChanged = true
+    }
 
-      if (newX - player.radius < 0 || newX + player.radius > this.field.width) {
-        this.adjustHorizontalWallCollision(player, newX)
-
-        directionChanged = true
-      }
-
-      if (
-        newY - player.radius < 0 ||
-        newY + player.radius > this.field.height
-      ) {
-        this.adjustVerticalWallCollision(player, newY)
-
-        directionChanged = true
-      }
-
-      if (directionChanged) {
-        this.normalizePlayerDirection(player)
-      }
+    if (newY - player.radius < 0 || newY + player.radius > this.field.height) {
+      this.adjustVerticalWallCollision(player, newY)
+      directionChanged = true
+    }
+    
+    if (directionChanged) {
+      this.normalizePlayerDirection(player)
     }
   }
 
