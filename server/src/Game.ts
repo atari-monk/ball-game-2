@@ -1,5 +1,6 @@
 interface Player {
   id: string
+  name: string
   x: number
   y: number
   velocityX: number
@@ -11,6 +12,8 @@ interface Player {
   speed: number
   maxSpeed: number
   team: Team | null
+  score: number
+  scorePoint(): void
 }
 
 interface Ball {
@@ -20,6 +23,7 @@ interface Ball {
   velocityY: number
   radius: number
   mass: number
+  lastHit: Player | null
 }
 
 interface Field {
@@ -32,12 +36,14 @@ interface Gate {
   y: number
   width: number
   height: number
+  team: Team
 }
 
 interface Team {
   name: string
   color: string
   playerIds: string[]
+  score: number
 }
 
 interface Message {
@@ -59,6 +65,7 @@ export class Game implements Match {
     velocityY: 0,
     radius: 5,
     mass: 5,
+    lastHit: null,
   }
   field: Field = { width: 800, height: 600 }
   gates: {
@@ -66,8 +73,8 @@ export class Game implements Match {
     right: Gate
   }
   teams: Team[] = [
-    { name: 'Team A', color: 'red', playerIds: [] },
-    { name: 'Team B', color: 'blue', playerIds: [] },
+    { name: 'Team A', color: 'red', playerIds: [], score: 0 },
+    { name: 'Team B', color: 'blue', playerIds: [], score: 0 },
   ]
   messages: Message[] = []
   matchDuration: number = 5 * 60 * 1000 // 5 minutes in milliseconds
@@ -80,12 +87,14 @@ export class Game implements Match {
         y: this.field.height / 2 - 50, // Adjust position as needed
         width: 10,
         height: 100,
+        team: this.teams[0],
       },
       right: {
         x: this.field.width - 10, // Adjust position as needed
         y: this.field.height / 2 - 50, // Adjust position as needed
         width: 10,
         height: 100,
+        team: this.teams[1],
       },
     }
   }
@@ -108,8 +117,13 @@ export class Game implements Match {
       this.ball.y >= this.gates.left.y &&
       this.ball.y <= this.gates.left.y + this.gates.left.height
     ) {
-      console.log('Ball hit the left gate')
       // Handle left gate collision here
+      if (
+        this.ball.lastHit &&
+        this.ball.lastHit.team?.name !== this.gates.left.team.name
+      ) {
+        this.pointScored()
+      }
     }
 
     // Check if the ball hits the right gate
@@ -119,14 +133,112 @@ export class Game implements Match {
       this.ball.y >= this.gates.right.y &&
       this.ball.y <= this.gates.right.y + this.gates.right.height
     ) {
-      console.log('Ball hit the right gate')
       // Handle right gate collision here
+      if (
+        this.ball.lastHit &&
+        this.ball.lastHit.team?.name !== this.gates.right.team.name
+      ) {
+        this.pointScored()
+      }
     }
+  }
+
+  positionPlayerInLine(player: Player) {
+    if (!player.team) throw 'Player team must be specified at this point!'
+
+    // Find the goalpost of the player's team and the opponent's goalpost
+    const playerTeamGoal =
+      player.team === this.teams[0] ? this.gates.left : this.gates.right
+
+    // Calculate the horizontal position as the average of ball position and player's team goalpost position
+    player.x = (this.ball.x + playerTeamGoal.x) / 2
+
+    // Set the direction angle to be purely horizontal and away from the player's team goalpost
+    player.direction = playerTeamGoal.x < this.ball.x ? 0 : Math.PI
+
+    // Calculate vertical spacing based on player radius
+    const playerSpacing = 4 * player.radius
+
+    // Calculate vertical position for each player
+    const ballVerticalPosition = this.ball.y
+    const numPlayers = player.team.playerIds.length
+    const playerIndex = player.team.playerIds.indexOf(player.id) + 1
+    this.sendServerMessage('server', `playerIndex: ${playerIndex}`)
+
+    // Adjust the vertical position of the first player to match the ball's Y-coordinate
+    player.y = ballVerticalPosition
+
+    if (numPlayers > 1) {
+      // Calculate the positions for subsequent players
+      if (playerIndex % 2 === 0) {
+        // If the player index is even, place players only above the first player
+        player.y -= (playerIndex / 2) * playerSpacing
+      } else {
+        // If the player index is odd, place players only below the first player
+        player.y += Math.floor(playerIndex / 2) * playerSpacing
+      }
+    }
+  }
+
+  resetGame() {
+    // Reset player scores
+    for (const player of this.players) {
+      player.score = 0
+      player.team = null
+    }
+
+    // Reset the ball position
+    this.ball.x = this.field.width / 2
+    this.ball.y = this.field.height / 2
+    this.ball.velocityX = 0
+    this.ball.velocityY = 0
+    this.ball.lastHit = null
+
+    // Reset team scores
+    for (const team of this.teams) {
+      team.score = 0
+      team.playerIds = []
+    }
+
+    // Clear messages
+    this.messages = []
+
+    // Reset match start time
+    this.matchStartTime = null
+
+    // Reassign players to teams and position them
+    for (const player of this.players) {
+      this.assignPlayerToTeam(player)
+      this.positionPlayerInLine(player)
+    }
+  }
+
+  resetAfterGoal() {
+    // Reposition the ball to the center of the field
+    this.ball.x = this.field.width / 2
+    this.ball.y = this.field.height / 2
+    this.ball.velocityX = 0
+    this.ball.velocityY = 0
+    this.ball.lastHit = null
+
+    for (const player of this.players) {
+      this.positionPlayerInLine(player)
+    }
+  }
+
+  pointScored() {
+    this.ball.lastHit?.scorePoint()
+    this.sendServerMessage('server', `Player ${this.ball.lastHit?.name} scored`)
+    for (const team of this.teams) {
+      this.sendServerMessage('server', `${team.name} Score: ${team.score}`)
+    }
+    this.resetAfterGoal()
   }
 
   addPlayer(id: string) {
     const newPlayer: Player = {
       id: id,
+      name: 'player-' + id.substring(0, 3),
       x: Math.random() * 800, // Initialize player's position randomly
       y: Math.random() * 600,
       radius: 20,
@@ -138,10 +250,17 @@ export class Game implements Match {
       speed: 0,
       maxSpeed: 0.3,
       team: null,
+      score: 0,
+      scorePoint() {
+        this.score++
+        if (this.team) this.team.score++
+      },
     }
     this.assignPlayerToTeam(newPlayer)
 
     this.players.push(newPlayer)
+
+    this.positionPlayerInLine(newPlayer)
 
     this.sendServerMessage('server', `Player ${newPlayer.id} connected.`)
 
@@ -252,6 +371,8 @@ export class Game implements Match {
         if (distance < player.radius + this.ball.radius) {
           this.handleCollision(player, this.ball)
 
+          this.ball.lastHit = player
+
           player.collisionDisabled = true
           setTimeout(() => {
             player.collisionDisabled = false
@@ -304,7 +425,7 @@ export class Game implements Match {
       this.adjustVerticalWallCollision(player, newY)
       directionChanged = true
     }
-    
+
     if (directionChanged) {
       this.normalizePlayerDirection(player)
     }

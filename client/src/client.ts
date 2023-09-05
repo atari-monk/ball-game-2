@@ -53,6 +53,7 @@ interface Gate {
   y: number
   width: number
   height: number
+  team: Team
 }
 
 interface Message {
@@ -91,8 +92,9 @@ socket.on('gameState', (gameState: GameState) => {
   ctx.fillRect(0, 0, field.width, field.height)
 
   // Draw the gates
-  ctx.fillStyle = 'gray' // Set the gate color
+  ctx.fillStyle = gates.left.team.color // Set the gate color
   ctx.fillRect(gates.left.x, gates.left.y, gates.left.width, gates.left.height)
+  ctx.fillStyle = gates.right.team.color
   ctx.fillRect(
     gates.right.x,
     gates.right.y,
