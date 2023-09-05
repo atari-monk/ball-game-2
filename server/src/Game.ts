@@ -57,6 +57,7 @@ interface Match {
 }
 
 export class Game implements Match {
+  private readonly frictionCoefficient: number = 0.99
   players: Player[] = []
   ball: Ball = {
     x: 400,
@@ -336,6 +337,10 @@ export class Game implements Match {
   }
 
   updateBallPosition(deltaTime: number) {
+    // Apply friction to the ball's velocity
+    this.ball.velocityX *= this.frictionCoefficient
+    this.ball.velocityY *= this.frictionCoefficient
+
     // Calculate the displacement based on velocity and deltaTime
     const displacementX = this.ball.velocityX * deltaTime
     const displacementY = this.ball.velocityY * deltaTime
