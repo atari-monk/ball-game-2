@@ -57,7 +57,7 @@ interface Match {
 }
 
 export class Game implements Match {
-  private readonly frictionCoefficient: number = 0.99
+  private readonly frictionCoefficient: number = 0.995
   players: Player[] = []
   ball: Ball = {
     x: 400,
@@ -207,21 +207,21 @@ export class Game implements Match {
       player.team === this.teams[0] ? this.gates.left : this.gates.right
 
     // Calculate the horizontal position as the average of ball position and player's team goalpost position
-    player.x = (this.ball.x + playerTeamGoal.x) / 2
+    player.x = (this.field.width / 2 + playerTeamGoal.x) / 2
 
     // Set the direction angle to be purely horizontal and away from the player's team goalpost
-    player.direction = playerTeamGoal.x < this.ball.x ? 0 : Math.PI
+    player.direction = playerTeamGoal.x < this.field.width / 2 ? 0 : Math.PI
 
     // Calculate vertical spacing based on player radius
     const playerSpacing = 4 * player.radius
 
     // Calculate vertical position for each player
-    const ballVerticalPosition = this.ball.y
+    const canvasCenterY = this.field.height / 2
     const numPlayers = player.team.playerIds.length
     const playerIndex = player.team.playerIds.indexOf(player.id) + 1
 
-    // Adjust the vertical position of the first player to match the ball's Y-coordinate
-    player.y = ballVerticalPosition
+    // Adjust the vertical position of the first player to match the center of the canvas
+    player.y = canvasCenterY
 
     if (numPlayers > 1) {
       // Calculate the positions for subsequent players
@@ -323,24 +323,35 @@ export class Game implements Match {
     if (this.matchStartTime === null && this.players.length === 2) {
       // Start the match timer when there are two players
       this.matchStartTime = Date.now()
-      this.sendServerMessage(
-        `${this.formatDateTime(new Date(this.matchStartTime))} Begin`
-      )
+      this.sendServerMessage(`${this.formatTime(this.matchStartTime)} Begin`)
     }
 
     return newPlayer
   }
 
   formatDateTime(date: Date): string {
+    const fdate = new Date(date)
     const options: Intl.DateTimeFormatOptions = {
       day: '2-digit',
       month: '2-digit',
       year: 'numeric',
       hour: '2-digit',
       minute: '2-digit',
+      hour12: false, // Use 24-hour time format
     }
 
-    return date.toLocaleString('pl-PL', options)
+    return fdate.toLocaleString('pl-PL', options)
+  }
+
+  formatTime(date: number): string {
+    const fdate = new Date(date)
+    const options: Intl.DateTimeFormatOptions = {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false, // Use 24-hour time format
+    }
+
+    return fdate.toLocaleString('pl-PL', options)
   }
 
   assignPlayerToTeam(player: Player) {
@@ -377,7 +388,9 @@ export class Game implements Match {
 
       // Check if the match has ended
       if (elapsedTime >= this.matchDuration) {
-        this.sendServerMessage(`It's over! ${this.getGameResult()}`)
+        this.sendServerMessage(
+          `${this.formatTime(Date.now())} It's over! ${this.getGameResult()}`
+        )
         this.matchStartTime = null // Add a method to stop the timer when the match is over
       }
     }
