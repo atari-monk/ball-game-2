@@ -1,4 +1,5 @@
 const path = require('path')
+const CopyWebpackPlugin = require('copy-webpack-plugin') // Import the plugin
 
 module.exports = {
   mode: 'development',
@@ -19,4 +20,10 @@ module.exports = {
       },
     ],
   },
+  plugins: [
+    // Configure the CopyWebpackPlugin to copy your index.html file to the build folder
+    new CopyWebpackPlugin({
+      patterns: [{ from: 'src/index.html', to: 'index.html' }],
+    }),
+  ],
 }
