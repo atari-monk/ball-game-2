@@ -1,5 +1,7 @@
 import { io } from 'socket.io-client'
 
+import './css/styles.css'
+
 const localhost = 'http://localhost:3001'
 const host = 'atari-monk-ball-game-2-server.azurewebsites.net'
 const socket = io(host)
