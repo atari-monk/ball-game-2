@@ -1,5 +1,6 @@
 const path = require('path')
-const CopyWebpackPlugin = require('copy-webpack-plugin') // Import the plugin
+const CopyWebpackPlugin = require('copy-webpack-plugin')
+const MiniCssExtractPlugin = require('mini-css-extract-plugin') // Import the plugin
 
 module.exports = {
   mode: 'development',
@@ -18,12 +19,19 @@ module.exports = {
         use: 'ts-loader',
         exclude: /node_modules/,
       },
+      {
+        test: /\.css$/, // Handle CSS files
+        use: [
+          MiniCssExtractPlugin.loader, // Extract CSS to separate file
+          'css-loader', // Translates CSS into CommonJS
+        ],
+      },
     ],
   },
   plugins: [
-    // Configure the CopyWebpackPlugin to copy your index.html file to the build folder
     new CopyWebpackPlugin({
       patterns: [{ from: 'src/index.html', to: 'index.html' }],
     }),
+    new MiniCssExtractPlugin({ filename: 'styles.css' }), // Configure the plugin for CSS
   ],
 }
