@@ -1,6 +1,8 @@
 import { io } from 'socket.io-client'
 
-const socket = io('http://localhost:3001')
+const localhost = 'http://localhost:3001'
+const host = 'atari-monk-ball-game-2-server.azurewebsites.net'
+const socket = io(host)
 
 const canvas = document.getElementById('canvas') as HTMLCanvasElement | null
 if (!canvas) {
