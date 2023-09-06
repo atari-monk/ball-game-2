@@ -74,12 +74,13 @@ export class Game implements Match {
     right: Gate
   }
   teams: Team[] = [
-    { name: 'Team A', color: 'red', playerIds: [], score: 0 },
-    { name: 'Team B', color: 'blue', playerIds: [], score: 0 },
+    { name: '', color: 'red', playerIds: [], score: 0 },
+    { name: '', color: 'blue', playerIds: [], score: 0 },
   ]
   messages: Message[] = []
-  matchDuration: number = 5 * 60 * 1000 // 5 minutes in milliseconds
+  matchDuration: number = 1 * 60 * 1000 // 5 minutes in milliseconds
   matchStartTime: number | null = null
+  usedNames: Set<string> = new Set()
 
   constructor() {
     this.gates = {
@@ -98,11 +99,65 @@ export class Game implements Match {
         team: this.teams[1],
       },
     }
+    const [teamA, teamB] = this.getRandomAnimalTeams()
+    this.teams[0].name = teamA
+    this.teams[1].name = teamB
   }
 
-  sendServerMessage(sender: string, messageText: string) {
+  getRandomAnimalTeams(): string[] {
+    const animalTeams = [
+      ['Lions', 'Tigers'],
+      ['Eagles', 'Hawks'],
+      ['Dolphins', 'Sharks'],
+      ['Wolves', 'Bears'],
+      ['Penguins', 'Seals'],
+      ['Cheetahs', 'Leopards'],
+      ['Owls', 'Falcons'],
+      ['Elephants', 'Rhinos'],
+      ['Kangaroos', 'Koalas'],
+      ['Gorillas', 'Chimpanzees'],
+    ]
+
+    const randomIndex = Math.floor(Math.random() * animalTeams.length)
+    return animalTeams[randomIndex]
+  }
+
+  getUniqueFunnySingleWordName(): string {
+    const funnyNames = [
+      'Whiskerz',
+      'Bubbles',
+      'Wobble',
+      'Squiggles',
+      'Snickers',
+      'Fluffy',
+      'Tater',
+      'Noodle',
+      'Fizzle',
+      'Puddin',
+      'Squishy',
+      'Fuzzy',
+      'Muffin',
+    ]
+
+    const availableNames = funnyNames.filter(
+      (name) => !this.usedNames.has(name)
+    )
+
+    if (availableNames.length === 0) {
+      // All names have been used
+      throw new Error('No more player names available')
+    }
+
+    const randomIndex = Math.floor(Math.random() * availableNames.length)
+    const selectedName = availableNames[randomIndex]
+    this.usedNames.add(selectedName)
+
+    return selectedName
+  }
+
+  sendServerMessage(messageText: string) {
     const message: Message = {
-      sender,
+      sender: '',
       text: messageText,
     }
 
@@ -164,7 +219,6 @@ export class Game implements Match {
     const ballVerticalPosition = this.ball.y
     const numPlayers = player.team.playerIds.length
     const playerIndex = player.team.playerIds.indexOf(player.id) + 1
-    this.sendServerMessage('server', `playerIndex: ${playerIndex}`)
 
     // Adjust the vertical position of the first player to match the ball's Y-coordinate
     player.y = ballVerticalPosition
@@ -229,17 +283,16 @@ export class Game implements Match {
 
   pointScored() {
     this.ball.lastHit?.scorePoint()
-    this.sendServerMessage('server', `Player ${this.ball.lastHit?.name} scored`)
-    for (const team of this.teams) {
-      this.sendServerMessage('server', `${team.name} Score: ${team.score}`)
-    }
+    this.sendServerMessage(
+      `Goal by ${this.ball.lastHit?.name}, ${this.teams[0].name}: ${this.teams[0].score} - ${this.teams[1].name}: ${this.teams[1].score}`
+    )
     this.resetAfterGoal()
   }
 
   addPlayer(id: string) {
     const newPlayer: Player = {
       id: id,
-      name: 'player-' + id.substring(0, 3),
+      name: this.getUniqueFunnySingleWordName(),
       x: Math.random() * 800, // Initialize player's position randomly
       y: Math.random() * 600,
       radius: 20,
@@ -263,18 +316,31 @@ export class Game implements Match {
 
     this.positionPlayerInLine(newPlayer)
 
-    this.sendServerMessage('server', `Player ${newPlayer.id} connected.`)
+    this.sendServerMessage(
+      `${newPlayer.name} joins team ${newPlayer.team?.name}`
+    )
 
     if (this.matchStartTime === null && this.players.length === 2) {
       // Start the match timer when there are two players
       this.matchStartTime = Date.now()
       this.sendServerMessage(
-        'server',
-        `Game starts at ${new Date(this.matchStartTime)}`
+        `${this.formatDateTime(new Date(this.matchStartTime))} Begin`
       )
     }
 
     return newPlayer
+  }
+
+  formatDateTime(date: Date): string {
+    const options: Intl.DateTimeFormatOptions = {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    }
+
+    return date.toLocaleString('pl-PL', options)
   }
 
   assignPlayerToTeam(player: Player) {
@@ -305,14 +371,13 @@ export class Game implements Match {
       if (elapsedTime % 60000 <= deltaTime && remainingTimeMinutes >= 0) {
         // Check if it's been a minute
         this.sendServerMessage(
-          'server',
-          `Remaining time: ${remainingTimeMinutes.toFixed(1)} minutes`
+          `End in ${remainingTimeMinutes.toFixed(1)} minutes`
         )
       }
 
       // Check if the match has ended
       if (elapsedTime >= this.matchDuration) {
-        this.sendServerMessage('server', 'Match over!')
+        this.sendServerMessage(`It's over! ${this.getGameResult()}`)
         this.matchStartTime = null // Add a method to stop the timer when the match is over
       }
     }
@@ -334,6 +399,19 @@ export class Game implements Match {
     this.checkWallCollisionForBall()
 
     this.checkGateCollision()
+  }
+
+  getGameResult() {
+    const teamA = this.teams[0]
+    const teamB = this.teams[1]
+
+    if (teamA.score > teamB.score) {
+      return `Team ${teamA.name} wins ${teamA.score}-${teamB.score}!`
+    } else if (teamB.score > teamA.score) {
+      return `Team ${teamB.name} wins ${teamB.score}-${teamA.score}!`
+    } else {
+      return `It's a tie! ${teamA.score}-${teamB.score}.`
+    }
   }
 
   updateBallPosition(deltaTime: number) {

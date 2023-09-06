@@ -20,7 +20,8 @@ if (!logTextarea) {
 const printedMessages: Set<string> = new Set<string>()
 
 function addMessageToLog(message: Message) {
-  const messageText = `${message.sender}: ${message.text}`
+  //${message.sender}:
+  const messageText = message.text
   if (logTextarea && !printedMessages.has(messageText)) {
     logTextarea.value += messageText + '\n'
     logTextarea.scrollTop = logTextarea.scrollHeight
