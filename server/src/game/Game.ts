@@ -1,4 +1,6 @@
-import { Player } from './Player'
+import { IPlayer } from './IPlayer'
+import { ITeam } from './ITeam'
+import { PlayerBuilder } from './PlayerBuilder'
 
 interface Ball {
   x: number
@@ -7,7 +9,7 @@ interface Ball {
   velocityY: number
   radius: number
   mass: number
-  lastHit: Player | null
+  lastHit: IPlayer | null
 }
 
 interface Field {
@@ -20,14 +22,7 @@ interface Gate {
   y: number
   width: number
   height: number
-  team: Team
-}
-
-export interface Team {
-  name: string
-  color: string
-  playerIds: string[]
-  score: number
+  team: ITeam
 }
 
 interface Message {
@@ -42,7 +37,7 @@ interface Match {
 
 export class Game implements Match {
   private readonly frictionCoefficient: number = 0.995
-  players: Player[] = []
+  players: IPlayer[] = []
   ball: Ball = {
     x: 400,
     y: 300,
@@ -57,7 +52,7 @@ export class Game implements Match {
     left: Gate
     right: Gate
   }
-  teams: Team[] = [
+  teams: ITeam[] = [
     { name: '', color: 'red', playerIds: [], score: 0 },
     { name: '', color: 'blue', playerIds: [], score: 0 },
   ]
@@ -183,7 +178,7 @@ export class Game implements Match {
     }
   }
 
-  positionPlayerInLine(player: Player) {
+  positionPlayerInLine(player: IPlayer) {
     if (!player.team) throw 'Player team must be specified at this point!'
 
     // Find the goalpost of the player's team and the opponent's goalpost
@@ -274,7 +269,20 @@ export class Game implements Match {
   }
 
   addPlayer(id: string) {
-    const newPlayer: Player = {
+    const newPlayer = new PlayerBuilder(id, this.getUniqueFunnySingleWordName())
+      .withPosition(0, 0)
+      .withVelocity(0, 0)
+      .withRadius(20)
+      .withCollisionDisabled(false)
+      .withMass(20)
+      .withDirection(0)
+      .withSpeed(0)
+      .withMaxSpeed(0.3)
+      .withTeam(null)
+      .withScore(0)
+      .build()
+    /*
+    const newPlayer: IPlayer = {
       id: id,
       name: this.getUniqueFunnySingleWordName(),
       x: Math.random() * 800, // Initialize player's position randomly
@@ -293,7 +301,7 @@ export class Game implements Match {
         this.score++
         if (this.team) this.team.score++
       },
-    }
+    }*/
     this.assignPlayerToTeam(newPlayer)
 
     this.players.push(newPlayer)
@@ -338,7 +346,7 @@ export class Game implements Match {
     return fdate.toLocaleString('pl-PL', options)
   }
 
-  assignPlayerToTeam(player: Player) {
+  assignPlayerToTeam(player: IPlayer) {
     if (player.team === null) {
       // Find the team with fewer players
       const teamA = this.teams[0]
@@ -462,7 +470,7 @@ export class Game implements Match {
     }
   }
 
-  handleCollision(player: Player, ball: Ball) {
+  handleCollision(player: IPlayer, ball: Ball) {
     const mass1 = player.mass
     const mass2 = ball.mass
     const v1x = player.velocityX
@@ -491,7 +499,7 @@ export class Game implements Match {
     ball.velocityY = newV2y
   }
 
-  checkWallCollision(player: Player, deltaTime: number) {
+  checkWallCollision(player: IPlayer, deltaTime: number) {
     const newX = player.x + player.velocityX * deltaTime
     const newY = player.y + player.velocityY * deltaTime
     let directionChanged = false
@@ -548,7 +556,7 @@ export class Game implements Match {
     }
   }
 
-  adjustHorizontalWallCollision(player: Player, newX: number) {
+  adjustHorizontalWallCollision(player: IPlayer, newX: number) {
     if (newX - player.radius < 0) {
       player.x = player.radius
     } else {
@@ -558,7 +566,7 @@ export class Game implements Match {
     player.direction = Math.PI - player.direction
   }
 
-  adjustVerticalWallCollision(player: Player, newY: number) {
+  adjustVerticalWallCollision(player: IPlayer, newY: number) {
     if (newY - player.radius < 0) {
       player.y = player.radius
     } else {
@@ -568,7 +576,7 @@ export class Game implements Match {
     player.direction = -player.direction
   }
 
-  normalizePlayerDirection(player: Player) {
+  normalizePlayerDirection(player: IPlayer) {
     const length = Math.sqrt(
       player.velocityX * player.velocityX + player.velocityY * player.velocityY
     )
