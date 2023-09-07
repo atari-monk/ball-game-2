@@ -1,16 +1,8 @@
+import { BallBuilder } from './BallBuilder'
+import { IBall } from './IBall'
 import { IPlayer } from './IPlayer'
 import { ITeam } from './ITeam'
 import { PlayerBuilder } from './PlayerBuilder'
-
-interface Ball {
-  x: number
-  y: number
-  velocityX: number
-  velocityY: number
-  radius: number
-  mass: number
-  lastHit: IPlayer | null
-}
 
 interface Field {
   width: number
@@ -38,15 +30,13 @@ interface Match {
 export class Game implements Match {
   private readonly frictionCoefficient: number = 0.995
   players: IPlayer[] = []
-  ball: Ball = {
-    x: 400,
-    y: 300,
-    velocityX: 0,
-    velocityY: 0,
-    radius: 5,
-    mass: 5,
-    lastHit: null,
-  }
+  private ball: IBall = new BallBuilder()
+    .withPosition(400, 300)
+    .withVelocity(0, 0)
+    .withRadius(5)
+    .withMass(5)
+    .withLastHit(null)
+    .build()
   field: Field = { width: 800, height: 600 }
   gates: {
     left: Gate
@@ -281,27 +271,7 @@ export class Game implements Match {
       .withTeam(null)
       .withScore(0)
       .build()
-    /*
-    const newPlayer: IPlayer = {
-      id: id,
-      name: this.getUniqueFunnySingleWordName(),
-      x: Math.random() * 800, // Initialize player's position randomly
-      y: Math.random() * 600,
-      radius: 20,
-      collisionDisabled: false,
-      mass: 20,
-      velocityX: 0,
-      velocityY: 0,
-      direction: 0,
-      speed: 0,
-      maxSpeed: 0.3,
-      team: null,
-      score: 0,
-      scorePoint() {
-        this.score++
-        if (this.team) this.team.score++
-      },
-    }*/
+
     this.assignPlayerToTeam(newPlayer)
 
     this.players.push(newPlayer)
@@ -470,7 +440,7 @@ export class Game implements Match {
     }
   }
 
-  handleCollision(player: IPlayer, ball: Ball) {
+  handleCollision(player: IPlayer, ball: IBall) {
     const mass1 = player.mass
     const mass2 = ball.mass
     const v1x = player.velocityX
