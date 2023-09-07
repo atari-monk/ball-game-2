@@ -4,6 +4,7 @@ import { Server } from 'socket.io'
 import { Game } from './game/Game'
 import cors from 'cors'
 import { GameState } from './game/GameState'
+import initializeSocketIO from './socket'
 
 const app = express()
 const server = http.createServer(app)
@@ -19,34 +20,7 @@ app.use(cors())
 
 const game = new Game()
 
-io.on('connection', (socket) => {
-  if (game.CurrentState !== GameState.MatchMaking) {
-    game.sendServerMessage('Game in progress, try later')
-    return
-  }
-  const player = game.addPlayer(socket.id)
-
-  socket.on('input', (input) => {
-    if (game.CurrentState !== GameState.Progress) {
-      return
-    }
-    const player = game.players.find((p) => p.id === socket.id)
-    if (player) {
-      if (input.up)
-        player.speed = Math.min(player.speed + 0.05, player.maxSpeed)
-      if (input.down) player.speed = Math.max(player.speed - 0.05, 0)
-      if (input.left) player.direction -= 0.1
-      if (input.right) player.direction += 0.1
-    }
-  })
-
-  socket.on('disconnect', () => {
-    game.sendServerMessage(`${player.team?.name}'s ${player.name} runned away`)
-    game.players = game.players.filter((p) => p.id !== socket.id)
-  })
-
-  io.emit('gameState', game)
-})
+initializeSocketIO(io, game)
 
 const frameRate = 30
 const frameInterval = 1000 / frameRate
