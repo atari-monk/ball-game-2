@@ -85,6 +85,17 @@ interface GameState {
   messages: Message[]
 }
 
+socket.on('connect', () => {
+  const yourPlayerId = localStorage.getItem('yourPlayerId')
+  socket.emit('setPlayerId', yourPlayerId)
+  console.log(`emit id ${yourPlayerId}`)
+})
+
+socket.on('yourPlayerId', (id: string) => {
+  localStorage.setItem('yourPlayerId', id)
+  console.log(`store id ${id}`)
+})
+
 socket.on('gameState', (gameState: GameState) => {
   //console.log('Received gameState:', gameState)
   const { players, ball, field, gates } = gameState
