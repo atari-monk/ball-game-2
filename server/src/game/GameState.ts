@@ -1,4 +1,7 @@
-enum GameState {
+export enum GameState {
+  Creating,
   MatchMaking,
-  GameInProgress,
+  Start,
+  Progress,
+  Over,
 }

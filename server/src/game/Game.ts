@@ -1,4 +1,5 @@
 import { BallBuilder } from './BallBuilder'
+import { GameState } from './GameState'
 import { GateBuilder } from './GateBuilder'
 import { IBall } from './IBall'
 import { IGate } from './IGate'
@@ -45,8 +46,15 @@ export class Game implements Match {
   matchDuration: number = 5 * 60 * 1000 // 5 minutes in milliseconds
   matchStartTime: number | null = null
   private nameGenerator = new NameGenerator()
+  private _currentState: GameState
+
+  get CurrentState(): GameState {
+    return this._currentState
+  }
 
   constructor() {
+    this._currentState = GameState.Creating
+    this.sendServerMessage('Creating')
     this.gates = {
       left: new GateBuilder()
         .withPosition(0, this.field.height / 2 - 50)
@@ -64,6 +72,32 @@ export class Game implements Match {
     const [teamA, teamB] = this.getRandomAnimalTeams()
     this.teams[0].name = teamA
     this.teams[1].name = teamB
+    this.transitionToMatchMaking()
+  }
+
+  transitionToMatchMaking() {
+    this._currentState = GameState.MatchMaking
+    this.sendServerMessage('Match Making')
+  }
+
+  transitionToStartGame() {
+    this._currentState = GameState.Start
+    this.sendServerMessage('Starting Game')
+    let timer = 3
+    const intervalId = setInterval(() => {
+      this.sendServerMessage(`In ${timer}`)
+      timer--
+      if (timer === 0) {
+        clearInterval(intervalId)
+        this.transitionToProgress()
+      }
+    }, 1000)
+  }
+
+  transitionToProgress() {
+    this._currentState = GameState.Progress
+    this.matchStartTime = Date.now()
+    this.sendServerMessage(`${this.formatTime(this.matchStartTime)} Begin`)
   }
 
   getRandomAnimalTeams(): string[] {
@@ -245,10 +279,8 @@ export class Game implements Match {
       `${newPlayer.name} joins team ${newPlayer.team?.name}`
     )
 
-    if (this.matchStartTime === null && this.players.length === 2) {
-      // Start the match timer when there are two players
-      this.matchStartTime = Date.now()
-      this.sendServerMessage(`${this.formatTime(this.matchStartTime)} Begin`)
+    if (this.players.length === 2) {
+      this.transitionToStartGame()
     }
 
     return newPlayer
