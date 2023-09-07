@@ -44,7 +44,7 @@ export class Player implements IPlayer {
     maxSpeed: number,
     team: ITeam | null,
     score: number
-  ): Player {
+  ): IPlayer {
     return new Player(
       id,
       name,

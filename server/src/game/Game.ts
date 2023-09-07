@@ -1,5 +1,7 @@
 import { BallBuilder } from './BallBuilder'
+import { GateBuilder } from './GateBuilder'
 import { IBall } from './IBall'
+import { IGate } from './IGate'
 import { IPlayer } from './IPlayer'
 import { ITeam } from './ITeam'
 import { PlayerBuilder } from './PlayerBuilder'
@@ -7,14 +9,6 @@ import { PlayerBuilder } from './PlayerBuilder'
 interface Field {
   width: number
   height: number
-}
-
-interface Gate {
-  x: number
-  y: number
-  width: number
-  height: number
-  team: ITeam
 }
 
 interface Message {
@@ -39,8 +33,8 @@ export class Game implements Match {
     .build()
   field: Field = { width: 800, height: 600 }
   gates: {
-    left: Gate
-    right: Gate
+    left: IGate
+    right: IGate
   }
   teams: ITeam[] = [
     { name: '', color: 'red', playerIds: [], score: 0 },
@@ -53,20 +47,18 @@ export class Game implements Match {
 
   constructor() {
     this.gates = {
-      left: {
-        x: 0,
-        y: this.field.height / 2 - 50, // Adjust position as needed
-        width: 10,
-        height: 100,
-        team: this.teams[0],
-      },
-      right: {
-        x: this.field.width - 10, // Adjust position as needed
-        y: this.field.height / 2 - 50, // Adjust position as needed
-        width: 10,
-        height: 100,
-        team: this.teams[1],
-      },
+      left: new GateBuilder()
+        .withPosition(0, this.field.height / 2 - 50)
+        .withWidth(5)
+        .withHeight(100)
+        .withTeam(this.teams[0])
+        .build(),
+      right: new GateBuilder()
+        .withPosition(this.field.width - 5, this.field.height / 2 - 50)
+        .withWidth(5)
+        .withHeight(100)
+        .withTeam(this.teams[1])
+        .build(),
     }
     const [teamA, teamB] = this.getRandomAnimalTeams()
     this.teams[0].name = teamA
