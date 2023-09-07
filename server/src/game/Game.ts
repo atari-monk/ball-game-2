@@ -4,6 +4,7 @@ import { IBall } from './IBall'
 import { IGate } from './IGate'
 import { IPlayer } from './IPlayer'
 import { ITeam } from './ITeam'
+import { NameGenerator } from './NameGenerator'
 import { PlayerBuilder } from './PlayerBuilder'
 
 interface Field {
@@ -41,9 +42,9 @@ export class Game implements Match {
     { name: '', color: 'blue', playerIds: [], score: 0 },
   ]
   messages: Message[] = []
-  matchDuration: number = 1 * 60 * 1000 // 5 minutes in milliseconds
+  matchDuration: number = 5 * 60 * 1000 // 5 minutes in milliseconds
   matchStartTime: number | null = null
-  usedNames: Set<string> = new Set()
+  private nameGenerator = new NameGenerator()
 
   constructor() {
     this.gates = {
@@ -81,39 +82,6 @@ export class Game implements Match {
 
     const randomIndex = Math.floor(Math.random() * animalTeams.length)
     return animalTeams[randomIndex]
-  }
-
-  getUniqueFunnySingleWordName(): string {
-    const funnyNames = [
-      'Whiskerz',
-      'Bubbles',
-      'Wobble',
-      'Squiggles',
-      'Snickers',
-      'Fluffy',
-      'Tater',
-      'Noodle',
-      'Fizzle',
-      'Puddin',
-      'Squishy',
-      'Fuzzy',
-      'Muffin',
-    ]
-
-    const availableNames = funnyNames.filter(
-      (name) => !this.usedNames.has(name)
-    )
-
-    if (availableNames.length === 0) {
-      // All names have been used
-      throw new Error('No more player names available')
-    }
-
-    const randomIndex = Math.floor(Math.random() * availableNames.length)
-    const selectedName = availableNames[randomIndex]
-    this.usedNames.add(selectedName)
-
-    return selectedName
   }
 
   sendServerMessage(messageText: string) {
@@ -251,7 +219,10 @@ export class Game implements Match {
   }
 
   addPlayer(id: string) {
-    const newPlayer = new PlayerBuilder(id, this.getUniqueFunnySingleWordName())
+    const newPlayer = new PlayerBuilder(
+      id,
+      this.nameGenerator.getUniqueFunnySingleWordName()
+    )
       .withPosition(0, 0)
       .withVelocity(0, 0)
       .withRadius(20)
