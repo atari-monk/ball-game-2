@@ -1,20 +1,4 @@
-interface Player {
-  id: string
-  name: string
-  x: number
-  y: number
-  velocityX: number
-  velocityY: number
-  radius: number
-  collisionDisabled: boolean
-  mass: number
-  direction: number
-  speed: number
-  maxSpeed: number
-  team: Team | null
-  score: number
-  scorePoint(): void
-}
+import { Player } from './Player'
 
 interface Ball {
   x: number
@@ -39,7 +23,7 @@ interface Gate {
   team: Team
 }
 
-interface Team {
+export interface Team {
   name: string
   color: string
   playerIds: string[]

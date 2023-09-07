@@ -4,7 +4,7 @@ import './css/styles.css'
 
 const localhost = 'http://localhost:3001'
 const host = 'atari-monk-ball-game-2-server.azurewebsites.net'
-const socket = io(host)
+const socket = io(localhost)
 
 const canvas = document.getElementById('canvas') as HTMLCanvasElement | null
 if (!canvas) {
