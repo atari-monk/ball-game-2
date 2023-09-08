@@ -3,7 +3,7 @@ import { io } from 'socket.io-client'
 import './css/styles.css'
 import { IMessage } from './IMessage'
 import { IGameState } from './IGameState'
-import { MatchDto } from 'api'
+import { FieldDto, MapDto, MatchDto } from 'api'
 
 const localhost = 'http://localhost:3001'
 const host = 'atari-monk-ball-game-2-server.azurewebsites.net'
@@ -41,30 +41,33 @@ function addMessageToLog(message: IMessage) {
 socket.on('connect', () => {
   const yourPlayerId = localStorage.getItem('yourPlayerId')
   socket.emit('setPlayerId', yourPlayerId)
-  console.log(`emit id ${yourPlayerId}`)
 })
 
 socket.on('yourPlayerId', (id: string) => {
   localStorage.setItem('yourPlayerId', id)
-  console.log(`store id ${id}`)
 })
 
 socket.on('ping', () => {
-  // Received a ping from the server, respond with a pong
-  console.log('sending pong!!')
   socket.emit('pong')
 })
 
+let field: FieldDto
+socket.on('map', (dto: MapDto) => {
+  field = dto.field
+  ctx.clearRect(0, 0, canvas.width, canvas.height)
+  drawField()
+})
+
 socket.on('update', (dto: MatchDto) => {
-  //console.log('Received gameState:', gameState)
   const { players, ball } = dto //,field, gates } = dto
 
-  // Update and render the game state on the canvas
   ctx.clearRect(0, 0, canvas.width, canvas.height)
-/*
+  drawField()
+  // Update and render the game state on the canvas
+  //ctx.clearRect(0, 0, canvas.width, canvas.height)
+  /*
   // Draw the field as a rectangle
-  ctx.fillStyle = 'green'
-  ctx.fillRect(0, 0, field.width, field.height)
+  
 
   // Draw the gates
   ctx.fillStyle = gates.left.team.color // Set the gate color
@@ -102,6 +105,11 @@ socket.on('update', (dto: MatchDto) => {
 
   //updateMessageBoard(dto.messages)
 })
+
+function drawField() {
+  ctx!.fillStyle = 'green'
+  ctx!.fillRect(0, 0, field.width, field.height)
+}
 
 function updateMessageBoard(messages: IMessage[]) {
   messages.forEach((message) => {

@@ -2,7 +2,7 @@ import { Server, Socket } from 'socket.io'
 import { Game } from './game/Game'
 import { GameState } from './game/GameState'
 import { v4 as uuidv4 } from 'uuid'
-import { IPlayer } from 'api'
+import { IPlayer, MapDto } from 'api'
 
 export default function initializeSocketIO(io: Server, game: Game) {
   const playerActivity = new Map()
@@ -62,13 +62,14 @@ export default function initializeSocketIO(io: Server, game: Game) {
               game.sendServerMessage(
                 `${player.team?.name}'s ${player.name} ran away`
               )
-              socket.emit('gameState', game)
+              socket.emit('update', game)
             }
           }
         }, 2000)
       })
 
-      socket.emit('gameState', game)
+      socket.emit('map', new MapDto(game.field))
+      socket.emit('update', game)
     })
   })
 }
