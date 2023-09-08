@@ -1,8 +1,8 @@
 import { Server, Socket } from 'socket.io'
 import { Game } from './game/Game'
 import { GameState } from './game/GameState'
-import { IPlayer } from './game/IPlayer'
 import { v4 as uuidv4 } from 'uuid'
+import { IPlayer } from 'api'
 
 export default function initializeSocketIO(io: Server, game: Game) {
   const playerActivity = new Map()

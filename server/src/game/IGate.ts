@@ -1,4 +1,4 @@
-import { ITeam } from './ITeam'
+import { ITeam } from "api"
 
 export interface IGate {
   x: number

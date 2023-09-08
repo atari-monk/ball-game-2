@@ -8,6 +8,8 @@
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true,
-    "declaration": true
-  }
+    "declaration": true,
+    "declarationDir": "./build" // Specify the output directory for declaration files
+  },
+  "exclude": ["node_modules", "script", "build"]
 }

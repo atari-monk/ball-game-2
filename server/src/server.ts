@@ -5,7 +5,7 @@ import { Game } from './game/Game'
 import cors from 'cors'
 import { GameState } from './game/GameState'
 import initializeSocketIO from './socket'
-import { MatchDto } from './MatchDto'
+import { MatchDto } from 'api'
 
 const app = express()
 const server = http.createServer(app)

@@ -1,10 +1,8 @@
+import { IPlayer, IBall, ITeam } from 'api'
 import { BallBuilder } from './BallBuilder'
 import { GameState } from './GameState'
 import { GateBuilder } from './GateBuilder'
-import { IBall } from './IBall'
 import { IGate } from './IGate'
-import { IPlayer } from './IPlayer'
-import { ITeam } from './ITeam'
 import { NameGenerator } from './NameGenerator'
 import { PlayerBuilder } from './PlayerBuilder'
 

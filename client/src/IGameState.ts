@@ -1,4 +1,4 @@
-import { IPlayer } from './IPlayer'
+import { IPlayer } from 'api'
 import { IGate } from './IGate'
 import { IMessage } from './IMessage'
 

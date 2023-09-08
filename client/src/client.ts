@@ -3,7 +3,7 @@ import { io } from 'socket.io-client'
 import './css/styles.css'
 import { IMessage } from './IMessage'
 import { IGameState } from './IGameState'
-import { MatchDto } from './MatchDto'
+import { MatchDto } from 'api'
 
 const localhost = 'http://localhost:3001'
 const host = 'atari-monk-ball-game-2-server.azurewebsites.net'

@@ -11,6 +11,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "api": "file:api-1.0.0.tgz",
     "socket.io-client": "^4.7.2",
     "ts-loader": "^9.4.4",
     "typescript": "^5.2.2",

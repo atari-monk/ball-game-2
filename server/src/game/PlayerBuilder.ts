@@ -1,5 +1,4 @@
-import { IPlayer } from './IPlayer'
-import { ITeam } from './ITeam'
+import { IPlayer, ITeam } from 'api'
 import { Player } from './Player'
 
 export class PlayerBuilder {
