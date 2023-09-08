@@ -4,7 +4,7 @@ import './css/styles.css'
 
 const localhost = 'http://localhost:3001'
 const host = 'atari-monk-ball-game-2-server.azurewebsites.net'
-const socket = io(host)
+const socket = io(localhost)
 
 const canvas = document.getElementById('canvas') as HTMLCanvasElement | null
 if (!canvas) {
@@ -94,6 +94,12 @@ socket.on('connect', () => {
 socket.on('yourPlayerId', (id: string) => {
   localStorage.setItem('yourPlayerId', id)
   console.log(`store id ${id}`)
+})
+
+socket.on('ping', () => {
+  // Received a ping from the server, respond with a pong
+  console.log('sending pong!!');
+  socket.emit('pong')
 })
 
 socket.on('gameState', (gameState: GameState) => {

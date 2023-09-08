@@ -1,40 +1,74 @@
 import { Server, Socket } from 'socket.io'
 import { Game } from './game/Game'
 import { GameState } from './game/GameState'
+import { IPlayer } from './game/IPlayer'
+import { v4 as uuidv4 } from 'uuid'
 
 export default function initializeSocketIO(io: Server, game: Game) {
+  const playerActivity = new Map()
+
   io.on('connection', (socket: Socket) => {
-    if (game.CurrentState !== GameState.MatchMaking) {
-      game.sendServerMessage('Game in progress, try later')
-      return
-    }
+    socket.on('setPlayerId', (id) => {
+      let playerId: string | undefined
+      playerId = id
+      console.log(`playerId: ${playerId}`)
 
-    const player = game.addPlayer(socket.id)
+      let player: IPlayer | undefined
 
-    socket.on('input', (input: any) => {
-      if (game.CurrentState !== GameState.Progress) {
-        return
+      if (playerId) {
+        player = game.players.find((p) => p.id === playerId)
+        if (!player) {
+          player = game.addPlayer(playerId)
+        }
+      } else {
+        playerId = uuidv4()
+        socket.emit('yourPlayerId', playerId)
+        player = game.addPlayer(playerId)
       }
 
-      const currentPlayer = game.players.find((p) => p.id === socket.id)
-      if (currentPlayer) {
-        if (input.up)
-          currentPlayer.speed = Math.min(
-            currentPlayer.speed + 0.05,
-            currentPlayer.maxSpeed
-          )
-        if (input.down)
-          currentPlayer.speed = Math.max(currentPlayer.speed - 0.05, 0)
-        if (input.left) currentPlayer.direction -= 0.1
-        if (input.right) currentPlayer.direction += 0.1
-      }
-    })
+      playerActivity.set(playerId, Date.now())
 
-    socket.on('disconnect', () => {
-      game.sendServerMessage(`${player.team?.name}'s ${player.name} ran away`)
-      game.players = game.players.filter((p) => p.id !== socket.id)
-    })
+      const pingInterval = setInterval(() => {
+        socket.emit('ping')
+      }, 2000)
 
-    io.emit('gameState', game)
+      socket.on('pong', () => {
+        playerActivity.set(playerId, Date.now())
+      })
+
+      socket.on('input', (input: any) => {
+        if (game.CurrentState !== GameState.Progress) {
+          return
+        }
+        if (player) {
+          if (input.up)
+            player.speed = Math.min(player.speed + 0.05, player.maxSpeed)
+          if (input.down) player.speed = Math.max(player.speed - 0.05, 0)
+          if (input.left) player.direction -= 0.1
+          if (input.right) player.direction += 0.1
+        }
+      })
+
+      socket.on('disconnect', () => {
+        clearInterval(pingInterval)
+        setTimeout(() => {
+          if (Date.now() - playerActivity.get(playerId) >= 2000) {
+            console.log(
+              `Player ${playerId} is still inactive after 2 seconds. Removing player.`
+            )
+            if (player) {
+              const id = player.id
+              game.players = game.players.filter((p) => p.id !== id)
+              game.sendServerMessage(
+                `${player.team?.name}'s ${player.name} ran away`
+              )
+              socket.emit('gameState', game)
+            }
+          }
+        }, 2000)
+      })
+
+      socket.emit('gameState', game)
+    })
   })
 }
