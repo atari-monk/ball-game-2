@@ -5,6 +5,7 @@ import { Game } from './game/Game'
 import cors from 'cors'
 import { GameState } from './game/GameState'
 import initializeSocketIO from './socket'
+import { MatchDto } from './MatchDto'
 
 const app = express()
 const server = http.createServer(app)
@@ -33,7 +34,7 @@ setInterval(() => {
   game.update(deltaTime)
 
   if (game.CurrentState === GameState.Progress) {
-    io.emit('gameState', game)
+    io.emit('update', new MatchDto(game.players, game.ball))
   }
 
   lastFrameTime = currentTime

@@ -26,7 +26,7 @@ interface Match {
 export class Game implements Match {
   private readonly frictionCoefficient: number = 0.995
   players: IPlayer[] = []
-  private ball: IBall = new BallBuilder()
+  ball: IBall = new BallBuilder()
     .withPosition(400, 300)
     .withVelocity(0, 0)
     .withRadius(5)

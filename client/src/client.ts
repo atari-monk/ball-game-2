@@ -1,6 +1,9 @@
 import { io } from 'socket.io-client'
 
 import './css/styles.css'
+import { IMessage } from './IMessage'
+import { IGameState } from './IGameState'
+import { MatchDto } from './MatchDto'
 
 const localhost = 'http://localhost:3001'
 const host = 'atari-monk-ball-game-2-server.azurewebsites.net'
@@ -23,7 +26,7 @@ if (!logTextarea) {
 
 const printedMessages: Set<string> = new Set<string>()
 
-function addMessageToLog(message: Message) {
+function addMessageToLog(message: IMessage) {
   //${message.sender}:
   const messageText = message.text
   if (logTextarea && !printedMessages.has(messageText)) {
@@ -33,56 +36,6 @@ function addMessageToLog(message: Message) {
     // Add the message text to the set of printed messages
     printedMessages.add(messageText)
   }
-}
-
-interface Player {
-  id: string
-  x: number
-  y: number
-  radius: number
-  mass: number
-  direction: number
-  speed: number
-  maxSpeed: number
-  team: Team | null
-}
-
-interface Team {
-  name: string
-  color: string
-  playerIds: string[]
-}
-
-interface Gate {
-  x: number
-  y: number
-  width: number
-  height: number
-  team: Team
-}
-
-interface Message {
-  sender: string
-  text: string
-}
-
-interface GameState {
-  players: Record<string, Player>
-  ball: {
-    x: number
-    y: number
-    radius: number
-    mass: number
-  }
-  field: {
-    width: number
-    height: number
-  }
-  gates: {
-    left: Gate
-    right: Gate
-  }
-  messages: Message[]
 }
 
 socket.on('connect', () => {
@@ -98,17 +51,17 @@ socket.on('yourPlayerId', (id: string) => {
 
 socket.on('ping', () => {
   // Received a ping from the server, respond with a pong
-  console.log('sending pong!!');
+  console.log('sending pong!!')
   socket.emit('pong')
 })
 
-socket.on('gameState', (gameState: GameState) => {
+socket.on('update', (dto: MatchDto) => {
   //console.log('Received gameState:', gameState)
-  const { players, ball, field, gates } = gameState
+  const { players, ball } = dto //,field, gates } = dto
 
   // Update and render the game state on the canvas
   ctx.clearRect(0, 0, canvas.width, canvas.height)
-
+/*
   // Draw the field as a rectangle
   ctx.fillStyle = 'green'
   ctx.fillRect(0, 0, field.width, field.height)
@@ -123,7 +76,7 @@ socket.on('gameState', (gameState: GameState) => {
     gates.right.width,
     gates.right.height
   )
-
+*/
   for (const playerId in players) {
     const player = players[playerId]
     ctx.fillStyle = player.team?.color ?? 'blue' // Change color or style as needed
@@ -147,10 +100,10 @@ socket.on('gameState', (gameState: GameState) => {
   ctx.arc(ball.x, ball.y, ball.radius, 0, 2 * Math.PI)
   ctx.fill()
 
-  updateMessageBoard(gameState.messages)
+  //updateMessageBoard(dto.messages)
 })
 
-function updateMessageBoard(messages: Message[]) {
+function updateMessageBoard(messages: IMessage[]) {
   messages.forEach((message) => {
     addMessageToLog(message)
   })
