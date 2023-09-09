@@ -3,7 +3,8 @@ import { io } from 'socket.io-client'
 import './css/styles.css'
 import { IMessage } from './IMessage'
 import { IGameState } from './IGameState'
-import { FieldDto, MapDto, MatchDto } from 'api'
+import { FieldDto, GateDto, MapDto, MatchDto } from 'api'
+import { IGateDtos } from 'api/dtos/IGateDtos'
 
 const localhost = 'http://localhost:3001'
 const host = 'atari-monk-ball-game-2-server.azurewebsites.net'
@@ -51,35 +52,24 @@ socket.on('ping', () => {
   socket.emit('pong')
 })
 
+let gates: IGateDtos
 let field: FieldDto
 socket.on('map', (dto: MapDto) => {
+  gates = dto.gates
   field = dto.field
+
   ctx.clearRect(0, 0, canvas.width, canvas.height)
   drawField()
+  drawGates()
 })
 
 socket.on('update', (dto: MatchDto) => {
-  const { players, ball } = dto //,field, gates } = dto
+  const { players, ball } = dto
 
   ctx.clearRect(0, 0, canvas.width, canvas.height)
   drawField()
-  // Update and render the game state on the canvas
-  //ctx.clearRect(0, 0, canvas.width, canvas.height)
-  /*
-  // Draw the field as a rectangle
+  drawGates()
   
-
-  // Draw the gates
-  ctx.fillStyle = gates.left.team.color // Set the gate color
-  ctx.fillRect(gates.left.x, gates.left.y, gates.left.width, gates.left.height)
-  ctx.fillStyle = gates.right.team.color
-  ctx.fillRect(
-    gates.right.x,
-    gates.right.y,
-    gates.right.width,
-    gates.right.height
-  )
-*/
   for (const playerId in players) {
     const player = players[playerId]
     ctx.fillStyle = player.team?.color ?? 'blue' // Change color or style as needed
@@ -109,6 +99,18 @@ socket.on('update', (dto: MatchDto) => {
 function drawField() {
   ctx!.fillStyle = 'green'
   ctx!.fillRect(0, 0, field.width, field.height)
+}
+
+function drawGates() {
+  ctx!.fillStyle = gates.left.team.color
+  ctx!.fillRect(gates.left.x, gates.left.y, gates.left.width, gates.left.height)
+  ctx!.fillStyle = gates.right.team.color
+  ctx!.fillRect(
+    gates.right.x,
+    gates.right.y,
+    gates.right.width,
+    gates.right.height
+  )
 }
 
 function updateMessageBoard(messages: IMessage[]) {

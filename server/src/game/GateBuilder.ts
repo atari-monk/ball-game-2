@@ -1,6 +1,5 @@
-import { ITeam } from 'api'
+import { IGate, ITeam } from 'api'
 import { Gate } from './Gate'
-import { IGate } from './IGate'
 
 export class GateBuilder {
   private x = 0

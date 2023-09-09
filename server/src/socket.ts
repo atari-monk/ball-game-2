@@ -68,7 +68,7 @@ export default function initializeSocketIO(io: Server, game: Game) {
         }, 2000)
       })
 
-      socket.emit('map', new MapDto(game.field))
+      socket.emit('map', new MapDto(game.gates, game.field))
       socket.emit('update', game)
     })
   })

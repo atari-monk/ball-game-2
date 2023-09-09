@@ -1,10 +1,10 @@
-import { IPlayer, IBall, ITeam, IField } from 'api'
+import { IPlayer, IBall, ITeam, IField, IGate } from 'api'
 import { BallBuilder } from './BallBuilder'
 import { GameState } from './GameState'
 import { GateBuilder } from './GateBuilder'
-import { IGate } from './IGate'
 import { NameGenerator } from './NameGenerator'
 import { PlayerBuilder } from './PlayerBuilder'
+import { IGates } from 'api/api/IGates'
 
 interface Message {
   sender: string
@@ -27,10 +27,7 @@ export class Game implements Match {
     .withLastHit(null)
     .build()
   field: IField = { width: 800, height: 600 }
-  gates: {
-    left: IGate
-    right: IGate
-  }
+  gates: IGates
   teams: ITeam[] = [
     { name: '', color: 'red', playerIds: [], score: 0 },
     { name: '', color: 'blue', playerIds: [], score: 0 },
