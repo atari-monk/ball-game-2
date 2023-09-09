@@ -1,22 +1,25 @@
-import { IPlayer, IBall, ITeam, IField, IGate } from 'api'
+import { Server, Socket } from 'socket.io'
+import {
+  IPlayer,
+  IBall,
+  ITeam,
+  IField,
+  IMessage,
+  MessageDto,
+  IGates,
+} from 'api'
 import { BallBuilder } from './BallBuilder'
 import { GameState } from './GameState'
 import { GateBuilder } from './GateBuilder'
 import { NameGenerator } from './NameGenerator'
 import { PlayerBuilder } from './PlayerBuilder'
-import { IGates } from 'api/api/IGates'
 
-interface Message {
-  sender: string
-  text: string
-}
-
-interface Match {
+interface IMatch {
   matchDuration: number
   matchStartTime: number | null
 }
 
-export class Game implements Match {
+export class Game implements IMatch {
   private readonly frictionCoefficient: number = 0.995
   players: IPlayer[] = []
   ball: IBall = new BallBuilder()
@@ -32,7 +35,7 @@ export class Game implements Match {
     { name: '', color: 'red', playerIds: [], score: 0 },
     { name: '', color: 'blue', playerIds: [], score: 0 },
   ]
-  messages: Message[] = []
+  messages: IMessage[] = []
   matchDuration: number = 5 * 60 * 1000 // 5 minutes in milliseconds
   matchStartTime: number | null = null
   private nameGenerator = new NameGenerator()
@@ -42,7 +45,7 @@ export class Game implements Match {
     return this._currentState
   }
 
-  constructor() {
+  constructor(private readonly io: Server) {
     this._currentState = GameState.Creating
     this.sendServerMessage('Creating')
     this.gates = {
@@ -108,14 +111,22 @@ export class Game implements Match {
     return animalTeams[randomIndex]
   }
 
-  sendServerMessage(messageText: string) {
-    const message: Message = {
-      sender: '',
-      text: messageText,
+  sendServerMessage(text: string, sender: string = '') {
+    const message: IMessage = {
+      sender: sender,
+      text: text,
     }
-
-    // Add the message to the game state
     this.messages.push(message)
+    this.io.emit('log', new MessageDto(message))
+  }
+
+  sendSocketMessage(socket: Socket, text: string, sender: string = '') {
+    const message: IMessage = {
+      sender: sender,
+      text: text,
+    }
+    this.messages.push(message)
+    socket.emit('log', new MessageDto(message))
   }
 
   checkGateCollision() {
@@ -242,7 +253,7 @@ export class Game implements Match {
     this.resetAfterGoal()
   }
 
-  addPlayer(id: string) {
+  addPlayer(id: string, socket: Socket) {
     const newPlayer = new PlayerBuilder(
       id,
       this.nameGenerator.getUniqueFunnySingleWordName()
@@ -265,14 +276,22 @@ export class Game implements Match {
 
     this.positionPlayerInLine(newPlayer)
 
-    this.sendServerMessage(
-      `${newPlayer.name} joins team ${newPlayer.team?.name}`
-    )
+    if (this.players.length === 1) {
+      this.sendSocketMessage(
+        socket,
+        `${newPlayer.name} joins team ${newPlayer.team?.name}`
+      )
+    } else if (this.players.length === 2) {
+      this.sendSocketMessage(
+        socket,
+        `${this.players[0].name} joins team ${this.players[0].team?.name}`
+      )
+      this.sendServerMessage(
+        `${newPlayer.name} joins team ${newPlayer.team?.name}`
+      )
 
-    if (this.players.length === 2) {
       this.transitionToStartGame()
     }
-
     return newPlayer
   }
 

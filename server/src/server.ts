@@ -19,7 +19,7 @@ const io = new Server(server, {
 
 app.use(cors())
 
-const game = new Game()
+const game = new Game(io)
 
 initializeSocketIO(io, game)
 

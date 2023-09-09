@@ -1,10 +1,6 @@
-import { io } from 'socket.io-client'
-
 import './css/styles.css'
-import { IMessage } from './IMessage'
-import { IGameState } from './IGameState'
-import { FieldDto, GateDto, MapDto, MatchDto } from 'api'
-import { IGateDtos } from 'api/dtos/IGateDtos'
+import { io } from 'socket.io-client'
+import { FieldDto, IGateDtos, MapDto, MatchDto, MessageDto } from 'api'
 
 const localhost = 'http://localhost:3001'
 const host = 'atari-monk-ball-game-2-server.azurewebsites.net'
@@ -20,22 +16,17 @@ if (!ctx) {
   throw new Error('Canvas 2d context not available.')
 }
 
-const logTextarea = document.getElementById('log') as HTMLTextAreaElement | null
-if (!logTextarea) {
+const textArea = document.getElementById('log') as HTMLTextAreaElement | null
+if (!textArea) {
   throw new Error('log Text area not available.')
 }
 
-const printedMessages: Set<string> = new Set<string>()
-
-function addMessageToLog(message: IMessage) {
+function logMessage(message: MessageDto) {
   //${message.sender}:
-  const messageText = message.text
-  if (logTextarea && !printedMessages.has(messageText)) {
-    logTextarea.value += messageText + '\n'
-    logTextarea.scrollTop = logTextarea.scrollHeight
-
-    // Add the message text to the set of printed messages
-    printedMessages.add(messageText)
+  const text = message.text
+  if (textArea) {
+    textArea.value += text + '\n'
+    textArea.scrollTop = textArea.scrollHeight
   }
 }
 
@@ -63,13 +54,17 @@ socket.on('map', (dto: MapDto) => {
   drawGates()
 })
 
+socket.on('log', (dto: MessageDto) => {
+  logMessage(dto)
+})
+
 socket.on('update', (dto: MatchDto) => {
   const { players, ball } = dto
 
   ctx.clearRect(0, 0, canvas.width, canvas.height)
   drawField()
   drawGates()
-  
+
   for (const playerId in players) {
     const player = players[playerId]
     ctx.fillStyle = player.team?.color ?? 'blue' // Change color or style as needed
@@ -92,8 +87,6 @@ socket.on('update', (dto: MatchDto) => {
   ctx.beginPath()
   ctx.arc(ball.x, ball.y, ball.radius, 0, 2 * Math.PI)
   ctx.fill()
-
-  //updateMessageBoard(dto.messages)
 })
 
 function drawField() {
@@ -111,12 +104,6 @@ function drawGates() {
     gates.right.width,
     gates.right.height
   )
-}
-
-function updateMessageBoard(messages: IMessage[]) {
-  messages.forEach((message) => {
-    addMessageToLog(message)
-  })
 }
 
 document.addEventListener('keydown', (event: KeyboardEvent) => {
