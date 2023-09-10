@@ -1,10 +1,10 @@
 import './css/styles.css'
 import { io } from 'socket.io-client'
 import { FieldDto, IGateDtos, MapDto, MatchDto, MessageDto, MsgFlag } from 'api'
+import config from './config'
 
-const localhost = 'http://localhost:3001'
-const host = 'atari-monk-ball-game-2-server.azurewebsites.net'
-const socket = io(host)
+const selectedHost: string = process.env.HOST || 'azure'
+const socket = io(config[selectedHost])
 
 const canvas = document.getElementById('canvas') as HTMLCanvasElement | null
 if (!canvas) {
