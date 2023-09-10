@@ -1,6 +1,6 @@
 import './css/styles.css'
 import { io } from 'socket.io-client'
-import { FieldDto, IGateDtos, MapDto, MatchDto, MessageDto } from 'api'
+import { FieldDto, IGateDtos, MapDto, MatchDto, MessageDto, MsgFlag } from 'api'
 
 const localhost = 'http://localhost:3001'
 const host = 'atari-monk-ball-game-2-server.azurewebsites.net'
@@ -8,26 +8,44 @@ const socket = io(localhost)
 
 const canvas = document.getElementById('canvas') as HTMLCanvasElement | null
 if (!canvas) {
-  throw new Error('Canvas element not found.')
+  throw new Error('Canvas element not found')
 }
 
 const ctx = canvas.getContext('2d')
 if (!ctx) {
-  throw new Error('Canvas 2d context not available.')
+  throw new Error('Canvas 2d context not available')
 }
 
 const textArea = document.getElementById('log') as HTMLTextAreaElement | null
 if (!textArea) {
-  throw new Error('log Text area not available.')
+  throw new Error('log Text area not available')
 }
 
+let logFilterOption = 'Text'
+const logFilter = document.getElementById('log-filter') as HTMLSelectElement
+if (!logFilter) {
+  throw new Error('log Filter not available')
+}
+logFilter.value = 'Text'
+logFilter.addEventListener('change', function () {
+  logFilterOption = logFilter.value
+})
+
 function logMessage(message: MessageDto) {
+  if (logFilterOption !== 'All' && logFilterOption !== MsgFlag[message.flag])
+    return
   const senderText = message.sender ? `${message.sender}:` : ''
   const log = `${senderText}${message.text}`
 
   if (textArea) {
     textArea.value += log + '\n'
     textArea.scrollTop = textArea.scrollHeight
+  }
+}
+
+function clearTextArea() {
+  if (textArea) {
+    textArea.value = '' // Set the value to an empty string
   }
 }
 
@@ -57,6 +75,10 @@ socket.on('map', (dto: MapDto) => {
 
 socket.on('log', (dto: MessageDto) => {
   logMessage(dto)
+})
+
+socket.on('log-reset', () => {
+  clearTextArea()
 })
 
 socket.on('update', (dto: MatchDto) => {

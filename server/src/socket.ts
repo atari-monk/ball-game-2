@@ -1,15 +1,18 @@
 import { Server, Socket } from 'socket.io'
-import { Game } from './game/Game'
-import { GameState } from './game/GameState'
 import { v4 as uuidv4 } from 'uuid'
-import { IPlayer, MapDto, MatchDto } from 'api'
+import { GameState, IPlayer, MapDto, MatchDto } from 'api'
+import { Game } from './game/Game'
 
 export default function initializeSocketIO(io: Server, game: Game) {
   const playerActivity = new Map()
 
   io.on('connection', (socket: Socket) => {
+    if (game.players.length > 14) {
+      game.sendTextToOne(socket, 'Server is at capacity')
+    }
+    game.clearLogOne(socket)
     if (game.messages.length > 0) {
-      game.resendLog()
+      game.resendLog(socket)
     }
 
     socket.on('setPlayerId', (id) => {
@@ -64,7 +67,8 @@ export default function initializeSocketIO(io: Server, game: Game) {
               const id = player.id
               game.players = game.players.filter((p) => p.id !== id)
               game.sendText(`${player.team?.name}'s ${player.name} ran away`)
-              socket.emit('update', new MatchDto(game.players, game.ball))
+              game.resetGame()
+              io.emit('update', new MatchDto(game.players, game.ball))
               game.transitionToMatchMaking()
             }
           }
@@ -72,7 +76,7 @@ export default function initializeSocketIO(io: Server, game: Game) {
       })
 
       socket.emit('map', new MapDto(game.gates, game.field))
-      socket.emit('update', new MatchDto(game.players, game.ball))
+      io.emit('update', new MatchDto(game.players, game.ball))
     })
   })
 }
