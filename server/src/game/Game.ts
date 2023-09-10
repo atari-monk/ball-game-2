@@ -321,6 +321,8 @@ export class Game implements IMatch {
       player.velocityY = 0
       player.speed = 0
     }
+
+    this.lastLogMinute = -1
   }
 
   resetAfterGoal() {
