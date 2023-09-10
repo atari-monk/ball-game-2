@@ -4,7 +4,7 @@ import { FieldDto, IGateDtos, MapDto, MatchDto, MessageDto } from 'api'
 
 const localhost = 'http://localhost:3001'
 const host = 'atari-monk-ball-game-2-server.azurewebsites.net'
-const socket = io(host)
+const socket = io(localhost)
 
 const canvas = document.getElementById('canvas') as HTMLCanvasElement | null
 if (!canvas) {
@@ -22,10 +22,11 @@ if (!textArea) {
 }
 
 function logMessage(message: MessageDto) {
-  //${message.sender}:
-  const text = message.text
+  const senderText = message.sender ? `${message.sender}:` : ''
+  const log = `${senderText}${message.text}`
+
   if (textArea) {
-    textArea.value += text + '\n'
+    textArea.value += log + '\n'
     textArea.scrollTop = textArea.scrollHeight
   }
 }

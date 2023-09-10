@@ -19,8 +19,9 @@ interface IMatch {
   matchStartTime: number | null
 }
 
+const serverState = 'Server State'
 export class Game implements IMatch {
-  private readonly frictionCoefficient: number = 0.995
+  private readonly frictionCoefficient: number = 0.99
   players: IPlayer[] = []
   ball: IBall = new BallBuilder()
     .withPosition(400, 300)
@@ -36,7 +37,7 @@ export class Game implements IMatch {
     { name: '', color: 'blue', playerIds: [], score: 0 },
   ]
   messages: IMessage[] = []
-  matchDuration: number = 5 * 60 * 1000 // 5 minutes in milliseconds
+  matchDuration: number = 1 * 60 * 1000 // 5 minutes in milliseconds
   matchStartTime: number | null = null
   private nameGenerator = new NameGenerator()
   private _currentState: GameState
@@ -47,7 +48,7 @@ export class Game implements IMatch {
 
   constructor(private readonly io: Server) {
     this._currentState = GameState.Creating
-    this.sendServerMessage('Creating')
+    this.sendServerState()
     this.gates = {
       left: new GateBuilder()
         .withPosition(0, this.field.height / 2 - 50)
@@ -70,15 +71,20 @@ export class Game implements IMatch {
 
   transitionToMatchMaking() {
     this._currentState = GameState.MatchMaking
-    this.sendServerMessage('Match Making')
+    this.sendServerState()
+  }
+
+  private sendServerState() {
+    this.sendMsg(serverState, GameState[this._currentState])
   }
 
   transitionToStartGame() {
     this._currentState = GameState.Start
-    this.sendServerMessage('Starting Game')
+    this.sendServerState()
+    this.sendText('Starting Game')
     let timer = 3
     const intervalId = setInterval(() => {
-      this.sendServerMessage(`In ${timer}`)
+      this.sendText(`In ${timer}`)
       timer--
       if (timer === 0) {
         clearInterval(intervalId)
@@ -89,8 +95,20 @@ export class Game implements IMatch {
 
   transitionToProgress() {
     this._currentState = GameState.Progress
+    this.sendServerState()
     this.matchStartTime = Date.now()
-    this.sendServerMessage(`${this.formatTime(this.matchStartTime)} Begin`)
+    this.sendText(`${this.formatTime(this.matchStartTime)} Begin`)
+  }
+
+  transitionToGameOver() {
+    this._currentState = GameState.Over
+    this.sendServerState()
+    this.resetGame()
+    if (this.players.length === 2) {
+      this.transitionToStartGame()
+    } else {
+      this.transitionToMatchMaking()
+    }
   }
 
   getRandomAnimalTeams(): string[] {
@@ -111,13 +129,28 @@ export class Game implements IMatch {
     return animalTeams[randomIndex]
   }
 
-  sendServerMessage(text: string, sender: string = '') {
+  sendText(text: string) {
+    const message: IMessage = {
+      sender: '',
+      text: text,
+    }
+    this.messages.push(message)
+    this.io.emit('log', new MessageDto(message))
+  }
+
+  sendMsg(sender: string, text: string) {
     const message: IMessage = {
       sender: sender,
       text: text,
     }
     this.messages.push(message)
     this.io.emit('log', new MessageDto(message))
+  }
+
+  resendLog() {
+    this.messages.forEach((msg) => {
+      this.io.emit('log', new MessageDto(msg))
+    })
   }
 
   sendSocketMessage(socket: Socket, text: string, sender: string = '') {
@@ -229,6 +262,9 @@ export class Game implements IMatch {
     for (const player of this.players) {
       this.assignPlayerToTeam(player)
       this.positionPlayerInLine(player)
+      player.velocityX = 0
+      player.velocityY = 0
+      player.speed = 0
     }
   }
 
@@ -242,12 +278,15 @@ export class Game implements IMatch {
 
     for (const player of this.players) {
       this.positionPlayerInLine(player)
+      player.velocityX = 0
+      player.velocityY = 0
+      player.speed = 0
     }
   }
 
   pointScored() {
     this.ball.lastHit?.scorePoint()
-    this.sendServerMessage(
+    this.sendText(
       `Goal by ${this.ball.lastHit?.name}, ${this.teams[0].name}: ${this.teams[0].score} - ${this.teams[1].name}: ${this.teams[1].score}`
     )
     this.resetAfterGoal()
@@ -286,9 +325,7 @@ export class Game implements IMatch {
         socket,
         `${this.players[0].name} joins team ${this.players[0].team?.name}`
       )
-      this.sendServerMessage(
-        `${newPlayer.name} joins team ${newPlayer.team?.name}`
-      )
+      this.sendText(`${newPlayer.name} joins team ${newPlayer.team?.name}`)
 
       this.transitionToStartGame()
     }
@@ -347,17 +384,16 @@ export class Game implements IMatch {
       // Log the remaining time every minute
       if (elapsedTime % 60000 <= deltaTime && remainingTimeMinutes >= 0) {
         // Check if it's been a minute
-        this.sendServerMessage(
-          `End in ${remainingTimeMinutes.toFixed(1)} minutes`
-        )
+        this.sendText(`End in ${remainingTimeMinutes.toFixed(1)} minutes`)
       }
 
       // Check if the match has ended
       if (elapsedTime >= this.matchDuration) {
-        this.sendServerMessage(
+        this.sendText(
           `${this.formatTime(Date.now())} It's over! ${this.getGameResult()}`
         )
         this.matchStartTime = null // Add a method to stop the timer when the match is over
+        this.transitionToGameOver()
       }
     }
 

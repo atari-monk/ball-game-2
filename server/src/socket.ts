@@ -8,10 +8,14 @@ export default function initializeSocketIO(io: Server, game: Game) {
   const playerActivity = new Map()
 
   io.on('connection', (socket: Socket) => {
+    if (game.messages.length > 0) {
+      game.resendLog()
+    }
+
     socket.on('setPlayerId', (id) => {
       let playerId: string | undefined
       playerId = id
-      //console.log(`playerId: ${playerId}`)
+      console.log(`playerId: ${playerId}`)
 
       let player: IPlayer | undefined
 
@@ -53,16 +57,15 @@ export default function initializeSocketIO(io: Server, game: Game) {
         clearInterval(pingInterval)
         setTimeout(() => {
           if (Date.now() - playerActivity.get(playerId) >= 2000) {
-            // console.log(
-            //   `Player ${playerId} is still inactive after 2 seconds. Removing player.`
-            // )
+            console.log(
+              `Player ${playerId} is still inactive after 2 seconds. Removing player.`
+            )
             if (player) {
               const id = player.id
               game.players = game.players.filter((p) => p.id !== id)
-              game.sendServerMessage(
-                `${player.team?.name}'s ${player.name} ran away`
-              )
+              game.sendText(`${player.team?.name}'s ${player.name} ran away`)
               socket.emit('update', new MatchDto(game.players, game.ball))
+              game.transitionToMatchMaking()
             }
           }
         }, 2000)
