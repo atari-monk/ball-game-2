@@ -96,6 +96,7 @@ export class Game implements IMatch {
   transitionToMatchMaking() {
     this._currentState = GameState.MatchMaking
     this.sendServerState()
+    this.sendText('Waiting for players')
   }
 
   private sendServerState() {
@@ -428,7 +429,7 @@ export class Game implements IMatch {
       const remainingTimeMinutes = (this.matchDuration - elapsedTime) / 60000 // Convert milliseconds to minutes
 
       // Log the remaining time every minute
-      if (elapsedTime % 60000 <= deltaTime*1.5 && remainingTimeMinutes >= 0) {
+      if (elapsedTime % 60000 <= deltaTime*1.1 && remainingTimeMinutes >= 0) {
         // Check if it's been a minute
         this.sendText(`End in ${remainingTimeMinutes.toFixed(1)} minutes`)
       }
