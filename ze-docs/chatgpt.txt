@@ -23443,3 +23443,115 @@ Copy code
 This is a one-line function in TypeScript.
 This is a one-line function using a regular function expression.
 You can replace the provided one-line functions with your own custom functions as needed.
+
+//here i missed to copy and deleted some pages about how to inject .env and config from webpack config (resolving issue of commiting localhost 
+//to repo, now it's localhost when dev loclaly and azure env var is commited to repo, at last convenience)
+
+update(deltaTime: number) {
+    // Calculate the remaining time if the match has started
+    if (this.matchStartTime !== null) {
+      const currentTime = Date.now()
+      const elapsedTime = currentTime - this.matchStartTime
+      const remainingTimeMinutes = (this.matchDuration - elapsedTime) / 60000 // Convert milliseconds to minutes
+
+      // Log the remaining time every minute
+      if (elapsedTime % 60000 <= deltaTime*1.1 && remainingTimeMinutes >= 0) {
+        // Check if it's been a minute
+        this.sendText(`End in ${remainingTimeMinutes.toFixed(1)} minutes`)
+      }
+
+      // Check if the match has ended
+      if (elapsedTime >= this.matchDuration) {
+        this.sendText(
+          `${this.formatTime(Date.now())} It's over! ${this.getGameResult()}`
+        )
+        this.matchStartTime = null // Add a method to stop the timer when the match is over
+        this.transitionToGameOver()
+      }
+    }// how to fix this, i get either no log End in x minutes or i get to may, when i make <= deltaTime*1.1 this delta value to big or small :(
+ChatGPT
+The issue you're facing seems to be related to the condition for logging the remaining time every minute. The problem with your current condition is that it relies on elapsedTime % 60000 <= deltaTime*1.1, which may not always work as expected due to floating-point precision and potential small variations in deltaTime. To ensure that you log the remaining time every minute, you can use a different approach:
+
+javascript
+Copy code
+update(deltaTime: number) {
+  // Calculate the remaining time if the match has started
+  if (this.matchStartTime !== null) {
+    const currentTime = Date.now();
+    const elapsedTime = currentTime - this.matchStartTime;
+    const remainingTimeMinutes = (this.matchDuration - elapsedTime) / 60000; // Convert milliseconds to minutes
+
+    // Log the remaining time every minute
+    const minutesPassed = Math.floor(elapsedTime / 60000);
+    const minutesSinceLastLog = minutesPassed - this.lastLogMinute;
+
+    if (minutesSinceLastLog >= 1 && remainingTimeMinutes >= 0) {
+      this.sendText(`End in ${remainingTimeMinutes.toFixed(1)} minutes`);
+      this.lastLogMinute = minutesPassed;
+    }
+
+    // Check if the match has ended
+    if (elapsedTime >= this.matchDuration) {
+      this.sendText(
+        `${this.formatTime(Date.now())} It's over! ${this.getGameResult()}`
+      );
+      this.matchStartTime = null; // Add a method to stop the timer when the match is over
+      this.transitionToGameOver();
+    }
+  }
+}
+In this updated code, I introduced a lastLogMinute variable to keep track of the last minute when you logged the remaining time. We calculate minutesSinceLastLog by subtracting this.lastLogMinute from minutesPassed. If minutesSinceLastLog is greater than or equal to 1, we log the remaining time and update this.lastLogMinute. This way, you'll ensure that the remaining time is logged approximately every minute without relying on the exact value of deltaTime.
+
+
+
+
+User
+Property 'lastLogMinute' does not exist on type 'Game'.
+ChatGPT
+I apologize for the oversight. It seems that the 'lastLogMinute' property is not defined in your 'Game' class. To fix this, you can add the 'lastLogMinute' property to your 'Game' class to keep track of the last minute when you logged the remaining time. Here's an example of how you can do this:
+
+javascript
+Copy code
+class Game {
+  // ...
+
+  private lastLogMinute: number = -1; // Initialize it to -1 to ensure the first log
+
+  update(deltaTime: number) {
+    // Calculate the remaining time if the match has started
+    if (this.matchStartTime !== null) {
+      const currentTime = Date.now();
+      const elapsedTime = currentTime - this.matchStartTime;
+      const remainingTimeMinutes = (this.matchDuration - elapsedTime) / 60000; // Convert milliseconds to minutes
+
+      // Log the remaining time every minute
+      const minutesPassed = Math.floor(elapsedTime / 60000);
+      const minutesSinceLastLog = minutesPassed - this.lastLogMinute;
+
+      if (minutesSinceLastLog >= 1 && remainingTimeMinutes >= 0) {
+        this.sendText(`End in ${remainingTimeMinutes.toFixed(1)} minutes`);
+        this.lastLogMinute = minutesPassed;
+      }
+
+      // Check if the match has ended
+      if (elapsedTime >= this.matchDuration) {
+        this.sendText(
+          `${this.formatTime(Date.now())} It's over! ${this.getGameResult()}`
+        );
+        this.matchStartTime = null; // Add a method to stop the timer when the match is over
+        this.transitionToGameOver();
+      }
+    }
+  }
+
+  // ...
+}
+By adding the 'lastLogMinute' property to your 'Game' class and initializing it to -1, you should no longer encounter the error, and the code should work as intended.
+
+
+
+
+User
+thx it seems to work
+ChatGPT
+You're welcome! I'm glad to hear that it's working now. If you have any more questions or need further assistance with anything else, feel free to ask. Good luck with your game development!

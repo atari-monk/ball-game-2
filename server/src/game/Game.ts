@@ -47,6 +47,7 @@ export class Game implements IMatch {
   private frameInterval: number = 1000 / this.frameRate
   private lastFrameTime: number = 0
   private gameLoop?: NodeJS.Timeout
+  private lastLogMinute: number = -1
 
   get CurrentState(): GameState {
     return this._currentState
@@ -422,16 +423,18 @@ export class Game implements IMatch {
   }
 
   update(deltaTime: number) {
-    // Calculate the remaining time if the match has started
     if (this.matchStartTime !== null) {
       const currentTime = Date.now()
       const elapsedTime = currentTime - this.matchStartTime
       const remainingTimeMinutes = (this.matchDuration - elapsedTime) / 60000 // Convert milliseconds to minutes
 
       // Log the remaining time every minute
-      if (elapsedTime % 60000 <= deltaTime*1.1 && remainingTimeMinutes >= 0) {
-        // Check if it's been a minute
+      const minutesPassed = Math.floor(elapsedTime / 60000)
+      const minutesSinceLastLog = minutesPassed - this.lastLogMinute
+
+      if (minutesSinceLastLog >= 1 && remainingTimeMinutes >= 0) {
         this.sendText(`End in ${remainingTimeMinutes.toFixed(1)} minutes`)
+        this.lastLogMinute = minutesPassed
       }
 
       // Check if the match has ended
