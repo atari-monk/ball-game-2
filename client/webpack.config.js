@@ -43,7 +43,7 @@ module.exports = (env) => {
       }),
       // Inject environment variables into your client-side code
       new webpack.DefinePlugin({
-        'process.env.HOST': JSON.stringify(envConfig.HOST || 'azure'),
+        'process.env.HOST': JSON.stringify(envConfig?.HOST || 'azure'),
       }),
     ],
   }
