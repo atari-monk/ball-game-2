@@ -4,12 +4,12 @@ name: Deploy server to Azure
     branches:
       - main
     paths:
-      - ./server/**
+      - 'server/**'
   workflow_dispatch:
 
 env:
   AZURE_WEBAPP_NAME: atari-monk-ball-game-2-server
-  AZURE_WEBAPP_PACKAGE_PATH: ./server
+  AZURE_WEBAPP_PACKAGE_PATH: server
   NODE_VERSION: 18.x
 
 jobs:
