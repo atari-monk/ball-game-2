@@ -4,7 +4,7 @@ import { FieldDto, IGateDtos, MapDto, MatchDto, MessageDto, MsgFlag } from 'api'
 
 const localhost = 'http://localhost:3001'
 const host = 'atari-monk-ball-game-2-server.azurewebsites.net'
-const socket = io(localhost)
+const socket = io(host)
 
 const canvas = document.getElementById('canvas') as HTMLCanvasElement | null
 if (!canvas) {
