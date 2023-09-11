@@ -365,7 +365,7 @@ export class Game implements IMatch {
       .withSpeed(0)
       .withMaxSpeedForward(0.1)
       .withMaxSpeedBackward(-0.05)
-      .withTurnSpeed(0.2)
+      .withTurnSpeed(0.4)
       .withTeam(null)
       .withScore(0)
       .build()

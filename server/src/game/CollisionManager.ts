@@ -1,4 +1,5 @@
 import { IBall, IPlayer } from 'api'
+import { Vector2 } from './Vector2'
 
 export class CollisionManager {
   checkPlayerBallCollision(players: IPlayer[], ball: IBall) {
@@ -29,30 +30,26 @@ export class CollisionManager {
     ball.y += collisionVectorY * overlap
   }
 
-  private handleCollision(player: IPlayer, ball: IBall) {
-    const mass1 = player.mass
-    const mass2 = ball.mass
-    const v1x = player.velocityX
-    const v1y = player.velocityY
-    const v2x = ball.velocityX
-    const v2y = ball.velocityY
+  private handleCollision(player: IPlayer, ball: IBall, e: number = 0.9) {
+    const playerVelocity = new Vector2(player.velocityX, player.velocityY)
+    const ballVelocity = new Vector2(ball.velocityX, ball.velocityY)
 
-    const newV1x =
-      ((mass1 - mass2) / (mass1 + mass2)) * v1x +
-      ((2 * mass2) / (mass1 + mass2)) * v2x
-    const newV1y =
-      ((mass1 - mass2) / (mass1 + mass2)) * v1y +
-      ((2 * mass2) / (mass1 + mass2)) * v2y
-    const newV2x =
-      ((2 * mass1) / (mass1 + mass2)) * v1x +
-      ((mass2 - mass1) / (mass1 + mass2)) * v2x
-    const newV2y =
-      ((2 * mass1) / (mass1 + mass2)) * v1y +
-      ((mass2 - mass1) / (mass1 + mass2)) * v2y
+    const relativeVelocity = ballVelocity.subtract(playerVelocity)
 
-    player.velocityX = newV1x
-    player.velocityY = newV1y
-    ball.velocityX = newV2x
-    ball.velocityY = newV2y
+    const playerMassFactor = (2 * ball.mass) / (player.mass + ball.mass)
+    const ballMassFactor = (2 * player.mass) / (player.mass + ball.mass)
+
+    const newPlayerVelocity = playerVelocity
+      .add(relativeVelocity.multiply(playerMassFactor))
+      .multiply(e)
+
+    const newBallVelocity = ballVelocity
+      .subtract(relativeVelocity.multiply(ballMassFactor))
+      .multiply(e)
+
+    player.velocityX = newPlayerVelocity.x
+    player.velocityY = newPlayerVelocity.y
+    ball.velocityX = newBallVelocity.x
+    ball.velocityY = newBallVelocity.y
   }
 }
