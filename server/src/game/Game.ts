@@ -517,21 +517,14 @@ export class Game implements IMatch {
 
   checkPlayerBallCollision() {
     for (const player of this.players) {
-      if (!player.collisionDisabled) {
-        const dx = this.ball.x - player.x
-        const dy = this.ball.y - player.y
-        const distance = Math.sqrt(dx * dx + dy * dy)
+      const dx = this.ball.x - player.x
+      const dy = this.ball.y - player.y
+      const distance = Math.sqrt(dx * dx + dy * dy)
 
-        if (distance < player.radius + this.ball.radius) {
-          this.handleCollision(player, this.ball)
+      if (distance < player.radius + this.ball.radius) {
+        this.handleCollision(player, this.ball)
 
-          this.ball.lastHit = player
-
-          player.collisionDisabled = true
-          setTimeout(() => {
-            player.collisionDisabled = false
-          }, 100)
-        }
+        this.ball.lastHit = player
       }
     }
   }
