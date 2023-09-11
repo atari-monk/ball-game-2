@@ -12,7 +12,8 @@ export interface IPlayer {
   mass: number
   direction: number
   speed: number
-  maxSpeed: number
+  maxSpeedForward: number
+  maxSpeedBackward: number
   team: ITeam | null
   score: number
   scorePoint(): void

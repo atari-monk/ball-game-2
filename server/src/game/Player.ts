@@ -14,7 +14,8 @@ export class Player implements IPlayer {
     public mass: number,
     public direction: number,
     public speed: number,
-    public maxSpeed: number,
+    public maxSpeedForward: number,
+    public maxSpeedBackward: number,
     public team: ITeam | null,
     public score: number
   ) {}
@@ -40,7 +41,8 @@ export class Player implements IPlayer {
     mass: number,
     direction: number,
     speed: number,
-    maxSpeed: number,
+    maxSpeedForward: number,
+    maxSpeedBackward: number,
     team: ITeam | null,
     score: number
   ): IPlayer {
@@ -56,7 +58,8 @@ export class Player implements IPlayer {
       mass,
       direction,
       speed,
-      maxSpeed,
+      maxSpeedForward,
+      maxSpeedBackward,
       team,
       score
     )

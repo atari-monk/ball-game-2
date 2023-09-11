@@ -10,8 +10,9 @@ export class PlayerBuilder {
   private collisionDisabled = false
   private mass = 20
   private direction = 0
-  private speed = 0.3
-  private maxSpeed = 0
+  private speed = 0
+  private maxSpeedForward = 0
+  private maxSpeedBackward = 0
   private team: ITeam | null = null
   private score = 0
 
@@ -54,8 +55,13 @@ export class PlayerBuilder {
     return this
   }
 
-  withMaxSpeed(maxSpeed: number): PlayerBuilder {
-    this.maxSpeed = maxSpeed
+  withMaxSpeedForward(maxSpeedForward: number): PlayerBuilder {
+    this.maxSpeedForward = maxSpeedForward
+    return this
+  }
+
+  withMaxSpeedBackward(maxSpeedBackward: number): PlayerBuilder {
+    this.maxSpeedBackward = maxSpeedBackward
     return this
   }
 
@@ -82,7 +88,8 @@ export class PlayerBuilder {
       this.mass,
       this.direction,
       this.speed,
-      this.maxSpeed,
+      this.maxSpeedForward,
+      this.maxSpeedBackward,
       this.team,
       this.score
     )

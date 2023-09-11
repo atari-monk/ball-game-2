@@ -9,7 +9,8 @@ export class PlayerDto {
   mass: number
   direction: number
   speed: number
-  maxSpeed: number
+  maxSpeedForward: number
+  maxSpeedBackward: number
   team: ITeam | null
 
   constructor(player: IPlayer) {
@@ -20,7 +21,8 @@ export class PlayerDto {
     this.mass = player.mass
     this.direction = player.direction
     this.speed = player.speed
-    this.maxSpeed = player.maxSpeed
+    this.maxSpeedForward = player.maxSpeedForward
+    this.maxSpeedBackward = player.maxSpeedBackward
     this.team = player.team
   }
 }
