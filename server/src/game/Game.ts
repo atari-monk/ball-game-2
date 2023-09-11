@@ -522,6 +522,17 @@ export class Game implements IMatch {
       const distance = Math.sqrt(dx * dx + dy * dy)
 
       if (distance < player.radius + this.ball.radius) {
+        // Calculate the overlap distance
+        const overlap = player.radius + this.ball.radius - distance
+
+        // Calculate the normalized collision vector
+        const collisionVectorX = dx / distance
+        const collisionVectorY = dy / distance
+
+        // Move the ball slightly outside the player to prevent sticking
+        this.ball.x += collisionVectorX * overlap
+        this.ball.y += collisionVectorY * overlap
+
         this.handleCollision(player, this.ball)
 
         this.ball.lastHit = player
