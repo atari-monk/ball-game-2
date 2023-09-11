@@ -15,6 +15,7 @@ import { BallBuilder } from './BallBuilder'
 import { GateBuilder } from './GateBuilder'
 import { NameGenerator } from './NameGenerator'
 import { PlayerBuilder } from './PlayerBuilder'
+import { CollisionManager } from './CollisionManager'
 
 interface IMatch {
   matchDuration: number
@@ -48,6 +49,7 @@ export class Game implements IMatch {
   private lastFrameTime: number = 0
   private gameLoop?: NodeJS.Timeout
   private lastLogMinute: number = -1
+  private playerBallCollision = new CollisionManager()
 
   get CurrentState(): GameState {
     return this._currentState
@@ -459,8 +461,7 @@ export class Game implements IMatch {
     // Update player positions based on their velocity
     this.updatePlayerPositions(deltaTime)
 
-    // Check collision with players
-    this.checkPlayerBallCollision()
+    this.playerBallCollision.checkPlayerBallCollision(this.players, this.ball)
 
     for (const player of this.players) {
       // Check collision with walls
@@ -515,59 +516,59 @@ export class Game implements IMatch {
     }
   }
 
-  checkPlayerBallCollision() {
-    for (const player of this.players) {
-      const dx = this.ball.x - player.x
-      const dy = this.ball.y - player.y
-      const distance = Math.sqrt(dx * dx + dy * dy)
+  //   checkPlayerBallCollision() {
+  //     for (const player of this.players) {
+  //       const dx = this.ball.x - player.x
+  //       const dy = this.ball.y - player.y
+  //       const distance = Math.sqrt(dx * dx + dy * dy)
 
-      if (distance < player.radius + this.ball.radius) {
-        // Calculate the overlap distance
-        const overlap = player.radius + this.ball.radius - distance
+  //       if (distance < player.radius + this.ball.radius) {
+  //         // Calculate the overlap distance
+  //         const overlap = player.radius + this.ball.radius - distance
 
-        // Calculate the normalized collision vector
-        const collisionVectorX = dx / distance
-        const collisionVectorY = dy / distance
+  //         // Calculate the normalized collision vector
+  //         const collisionVectorX = dx / distance
+  //         const collisionVectorY = dy / distance
 
-        // Move the ball slightly outside the player to prevent sticking
-        this.ball.x += collisionVectorX * overlap
-        this.ball.y += collisionVectorY * overlap
+  //         // Move the ball slightly outside the player to prevent sticking
+  //         this.ball.x += collisionVectorX * overlap
+  //         this.ball.y += collisionVectorY * overlap
 
-        this.handleCollision(player, this.ball)
+  //         this.handleCollision(player, this.ball)
 
-        this.ball.lastHit = player
-      }
-    }
-  }
+  //         this.ball.lastHit = player
+  //       }
+  //     }
+  //   }
 
-  handleCollision(player: IPlayer, ball: IBall) {
-    const mass1 = player.mass
-    const mass2 = ball.mass
-    const v1x = player.velocityX
-    const v1y = player.velocityY
-    const v2x = ball.velocityX
-    const v2y = ball.velocityY
+  //   handleCollision(player: IPlayer, ball: IBall) {
+  //     const mass1 = player.mass
+  //     const mass2 = ball.mass
+  //     const v1x = player.velocityX
+  //     const v1y = player.velocityY
+  //     const v2x = ball.velocityX
+  //     const v2y = ball.velocityY
 
-    // Calculate new velocities using conservation of momentum and kinetic energy
-    const newV1x =
-      ((mass1 - mass2) / (mass1 + mass2)) * v1x +
-      ((2 * mass2) / (mass1 + mass2)) * v2x
-    const newV1y =
-      ((mass1 - mass2) / (mass1 + mass2)) * v1y +
-      ((2 * mass2) / (mass1 + mass2)) * v2y
-    const newV2x =
-      ((2 * mass1) / (mass1 + mass2)) * v1x +
-      ((mass2 - mass1) / (mass1 + mass2)) * v2x
-    const newV2y =
-      ((2 * mass1) / (mass1 + mass2)) * v1y +
-      ((mass2 - mass1) / (mass1 + mass2)) * v2y
+  //     // Calculate new velocities using conservation of momentum and kinetic energy
+  //     const newV1x =
+  //       ((mass1 - mass2) / (mass1 + mass2)) * v1x +
+  //       ((2 * mass2) / (mass1 + mass2)) * v2x
+  //     const newV1y =
+  //       ((mass1 - mass2) / (mass1 + mass2)) * v1y +
+  //       ((2 * mass2) / (mass1 + mass2)) * v2y
+  //     const newV2x =
+  //       ((2 * mass1) / (mass1 + mass2)) * v1x +
+  //       ((mass2 - mass1) / (mass1 + mass2)) * v2x
+  //     const newV2y =
+  //       ((2 * mass1) / (mass1 + mass2)) * v1y +
+  //       ((mass2 - mass1) / (mass1 + mass2)) * v2y
 
-    // Update the velocities of the player and the ball
-    player.velocityX = newV1x
-    player.velocityY = newV1y
-    ball.velocityX = newV2x
-    ball.velocityY = newV2y
-  }
+  //     // Update the velocities of the player and the ball
+  //     player.velocityX = newV1x
+  //     player.velocityY = newV1y
+  //     ball.velocityX = newV2x
+  //     ball.velocityY = newV2y
+  //   }
 
   checkWallCollision(player: IPlayer, deltaTime: number) {
     const newX = player.x + player.velocityX * deltaTime
