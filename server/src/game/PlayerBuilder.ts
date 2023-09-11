@@ -13,6 +13,7 @@ export class PlayerBuilder {
   private speed = 0
   private maxSpeedForward = 0
   private maxSpeedBackward = 0
+  private turnSpeed = 0
   private team: ITeam | null = null
   private score = 0
 
@@ -65,6 +66,11 @@ export class PlayerBuilder {
     return this
   }
 
+  withTurnSpeed(turnSpeed: number): PlayerBuilder {
+    this.turnSpeed = turnSpeed
+    return this
+  }
+
   withTeam(team: ITeam | null): PlayerBuilder {
     this.team = team
     return this
@@ -90,6 +96,7 @@ export class PlayerBuilder {
       this.speed,
       this.maxSpeedForward,
       this.maxSpeedBackward,
+      this.turnSpeed,
       this.team,
       this.score
     )
