@@ -1,7 +1,7 @@
 import { IMessage, MessageDto, MsgFlag } from 'api'
 import { Server, Socket } from 'socket.io'
 
-export class Messanger {
+export class Messenger {
   private messages: IMessage[] = []
   private readonly logEvent = 'log'
   private readonly logResetEvent = 'log-reset'

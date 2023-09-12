@@ -8,10 +8,10 @@ export default function initializeSocketIO(io: Server, game: Game) {
 
   io.on('connection', (socket: Socket) => {
     if (game.players.length > 14) {
-      game.messanger.sendTextToOne(socket, 'Server is at capacity')
+      game.messenger.sendTextToOne(socket, 'Server is at capacity')
     }
-    game.messanger.clearLogOne(socket)
-    game.messanger.resendLog(socket)
+    game.messenger.clearLogOne(socket)
+    game.messenger.resendLog(socket)
 
     socket.on('setPlayerId', (id) => {
       let playerId: string | undefined
@@ -42,7 +42,7 @@ export default function initializeSocketIO(io: Server, game: Game) {
       })
 
       socket.on('input', (input: any) => {
-        if (game.CurrentState !== GameState.Progress) {
+        if (game.stateManager.isNotInProgressState()) {
           return
         }
         if (player) {
@@ -73,12 +73,12 @@ export default function initializeSocketIO(io: Server, game: Game) {
             if (player) {
               const id = player.id
               game.players = game.players.filter((p) => p.id !== id)
-              game.messanger.sendText(
+              game.messenger.sendText(
                 `${player.team?.name}'s ${player.name} ran away`
               )
               game.resetGame()
               io.emit('update', new MatchDto(game.players, game.ball))
-              game.transitionToMatchMaking()
+              game.stateManager.transitionToMatchMaking()
             }
           }
         }, 2000)
