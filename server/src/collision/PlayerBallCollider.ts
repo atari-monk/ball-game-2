@@ -1,7 +1,7 @@
 import { IBall, IPlayer } from 'api'
 import { Vector2 } from '../Vector2'
 
-export class PlayerBallCollision {
+export class PlayerBallCollider {
   checkPlayerBallCollision(players: IPlayer[], ball: IBall) {
     for (const player of players) {
       const dx = ball.x - player.x

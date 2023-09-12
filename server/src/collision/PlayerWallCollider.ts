@@ -1,6 +1,6 @@
 import { IField, IPlayer } from 'api'
 
-export class PlayerWallCollision {
+export class PlayerWallCollider {
   public checkWallCollision(
     players: IPlayer[],
     field: IField,

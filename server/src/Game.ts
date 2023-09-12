@@ -15,8 +15,9 @@ import { BallBuilder } from './BallBuilder'
 import { GateBuilder } from './GateBuilder'
 import { NameGenerator } from './NameGenerator'
 import { PlayerBuilder } from './PlayerBuilder'
-import { PlayerBallCollision } from './collision/PlayerBallCollision'
-import { PlayerWallCollision } from './collision/PlayerWallCollision'
+import { PlayerBallCollider } from './collision/PlayerBallCollider'
+import { PlayerWallCollider } from './collision/PlayerWallCollider'
+import { BallWallCollider } from './collision/BallWallCollider'
 
 interface IMatch {
   matchDuration: number
@@ -50,8 +51,9 @@ export class Game implements IMatch {
   private lastFrameTime: number = 0
   private gameLoop?: NodeJS.Timeout
   private lastLogMinute: number = -1
-  private playerBallCollision = new PlayerBallCollision()
-  private playerWallCollision = new PlayerWallCollision()
+  private playerBallCollider = new PlayerBallCollider()
+  private playerWallCollider = new PlayerWallCollider()
+  private ballWallCollision = new BallWallCollider()
 
   get CurrentState(): GameState {
     return this._currentState
@@ -463,11 +465,15 @@ export class Game implements IMatch {
     // Update player positions based on their velocity
     this.updatePlayerPositions(deltaTime)
 
-    this.playerBallCollision.checkPlayerBallCollision(this.players, this.ball)
+    this.playerBallCollider.checkPlayerBallCollision(this.players, this.ball)
 
-    this.playerWallCollision.checkWallCollision(this.players, this.field, deltaTime)
+    this.playerWallCollider.checkWallCollision(
+      this.players,
+      this.field,
+      deltaTime
+    )
 
-    this.checkWallCollisionForBall()
+    this.ballWallCollision.checkWallCollisionForBall(this.ball, this.field)
 
     this.checkGateCollision()
   }
@@ -512,43 +518,6 @@ export class Game implements IMatch {
       // Update the player's position
       player.x += displacementX
       player.y += displacementY
-    }
-  }
-
-  checkWallCollisionForBall() {
-    const newX = this.ball.x + this.ball.velocityX
-    const newY = this.ball.y + this.ball.velocityY
-
-    // Check if the ball hits the left or right wall
-    if (
-      newX - this.ball.radius < 0 ||
-      newX + this.ball.radius > this.field.width
-    ) {
-      // Reverse the ball's horizontal velocity
-      this.ball.velocityX *= -1
-
-      // Move the ball slightly away from the wall to prevent re-collision
-      if (newX - this.ball.radius < 0) {
-        this.ball.x = this.ball.radius // Adjust this value as needed
-      } else {
-        this.ball.x = this.field.width - this.ball.radius // Adjust this value as needed
-      }
-    }
-
-    // Check if the ball hits the top or bottom wall
-    if (
-      newY - this.ball.radius < 0 ||
-      newY + this.ball.radius > this.field.height
-    ) {
-      // Reverse the ball's vertical velocity
-      this.ball.velocityY *= -1
-
-      // Move the ball slightly away from the wall to prevent re-collision
-      if (newY - this.ball.radius < 0) {
-        this.ball.y = this.ball.radius // Adjust this value as needed
-      } else {
-        this.ball.y = this.field.height - this.ball.radius // Adjust this value as needed
-      }
     }
   }
 }
