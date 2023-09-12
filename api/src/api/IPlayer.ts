@@ -1,21 +1,4 @@
-import { ITeam } from './ITeam'
+import { IPlayerBehavior } from './IPlayerBehavior'
+import { IPlayerModel } from './IPlayerModel'
 
-export interface IPlayer {
-  id: string
-  name: string
-  x: number
-  y: number
-  velocityX: number
-  velocityY: number
-  radius: number
-  collisionDisabled: boolean
-  mass: number
-  direction: number
-  speed: number
-  maxSpeedForward: number
-  maxSpeedBackward: number
-  turnSpeed: number
-  team: ITeam | null
-  score: number
-  scorePoint(): void
-}
+export interface IPlayer extends IPlayerModel, IPlayerBehavior {}

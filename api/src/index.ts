@@ -6,6 +6,8 @@ export { IGate } from './api/IGate'
 export { IGates } from './api/IGates'
 export { IMessage } from './api/IMessage'
 export { IPlayer } from './api/IPlayer'
+export { IPlayerBehavior } from './api/IPlayerBehavior'
+export { IPlayerModel } from './api/IPlayerModel'
 export { ITeam } from './api/ITeam'
 export { MsgFlag } from './api/MsgFlag'
 //dtos

@@ -340,17 +340,7 @@ export class Game implements IMatch {
 
   updatePlayerPositions(deltaTime: number) {
     for (const player of this.players) {
-      const speed = player.speed
-      player.velocityX = speed * Math.cos(player.direction)
-      player.velocityY = speed * Math.sin(player.direction)
-
-      // Calculate the displacement based on velocity and deltaTime
-      const displacementX = player.velocityX * deltaTime
-      const displacementY = player.velocityY * deltaTime
-
-      // Update the player's position
-      player.x += displacementX
-      player.y += displacementY
+      player.update(deltaTime)
     }
   }
 }

@@ -1,7 +1,10 @@
 import { IPlayer, ITeam } from 'api'
 import { PlayerBuilder } from './PlayerBuilder'
+import { BallPlayer } from './BallPlayer'
 
 export class Player implements IPlayer {
+  private behaviors: BallPlayer
+
   private constructor(
     public id: string,
     public name: string,
@@ -19,11 +22,8 @@ export class Player implements IPlayer {
     public turnSpeed: number,
     public team: ITeam | null,
     public score: number
-  ) {}
-
-  scorePoint(): void {
-    this.score++
-    if (this.team) this.team.score++
+  ) {
+    this.behaviors = new BallPlayer(this)
   }
 
   static builder(id: string, name: string): PlayerBuilder {
@@ -66,5 +66,13 @@ export class Player implements IPlayer {
       team,
       score
     )
+  }
+
+  update(deltaTime: number) {
+    this.behaviors.update(deltaTime)
+  }
+
+  scorePoint(): void {
+    this.behaviors.scorePoint()
   }
 }
