@@ -15,7 +15,8 @@ import { BallBuilder } from './BallBuilder'
 import { GateBuilder } from './GateBuilder'
 import { NameGenerator } from './NameGenerator'
 import { PlayerBuilder } from './PlayerBuilder'
-import { CollisionManager } from './CollisionManager'
+import { PlayerBallCollision } from './collision/PlayerBallCollision'
+import { PlayerWallCollision } from './collision/PlayerWallCollision'
 
 interface IMatch {
   matchDuration: number
@@ -49,7 +50,8 @@ export class Game implements IMatch {
   private lastFrameTime: number = 0
   private gameLoop?: NodeJS.Timeout
   private lastLogMinute: number = -1
-  private playerBallCollision = new CollisionManager()
+  private playerBallCollision = new PlayerBallCollision()
+  private playerWallCollision = new PlayerWallCollision()
 
   get CurrentState(): GameState {
     return this._currentState
@@ -463,10 +465,7 @@ export class Game implements IMatch {
 
     this.playerBallCollision.checkPlayerBallCollision(this.players, this.ball)
 
-    for (const player of this.players) {
-      // Check collision with walls
-      this.checkWallCollision(player, deltaTime)
-    }
+    this.playerWallCollision.checkWallCollision(this.players, this.field, deltaTime)
 
     this.checkWallCollisionForBall()
 
@@ -516,80 +515,6 @@ export class Game implements IMatch {
     }
   }
 
-  //   checkPlayerBallCollision() {
-  //     for (const player of this.players) {
-  //       const dx = this.ball.x - player.x
-  //       const dy = this.ball.y - player.y
-  //       const distance = Math.sqrt(dx * dx + dy * dy)
-
-  //       if (distance < player.radius + this.ball.radius) {
-  //         // Calculate the overlap distance
-  //         const overlap = player.radius + this.ball.radius - distance
-
-  //         // Calculate the normalized collision vector
-  //         const collisionVectorX = dx / distance
-  //         const collisionVectorY = dy / distance
-
-  //         // Move the ball slightly outside the player to prevent sticking
-  //         this.ball.x += collisionVectorX * overlap
-  //         this.ball.y += collisionVectorY * overlap
-
-  //         this.handleCollision(player, this.ball)
-
-  //         this.ball.lastHit = player
-  //       }
-  //     }
-  //   }
-
-  //   handleCollision(player: IPlayer, ball: IBall) {
-  //     const mass1 = player.mass
-  //     const mass2 = ball.mass
-  //     const v1x = player.velocityX
-  //     const v1y = player.velocityY
-  //     const v2x = ball.velocityX
-  //     const v2y = ball.velocityY
-
-  //     // Calculate new velocities using conservation of momentum and kinetic energy
-  //     const newV1x =
-  //       ((mass1 - mass2) / (mass1 + mass2)) * v1x +
-  //       ((2 * mass2) / (mass1 + mass2)) * v2x
-  //     const newV1y =
-  //       ((mass1 - mass2) / (mass1 + mass2)) * v1y +
-  //       ((2 * mass2) / (mass1 + mass2)) * v2y
-  //     const newV2x =
-  //       ((2 * mass1) / (mass1 + mass2)) * v1x +
-  //       ((mass2 - mass1) / (mass1 + mass2)) * v2x
-  //     const newV2y =
-  //       ((2 * mass1) / (mass1 + mass2)) * v1y +
-  //       ((mass2 - mass1) / (mass1 + mass2)) * v2y
-
-  //     // Update the velocities of the player and the ball
-  //     player.velocityX = newV1x
-  //     player.velocityY = newV1y
-  //     ball.velocityX = newV2x
-  //     ball.velocityY = newV2y
-  //   }
-
-  checkWallCollision(player: IPlayer, deltaTime: number) {
-    const newX = player.x + player.velocityX * deltaTime
-    const newY = player.y + player.velocityY * deltaTime
-    let directionChanged = false
-
-    if (newX - player.radius < 0 || newX + player.radius > this.field.width) {
-      this.adjustHorizontalWallCollision(player, newX)
-      directionChanged = true
-    }
-
-    if (newY - player.radius < 0 || newY + player.radius > this.field.height) {
-      this.adjustVerticalWallCollision(player, newY)
-      directionChanged = true
-    }
-
-    if (directionChanged) {
-      this.normalizePlayerDirection(player)
-    }
-  }
-
   checkWallCollisionForBall() {
     const newX = this.ball.x + this.ball.velocityX
     const newY = this.ball.y + this.ball.velocityY
@@ -625,34 +550,5 @@ export class Game implements IMatch {
         this.ball.y = this.field.height - this.ball.radius // Adjust this value as needed
       }
     }
-  }
-
-  adjustHorizontalWallCollision(player: IPlayer, newX: number) {
-    if (newX - player.radius < 0) {
-      player.x = player.radius
-    } else {
-      player.x = this.field.width - player.radius
-    }
-
-    player.direction = Math.PI - player.direction
-  }
-
-  adjustVerticalWallCollision(player: IPlayer, newY: number) {
-    if (newY - player.radius < 0) {
-      player.y = player.radius
-    } else {
-      player.y = this.field.height - player.radius
-    }
-
-    player.direction = -player.direction
-  }
-
-  normalizePlayerDirection(player: IPlayer) {
-    const length = Math.sqrt(
-      player.velocityX * player.velocityX + player.velocityY * player.velocityY
-    )
-
-    player.velocityX /= length
-    player.velocityY /= length
   }
 }
