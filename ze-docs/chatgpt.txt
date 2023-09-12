@@ -24102,3 +24102,1429 @@ Indoor Surfaces: In indoor football arenas with specialized flooring, the COR ma
 It's essential to note that the COR is an empirical value, and you may need to adjust it based on your specific simulation or game requirements. Additionally, the COR can vary depending on factors such as ball inflation pressure, ball surface condition, and the angle of impact.
 
 To achieve realistic ball behavior in a football simulation, you may consider experimenting with different COR values within the mentioned ranges and observing the results to find the most suitable value for your scenario.
+
+import { Server, Socket } from 'socket.io'
+import { IPlayer, IBall, ITeam, IField, IGates, MatchDto } from 'api'
+import { BallBuilder } from '../ball/BallBuilder'
+import { GateBuilder } from '../gate/GateBuilder'
+import { NameGenerator } from '../utils/NameGenerator'
+import { PlayerBuilder } from '../player/PlayerBuilder'
+import { PlayerBallCollider } from '../collision/PlayerBallCollider'
+import { PlayerWallCollider } from '../collision/PlayerWallCollider'
+import { BallWallCollider } from '../collision/BallWallCollider'
+import { Messenger } from '../utils/Messenger'
+import { GameStateManager } from './GameStateManager'
+
+interface IMatch {
+  matchDuration: number
+  matchStartTime: number | null
+}
+
+export class Game implements IMatch {
+  private readonly frictionCoefficient: number = 0.99
+  players: IPlayer[] = []
+  ball: IBall = new BallBuilder()
+    .withPosition(400, 300)
+    .withVelocity(0, 0)
+    .withRadius(5)
+    .withMass(5)
+    .withLastHit(null)
+    .build()
+  field: IField = { width: 800, height: 600 }
+  gates: IGates
+  teams: ITeam[] = [
+    { name: '', color: 'red', playerIds: [], score: 0 },
+    { name: '', color: 'blue', playerIds: [], score: 0 },
+  ]
+  matchDuration: number = 5 * 60 * 1000 // 5 minutes in milliseconds
+  matchStartTime: number | null = null
+  private nameGenerator = new NameGenerator()
+  private frameRate: number = 30
+  private frameInterval: number = 1000 / this.frameRate
+  private lastFrameTime: number = 0
+  private gameLoop?: NodeJS.Timeout
+  private lastLogMinute: number = -1
+  private playerBallCollider = new PlayerBallCollider()
+  private playerWallCollider = new PlayerWallCollider()
+  private ballWallCollision = new BallWallCollider()
+  private _messenger: Messenger
+  private _stateManager: GameStateManager
+
+  get messenger(): Messenger {
+    return this._messenger
+  }
+
+  get stateManager(): GameStateManager {
+    return this._stateManager
+  }
+
+  constructor(private readonly io: Server) {
+    this._messenger = new Messenger(io)
+    this._stateManager = new GameStateManager(this._messenger, this)
+    this.gates = {
+      left: new GateBuilder()
+        .withPosition(0, this.field.height / 2 - 50)
+        .withWidth(5)
+        .withHeight(100)
+        .withTeam(this.teams[0])
+        .build(),
+      right: new GateBuilder()
+        .withPosition(this.field.width - 5, this.field.height / 2 - 50)
+        .withWidth(5)
+        .withHeight(100)
+        .withTeam(this.teams[1])
+        .build(),
+    }
+    const [teamA, teamB] = this.getRandomAnimalTeams()
+    this.teams[0].name = teamA
+    this.teams[1].name = teamB
+    this._stateManager.transitionToMatchMaking()
+  }
+
+  public startLoop() {
+    this.lastFrameTime = Date.now()
+    this.gameLoop = setInterval(() => {
+      const currentTime = Date.now()
+      const deltaTime = currentTime - this.lastFrameTime
+
+      this.update(deltaTime)
+
+      this.io.emit('update', new MatchDto(this.players, this.ball))
+
+      this.lastFrameTime = currentTime
+    }, this.frameInterval)
+  }
+
+  public startMatch() {
+    this.matchStartTime = Date.now()
+    this._messenger.sendText(`${this.formatTime(this.matchStartTime)} Begin`)
+  }
+
+  public stopLoop() {
+    clearInterval(this.gameLoop)
+  }
+
+  getRandomAnimalTeams(): string[] {
+    const animalTeams = [
+      ['Lions', 'Tigers'],
+      ['Eagles', 'Hawks'],
+      ['Dolphins', 'Sharks'],
+      ['Wolves', 'Bears'],
+      ['Penguins', 'Seals'],
+      ['Cheetahs', 'Leopards'],
+      ['Owls', 'Falcons'],
+      ['Elephants', 'Rhinos'],
+      ['Kangaroos', 'Koalas'],
+      ['Gorillas', 'Chimpanzees'],
+    ]
+
+    const randomIndex = Math.floor(Math.random() * animalTeams.length)
+    return animalTeams[randomIndex]
+  }
+
+  checkGateCollision() {
+    // Check if the ball hits the left gate
+    if (
+      this.ball.x >= this.gates.left.x &&
+      this.ball.x <= this.gates.left.x + this.gates.left.width &&
+      this.ball.y >= this.gates.left.y &&
+      this.ball.y <= this.gates.left.y + this.gates.left.height
+    ) {
+      // Handle left gate collision here
+      if (
+        this.ball.lastHit &&
+        this.ball.lastHit.team?.name !== this.gates.left.team.name
+      ) {
+        this.pointScored()
+      }
+    }
+
+    // Check if the ball hits the right gate
+    if (
+      this.ball.x >= this.gates.right.x &&
+      this.ball.x <= this.gates.right.x + this.gates.right.width &&
+      this.ball.y >= this.gates.right.y &&
+      this.ball.y <= this.gates.right.y + this.gates.right.height
+    ) {
+      // Handle right gate collision here
+      if (
+        this.ball.lastHit &&
+        this.ball.lastHit.team?.name !== this.gates.right.team.name
+      ) {
+        this.pointScored()
+      }
+    }
+  }
+
+  positionPlayerInLine(player: IPlayer) {
+    if (!player.team) throw 'Player team must be specified at this point!'
+
+    // Find the goalpost of the player's team and the opponent's goalpost
+    const playerTeamGoal =
+      player.team === this.teams[0] ? this.gates.left : this.gates.right
+
+    // Calculate the horizontal position as the average of ball position and player's team goalpost position
+    player.x = (this.field.width / 2 + playerTeamGoal.x) / 2
+
+    // Set the direction angle to be purely horizontal and away from the player's team goalpost
+    player.direction = playerTeamGoal.x < this.field.width / 2 ? 0 : Math.PI
+
+    // Calculate vertical spacing based on player radius
+    const playerSpacing = 4 * player.radius
+
+    // Calculate vertical position for each player
+    const canvasCenterY = this.field.height / 2
+    const numPlayers = player.team.playerIds.length
+    const playerIndex = player.team.playerIds.indexOf(player.id) + 1
+
+    // Adjust the vertical position of the first player to match the center of the canvas
+    player.y = canvasCenterY
+
+    if (numPlayers > 1) {
+      // Calculate the positions for subsequent players
+      if (playerIndex % 2 === 0) {
+        // If the player index is even, place players only above the first player
+        player.y -= (playerIndex / 2) * playerSpacing
+      } else {
+        // If the player index is odd, place players only below the first player
+        player.y += Math.floor(playerIndex / 2) * playerSpacing
+      }
+    }
+  }
+
+  resetGame() {
+    this.messenger.clearLogAll()
+    // Reset player scores
+    for (const player of this.players) {
+      player.score = 0
+      player.team = null
+    }
+
+    // Reset the ball position
+    this.ball.x = this.field.width / 2
+    this.ball.y = this.field.height / 2
+    this.ball.velocityX = 0
+    this.ball.velocityY = 0
+    this.ball.lastHit = null
+
+    // Reset team scores
+    for (const team of this.teams) {
+      team.score = 0
+      team.playerIds = []
+    }
+
+    this.matchStartTime = null
+
+    // Reassign players to teams and position them
+    for (const player of this.players) {
+      this.assignPlayerToTeam(player)
+      this.positionPlayerInLine(player)
+      player.velocityX = 0
+      player.velocityY = 0
+      player.speed = 0
+    }
+
+    this.lastLogMinute = -1
+  }
+
+  resetAfterGoal() {
+    // Reposition the ball to the center of the field
+    this.ball.x = this.field.width / 2
+    this.ball.y = this.field.height / 2
+    this.ball.velocityX = 0
+    this.ball.velocityY = 0
+    this.ball.lastHit = null
+
+    for (const player of this.players) {
+      this.positionPlayerInLine(player)
+      player.velocityX = 0
+      player.velocityY = 0
+      player.speed = 0
+    }
+  }
+
+  pointScored() {
+    this.ball.lastHit?.scorePoint()
+    this._messenger.sendText(
+      `Goal by ${this.ball.lastHit?.name}, ${this.teams[0].name} (${this.teams[0].color}): ${this.teams[0].score} - ${this.teams[1].name}: ${this.teams[1].score}`
+    )
+    this.resetAfterGoal()
+  }
+
+  addPlayer(id: string, socket: Socket) {
+    const newPlayer = new PlayerBuilder(
+      id,
+      this.nameGenerator.getUniqueFunnySingleWordName()
+    )
+      .withPosition(0, 0)
+      .withVelocity(0, 0)
+      .withRadius(20)
+      .withCollisionDisabled(false)
+      .withMass(20)
+      .withDirection(0)
+      .withSpeed(0)
+      .withMaxSpeedForward(0.1)
+      .withMaxSpeedBackward(-0.05)
+      .withTurnSpeed(0.4)
+      .withTeam(null)
+      .withScore(0)
+      .build()
+
+    this.assignPlayerToTeam(newPlayer)
+
+    this.players.push(newPlayer)
+
+    this.positionPlayerInLine(newPlayer)
+
+    this._messenger.sendText(
+      `${newPlayer.name} joins team ${newPlayer.team?.name} (${newPlayer.team?.color})`
+    )
+
+    if (this.players.length === 2) {
+      this._stateManager.transitionToStartGame()
+    }
+    return newPlayer
+  }
+
+  formatDateTime(date: Date): string {
+    const fdate = new Date(date)
+    const options: Intl.DateTimeFormatOptions = {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false, // Use 24-hour time format
+    }
+
+    return fdate.toLocaleString('pl-PL', options)
+  }
+
+  formatTime(date: number): string {
+    const fdate = new Date(date)
+    const options: Intl.DateTimeFormatOptions = {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false, // Use 24-hour time format
+    }
+
+    return fdate.toLocaleString('pl-PL', options)
+  }
+
+  assignPlayerToTeam(player: IPlayer) {
+    if (player.team === null) {
+      // Find the team with fewer players
+      const teamA = this.teams[0]
+      const teamB = this.teams[1]
+
+      // Choose the team with fewer players
+      const selectedTeam =
+        teamA.playerIds.length <= teamB.playerIds.length ? teamA : teamB
+
+      // Assign the player to the selected team
+      player.team = selectedTeam
+      // Add the player's ID to the team's list of player IDs
+      selectedTeam.playerIds.push(player.id)
+    }
+  }
+
+  update(deltaTime: number) {
+    if (this.matchStartTime !== null) {
+      const currentTime = Date.now()
+      const elapsedTime = currentTime - this.matchStartTime
+      const remainingTimeMinutes = (this.matchDuration - elapsedTime) / 60000 // Convert milliseconds to minutes
+
+      // Log the remaining time every minute
+      const minutesPassed = Math.floor(elapsedTime / 60000)
+      const minutesSinceLastLog = minutesPassed - this.lastLogMinute
+
+      if (minutesSinceLastLog >= 1 && remainingTimeMinutes >= 0) {
+        this._messenger.sendText(
+          `End in ${remainingTimeMinutes.toFixed(1)} minutes`
+        )
+        this.lastLogMinute = minutesPassed
+      }
+
+      // Check if the match has ended
+      if (elapsedTime >= this.matchDuration) {
+        this._messenger.sendText(
+          `${this.formatTime(Date.now())} It's over! ${this.getGameResult()}`
+        )
+        this.matchStartTime = null // Add a method to stop the timer when the match is over
+        this._stateManager.transitionToGameOver()
+      }
+    }
+
+    if (this._stateManager.isNotInProgressState()) return
+
+    // Update ball position based on its velocity
+    this.updateBallPosition(deltaTime)
+
+    // Update player positions based on their velocity
+    this.updatePlayerPositions(deltaTime)
+
+    this.playerBallCollider.checkPlayerBallCollision(this.players, this.ball)
+
+    this.playerWallCollider.checkWallCollision(
+      this.players,
+      this.field,
+      deltaTime
+    )
+
+    this.ballWallCollision.checkWallCollisionForBall(this.ball, this.field)
+
+    this.checkGateCollision()
+  }
+
+  getGameResult() {
+    const teamA = this.teams[0]
+    const teamB = this.teams[1]
+
+    if (teamA.score > teamB.score) {
+      return `Team ${teamA.name} (${teamA.color}) wins ${teamA.score}-${teamB.score}!`
+    } else if (teamB.score > teamA.score) {
+      return `Team ${teamB.name} (${teamB.color}) wins ${teamB.score}-${teamA.score}!`
+    } else {
+      return `It's a tie! ${teamA.score}-${teamB.score}`
+    }
+  }
+
+  updateBallPosition(deltaTime: number) {
+    // Apply friction to the ball's velocity
+    this.ball.velocityX *= this.frictionCoefficient
+    this.ball.velocityY *= this.frictionCoefficient
+
+    // Calculate the displacement based on velocity and deltaTime
+    const displacementX = this.ball.velocityX * deltaTime
+    const displacementY = this.ball.velocityY * deltaTime
+
+    // Update the ball's position
+    this.ball.x += displacementX
+    this.ball.y += displacementY
+  }
+
+  updatePlayerPositions(deltaTime: number) {
+    for (const player of this.players) {
+      const speed = player.speed
+      player.velocityX = speed * Math.cos(player.direction)
+      player.velocityY = speed * Math.sin(player.direction)
+
+      // Calculate the displacement based on velocity and deltaTime
+      const displacementX = player.velocityX * deltaTime
+      const displacementY = player.velocityY * deltaTime
+
+      // Update the player's position
+      player.x += displacementX
+      player.y += displacementY
+    }
+  }
+}
+//what can we extract from this class ?
+ChatGPT
+From the Game class, several elements can be extracted to improve code organization, readability, and maintainability. Here are some potential areas for extraction:
+
+Game Configuration:
+
+The game configuration, including constants like frictionCoefficient, frameRate, frameInterval, and matchDuration, can be extracted into a dedicated configuration file or object. This can make it easier to modify these values without altering the class itself.
+Builders:
+
+The creation of Ball and Gate objects using builders can be extracted into separate builder classes. This separation can improve the readability of the code and allow for easy customization of object creation.
+Team and Player Logic:
+
+The logic related to teams, players, and their assignment can be extracted into separate classes responsible for managing teams and players. This separation can make the code related to team and player management more modular.
+Collision Handling:
+
+The collision handling logic for players, the ball, and walls can be extracted into separate collision handler classes. Each collision handler class can be responsible for a specific type of collision, making the code more organized and easier to maintain.
+Messaging and State Management:
+
+The messaging and game state management logic can be extracted into separate classes. This separation can improve code organization and make it easier to add or modify messaging and game state functionality.
+Random Team Names:
+
+The logic for generating random animal team names can be extracted into a utility function or class, especially if it's used in multiple places.
+Logging and Messaging:
+
+The logging and messaging functionality, such as sending messages to players, can be extracted into a separate class or module responsible for handling communication.
+Time Formatting:
+
+The time formatting functions can be extracted into a utility class or module for reuse throughout the application.
+Game Result Calculation:
+
+The logic for calculating the game result can be extracted into a separate class or function responsible for determining the winner or if it's a tie.
+By extracting these elements into separate classes or modules, you can achieve better code organization, maintainability, and reusability. This approach also adheres to the principles of separation of concerns and single responsibility, making the codebase easier to understand and extend.
+
+
+
+
+User
+extract point 6 to class
+ChatGPT
+Certainly! You can extract the logic for generating random animal team names into a separate class. Here's an example of how you can do it:
+
+typescript
+Copy code
+export class TeamNameGenerator {
+  private static readonly animalTeams: string[][] = [
+    ['Lions', 'Tigers'],
+    ['Eagles', 'Hawks'],
+    ['Dolphins', 'Sharks'],
+    ['Wolves', 'Bears'],
+    ['Penguins', 'Seals'],
+    ['Cheetahs', 'Leopards'],
+    ['Owls', 'Falcons'],
+    ['Elephants', 'Rhinos'],
+    ['Kangaroos', 'Koalas'],
+    ['Gorillas', 'Chimpanzees'],
+  ];
+
+  static getRandomAnimalTeams(): string[] {
+    const randomIndex = Math.floor(Math.random() * this.animalTeams.length);
+    return this.animalTeams[randomIndex];
+  }
+}
+Now you can use this TeamNameGenerator class to generate random animal team names in your Game class or any other part of your code where it's needed:
+
+typescript
+Copy code
+const [teamA, teamB] = TeamNameGenerator.getRandomAnimalTeams();
+this.teams[0].name = teamA;
+this.teams[1].name = teamB;
+This extraction encapsulates the logic for generating team names in a reusable class, promoting better code organization and maintainability.
+
+
+
+
+User
+import { IPlayer, ITeam } from 'api'
+import { PlayerBuilder } from './PlayerBuilder'
+
+export class Player implements IPlayer {
+  private constructor(
+    public id: string,
+    public name: string,
+    public x: number,
+    public y: number,
+    public velocityX: number,
+    public velocityY: number,
+    public radius: number,
+    public collisionDisabled: boolean,
+    public mass: number,
+    public direction: number,
+    public speed: number,
+    public maxSpeedForward: number,
+    public maxSpeedBackward: number,
+    public turnSpeed: number,
+    public team: ITeam | null,
+    public score: number
+  ) {}
+
+  scorePoint(): void {
+    this.score++
+    if (this.team) this.team.score++
+  }
+
+  static builder(id: string, name: string): PlayerBuilder {
+    return new PlayerBuilder(id, name)
+  }
+
+  static create(
+    id: string,
+    name: string,
+    x: number,
+    y: number,
+    velocityX: number,
+    velocityY: number,
+    radius: number,
+    collisionDisabled: boolean,
+    mass: number,
+    direction: number,
+    speed: number,
+    maxSpeedForward: number,
+    maxSpeedBackward: number,
+    turnSpeed: number,
+    team: ITeam | null,
+    score: number
+  ): IPlayer {
+    return new Player(
+      id,
+      name,
+      x,
+      y,
+      velocityX,
+      velocityY,
+      radius,
+      collisionDisabled,
+      mass,
+      direction,
+      speed,
+      maxSpeedForward,
+      maxSpeedBackward,
+      turnSpeed,
+      team,
+      score
+    )
+  }
+}
+
+import { IPlayer, ITeam } from 'api'
+import { Player } from './Player'
+
+export class PlayerBuilder {
+  private x = 0
+  private y = 0
+  private velocityX = 0
+  private velocityY = 0
+  private radius = 20
+  private collisionDisabled = false
+  private mass = 20
+  private direction = 0
+  private speed = 0
+  private maxSpeedForward = 0
+  private maxSpeedBackward = 0
+  private turnSpeed = 0
+  private team: ITeam | null = null
+  private score = 0
+
+  constructor(private readonly id: string, private readonly name: string) {}
+
+  withPosition(x: number, y: number): PlayerBuilder {
+    this.x = x
+    this.y = y
+    return this
+  }
+
+  withVelocity(velocityX: number, velocityY: number): PlayerBuilder {
+    this.velocityX = velocityX
+    this.velocityY = velocityY
+    return this
+  }
+
+  withRadius(radius: number): PlayerBuilder {
+    this.radius = radius
+    return this
+  }
+
+  withCollisionDisabled(collisionDisabled: boolean): PlayerBuilder {
+    this.collisionDisabled = collisionDisabled
+    return this
+  }
+
+  withMass(mass: number): PlayerBuilder {
+    this.mass = mass
+    return this
+  }
+
+  withDirection(direction: number): PlayerBuilder {
+    this.direction = direction
+    return this
+  }
+
+  withSpeed(speed: number): PlayerBuilder {
+    this.speed = speed
+    return this
+  }
+
+  withMaxSpeedForward(maxSpeedForward: number): PlayerBuilder {
+    this.maxSpeedForward = maxSpeedForward
+    return this
+  }
+
+  withMaxSpeedBackward(maxSpeedBackward: number): PlayerBuilder {
+    this.maxSpeedBackward = maxSpeedBackward
+    return this
+  }
+
+  withTurnSpeed(turnSpeed: number): PlayerBuilder {
+    this.turnSpeed = turnSpeed
+    return this
+  }
+
+  withTeam(team: ITeam | null): PlayerBuilder {
+    this.team = team
+    return this
+  }
+
+  withScore(score: number): PlayerBuilder {
+    this.score = score
+    return this
+  }
+
+  build(): IPlayer {
+    return Player.create(
+      this.id,
+      this.name,
+      this.x,
+      this.y,
+      this.velocityX,
+      this.velocityY,
+      this.radius,
+      this.collisionDisabled,
+      this.mass,
+      this.direction,
+      this.speed,
+      this.maxSpeedForward,
+      this.maxSpeedBackward,
+      this.turnSpeed,
+      this.team,
+      this.score
+    )
+  }
+}
+
+//given above examples pls create Team class and its builder for interface 
+export interface ITeam {
+  name: string
+  color: string
+  playerIds: string[]
+  score: number
+}
+
+
+
+ 
+
+
+
+
+
+ChatGPT
+You can create a Team class and its builder class for the ITeam interface as follows:
+
+typescript
+Copy code
+import { ITeam } from 'api';
+
+export class Team implements ITeam {
+  constructor(
+    public name: string,
+    public color: string,
+    public playerIds: string[],
+    public score: number
+  ) {}
+
+  static builder(name: string, color: string): TeamBuilder {
+    return new TeamBuilder(name, color);
+  }
+
+  static create(name: string, color: string, playerIds: string[], score: number): ITeam {
+    return new Team(name, color, playerIds, score);
+  }
+}
+
+export class TeamBuilder {
+  private playerIds: string[] = [];
+  private score: number = 0;
+
+  constructor(private readonly name: string, private readonly color: string) {}
+
+  withPlayerIds(playerIds: string[]): TeamBuilder {
+    this.playerIds = playerIds;
+    return this;
+  }
+
+  withScore(score: number): TeamBuilder {
+    this.score = score;
+    return this;
+  }
+
+  build(): ITeam {
+    return Team.create(this.name, this.color, this.playerIds, this.score);
+  }
+}
+Now you have a Team class and a TeamBuilder class for creating ITeam instances. You can use them like this:
+
+typescript
+Copy code
+const teamA = Team.builder('Team A', 'red')
+  .withPlayerIds(['player1', 'player2'])
+  .withScore(0)
+  .build();
+
+const teamB = Team.builder('Team B', 'blue')
+  .withPlayerIds(['player3', 'player4'])
+  .withScore(0)
+  .build();
+This allows you to create Team objects with the desired properties while providing a clean and flexible builder pattern for constructing them.
+
+
+
+
+User
+export class BallGateCollider {
+  checkGateCollision(ball: IBall, gates: IGates[]) {
+    // Check if the ball hits the left gate
+    if (
+      ball.x >= gates.left.x &&
+      ball.x <= gates.left.x + gates.left.width &&
+      ball.y >= gates.left.y &&
+      ball.y <= gates.left.y + gates.left.height
+    ) {
+      // Handle left gate collision here
+      if (
+        ball.lastHit &&
+        ball.lastHit.team?.name !== gates.left.team.name
+      ) {
+        pointScored()
+      }
+    }
+
+    // Check if the ball hits the right gate
+    if (
+      ball.x >= gates.right.x &&
+      ball.x <= gates.right.x + gates.right.width &&
+      ball.y >= gates.right.y &&
+      ball.y <= gates.right.y + gates.right.height
+    ) {
+      // Handle right gate collision here
+      if (
+        ball.lastHit &&
+        ball.lastHit.team?.name !== gates.right.team.name
+      ) {
+        pointScored()
+      }
+    }
+  }
+}//import { IGate } from './IGate';
+export interface IGates {
+    left: IGate;
+    right: IGate;
+}
+//why it dosent see left right props from IGates ?
+ChatGPT
+It appears that the checkGateCollision method in your BallGateCollider class expects an array of gates, but in your IGates interface, you have defined left and right as individual properties, not as an array. To resolve this issue, you should update the method's parameter to expect an object with left and right properties, matching the structure of the IGates interface.
+
+Here's the corrected BallGateCollider class:
+
+typescript
+Copy code
+import { IBall } from 'api';
+import { IGate, IGates } from './IGate'; // Import the necessary interfaces
+
+export class BallGateCollider {
+  checkGateCollision(ball: IBall, gates: IGates) {
+    // Check if the ball hits the left gate
+    if (
+      ball.x >= gates.left.x &&
+      ball.x <= gates.left.x + gates.left.width &&
+      ball.y >= gates.left.y &&
+      ball.y <= gates.left.y + gates.left.height
+    ) {
+      // Handle left gate collision here
+      if (
+        ball.lastHit &&
+        ball.lastHit.team?.name !== gates.left.team.name
+      ) {
+        // You should call a method within the correct context
+        // For example, you should have a reference to your Game class
+        // and call pointScored on that instance.
+        // Example: gameInstance.pointScored();
+      }
+    }
+
+    // Check if the ball hits the right gate
+    if (
+      ball.x >= gates.right.x &&
+      ball.x <= gates.right.x + gates.right.width &&
+      ball.y >= gates.right.y &&
+      ball.y <= gates.right.y + gates.right.height
+    ) {
+      // Handle right gate collision here
+      if (
+        ball.lastHit &&
+        ball.lastHit.team?.name !== gates.right.team.name
+      ) {
+        // You should call a method within the correct context
+        // Example: gameInstance.pointScored();
+      }
+    }
+  }
+}
+Please note that you need to call the pointScored method within the correct context. In the above code, I've added comments to indicate where you should call this method. Depending on your code structure, you should have a reference to your Game class instance and call pointScored on that instance.
+
+
+
+
+User
+import { Server, Socket } from 'socket.io'
+import { IPlayer, IBall, ITeam, IField, IGates, MatchDto } from 'api'
+import { BallBuilder } from '../ball/BallBuilder'
+import { GateBuilder } from '../gate/GateBuilder'
+import { NameGenerator } from '../utils/NameGenerator'
+import { PlayerBuilder } from '../player/PlayerBuilder'
+import { PlayerBallCollider } from '../collision/PlayerBallCollider'
+import { PlayerWallCollider } from '../collision/PlayerWallCollider'
+import { BallWallCollider } from '../collision/BallWallCollider'
+import { Messenger } from '../utils/Messenger'
+import { GameStateManager } from './GameStateManager'
+import { Team } from '../team/Team'
+import { TeamNameGenerator } from '../team/TeamNameGenerator'
+import { BallGateCollider } from '../collision/BallGateCollider'
+
+interface IMatch {
+  matchDuration: number
+  matchStartTime: number | null
+}
+
+export class Game implements IMatch {
+  private readonly frictionCoefficient: number = 0.99
+  players: IPlayer[] = []
+  ball: IBall = new BallBuilder()
+    .withPosition(400, 300)
+    .withVelocity(0, 0)
+    .withRadius(5)
+    .withMass(5)
+    .withLastHit(null)
+    .build()
+  field: IField = { width: 800, height: 600 }
+  gates: IGates
+  teams: ITeam[] = []
+  matchDuration: number = 5 * 60 * 1000 // 5 minutes in milliseconds
+  matchStartTime: number | null = null
+  private nameGenerator = new NameGenerator()
+  private frameRate: number = 30
+  private frameInterval: number = 1000 / this.frameRate
+  private lastFrameTime: number = 0
+  private gameLoop?: NodeJS.Timeout
+  private lastLogMinute: number = -1
+  private playerBallCollider = new PlayerBallCollider()
+  private playerWallCollider = new PlayerWallCollider()
+  private ballWallCollider = new BallWallCollider()
+  private ballGateCollider = new BallGateCollider()
+  private _messenger: Messenger
+  private _stateManager: GameStateManager
+  private teamNameGenerator: TeamNameGenerator
+
+  get messenger(): Messenger {
+    return this._messenger
+  }
+
+  get stateManager(): GameStateManager {
+    return this._stateManager
+  }
+
+  constructor(private readonly io: Server) {
+    this._messenger = new Messenger(io)
+    this._stateManager = new GameStateManager(this._messenger, this)
+
+    this.teamNameGenerator = new TeamNameGenerator()
+    const [nameA, nameB] = this.teamNameGenerator.getRandomAnimalTeams()
+    const teamA = Team.builder()
+      .withName(nameA)
+      .withColor('red')
+      .withScore(0)
+      .build()
+    const teamB = Team.builder()
+      .withName(nameB)
+      .withColor('blue')
+      .withScore(0)
+      .build()
+    this.teams.push(teamA)
+    this.teams.push(teamB)
+
+    this.gates = {
+      left: new GateBuilder()
+        .withPosition(0, this.field.height / 2 - 50)
+        .withWidth(5)
+        .withHeight(100)
+        .withTeam(this.teams[0])
+        .build(),
+      right: new GateBuilder()
+        .withPosition(this.field.width - 5, this.field.height / 2 - 50)
+        .withWidth(5)
+        .withHeight(100)
+        .withTeam(this.teams[1])
+        .build(),
+    }
+
+    this._stateManager.transitionToMatchMaking()
+  }
+
+  public startLoop() {
+    this.lastFrameTime = Date.now()
+    this.gameLoop = setInterval(() => {
+      const currentTime = Date.now()
+      const deltaTime = currentTime - this.lastFrameTime
+
+      this.update(deltaTime)
+
+      this.io.emit('update', new MatchDto(this.players, this.ball))
+
+      this.lastFrameTime = currentTime
+    }, this.frameInterval)
+  }
+
+  public startMatch() {
+    this.matchStartTime = Date.now()
+    this._messenger.sendText(`${this.formatTime(this.matchStartTime)} Begin`)
+  }
+
+  public stopLoop() {
+    clearInterval(this.gameLoop)
+  }
+
+  positionPlayerInLine(player: IPlayer) {
+    if (!player.team) throw 'Player team must be specified at this point!'
+
+    // Find the goalpost of the player's team and the opponent's goalpost
+    const playerTeamGoal =
+      player.team === this.teams[0] ? this.gates.left : this.gates.right
+
+    // Calculate the horizontal position as the average of ball position and player's team goalpost position
+    player.x = (this.field.width / 2 + playerTeamGoal.x) / 2
+
+    // Set the direction angle to be purely horizontal and away from the player's team goalpost
+    player.direction = playerTeamGoal.x < this.field.width / 2 ? 0 : Math.PI
+
+    // Calculate vertical spacing based on player radius
+    const playerSpacing = 4 * player.radius
+
+    // Calculate vertical position for each player
+    const canvasCenterY = this.field.height / 2
+    const numPlayers = player.team.playerIds.length
+    const playerIndex = player.team.playerIds.indexOf(player.id) + 1
+
+    // Adjust the vertical position of the first player to match the center of the canvas
+    player.y = canvasCenterY
+
+    if (numPlayers > 1) {
+      // Calculate the positions for subsequent players
+      if (playerIndex % 2 === 0) {
+        // If the player index is even, place players only above the first player
+        player.y -= (playerIndex / 2) * playerSpacing
+      } else {
+        // If the player index is odd, place players only below the first player
+        player.y += Math.floor(playerIndex / 2) * playerSpacing
+      }
+    }
+  }
+
+  resetGame() {
+    this.messenger.clearLogAll()
+    // Reset player scores
+    for (const player of this.players) {
+      player.score = 0
+      player.team = null
+    }
+
+    // Reset the ball position
+    this.ball.x = this.field.width / 2
+    this.ball.y = this.field.height / 2
+    this.ball.velocityX = 0
+    this.ball.velocityY = 0
+    this.ball.lastHit = null
+
+    // Reset team scores
+    for (const team of this.teams) {
+      team.score = 0
+      team.playerIds = []
+    }
+
+    this.matchStartTime = null
+
+    // Reassign players to teams and position them
+    for (const player of this.players) {
+      this.assignPlayerToTeam(player)
+      this.positionPlayerInLine(player)
+      player.velocityX = 0
+      player.velocityY = 0
+      player.speed = 0
+    }
+
+    this.lastLogMinute = -1
+  }
+
+  resetAfterGoal() {
+    // Reposition the ball to the center of the field
+    this.ball.x = this.field.width / 2
+    this.ball.y = this.field.height / 2
+    this.ball.velocityX = 0
+    this.ball.velocityY = 0
+    this.ball.lastHit = null
+
+    for (const player of this.players) {
+      this.positionPlayerInLine(player)
+      player.velocityX = 0
+      player.velocityY = 0
+      player.speed = 0
+    }
+  }
+
+  pointScored() {
+    this.ball.lastHit?.scorePoint()
+    this._messenger.sendText(
+      `Goal by ${this.ball.lastHit?.name}, ${this.teams[0].name} (${this.teams[0].color}): ${this.teams[0].score} - ${this.teams[1].name}: ${this.teams[1].score}`
+    )
+    this.resetAfterGoal()
+  }
+
+  addPlayer(id: string, socket: Socket) {
+    const newPlayer = new PlayerBuilder(
+      id,
+      this.nameGenerator.getUniqueFunnySingleWordName()
+    )
+      .withPosition(0, 0)
+      .withVelocity(0, 0)
+      .withRadius(20)
+      .withCollisionDisabled(false)
+      .withMass(20)
+      .withDirection(0)
+      .withSpeed(0)
+      .withMaxSpeedForward(0.1)
+      .withMaxSpeedBackward(-0.05)
+      .withTurnSpeed(0.4)
+      .withTeam(null)
+      .withScore(0)
+      .build()
+
+    this.assignPlayerToTeam(newPlayer)
+
+    this.players.push(newPlayer)
+
+    this.positionPlayerInLine(newPlayer)
+
+    this._messenger.sendText(
+      `${newPlayer.name} joins team ${newPlayer.team?.name} (${newPlayer.team?.color})`
+    )
+
+    if (this.players.length === 2) {
+      this._stateManager.transitionToStartGame()
+    }
+    return newPlayer
+  }
+
+  formatDateTime(date: Date): string {
+    const fdate = new Date(date)
+    const options: Intl.DateTimeFormatOptions = {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false, // Use 24-hour time format
+    }
+
+    return fdate.toLocaleString('pl-PL', options)
+  }
+
+  formatTime(date: number): string {
+    const fdate = new Date(date)
+    const options: Intl.DateTimeFormatOptions = {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false, // Use 24-hour time format
+    }
+
+    return fdate.toLocaleString('pl-PL', options)
+  }
+
+  assignPlayerToTeam(player: IPlayer) {
+    if (player.team === null) {
+      // Find the team with fewer players
+      const teamA = this.teams[0]
+      const teamB = this.teams[1]
+
+      // Choose the team with fewer players
+      const selectedTeam =
+        teamA.playerIds.length <= teamB.playerIds.length ? teamA : teamB
+
+      // Assign the player to the selected team
+      player.team = selectedTeam
+      // Add the player's ID to the team's list of player IDs
+      selectedTeam.playerIds.push(player.id)
+    }
+  }
+
+  update(deltaTime: number) {
+    if (this.matchStartTime !== null) {
+      const currentTime = Date.now()
+      const elapsedTime = currentTime - this.matchStartTime
+      const remainingTimeMinutes = (this.matchDuration - elapsedTime) / 60000 // Convert milliseconds to minutes
+
+      // Log the remaining time every minute
+      const minutesPassed = Math.floor(elapsedTime / 60000)
+      const minutesSinceLastLog = minutesPassed - this.lastLogMinute
+
+      if (minutesSinceLastLog >= 1 && remainingTimeMinutes >= 0) {
+        this._messenger.sendText(
+          `End in ${remainingTimeMinutes.toFixed(1)} minutes`
+        )
+        this.lastLogMinute = minutesPassed
+      }
+
+      // Check if the match has ended
+      if (elapsedTime >= this.matchDuration) {
+        this._messenger.sendText(
+          `${this.formatTime(Date.now())} It's over! ${this.getGameResult()}`
+        )
+        this.matchStartTime = null // Add a method to stop the timer when the match is over
+        this._stateManager.transitionToGameOver()
+      }
+    }
+
+    if (this._stateManager.isNotInProgressState()) return
+
+    // Update ball position based on its velocity
+    this.updateBallPosition(deltaTime)
+
+    // Update player positions based on their velocity
+    this.updatePlayerPositions(deltaTime)
+
+    this.playerBallCollider.checkPlayerBallCollision(this.players, this.ball)
+
+    this.playerWallCollider.checkWallCollision(
+      this.players,
+      this.field,
+      deltaTime
+    )
+
+    this.ballWallCollider.checkWallCollisionForBall(this.ball, this.field)
+
+    this.ballGateCollider.checkGateCollision(this.ball, this.gates, this)
+  }
+
+  getGameResult() {
+    const teamA = this.teams[0]
+    const teamB = this.teams[1]
+
+    if (teamA.score > teamB.score) {
+      return `Team ${teamA.name} (${teamA.color}) wins ${teamA.score}-${teamB.score}!`
+    } else if (teamB.score > teamA.score) {
+      return `Team ${teamB.name} (${teamB.color}) wins ${teamB.score}-${teamA.score}!`
+    } else {
+      return `It's a tie! ${teamA.score}-${teamB.score}`
+    }
+  }
+
+  updateBallPosition(deltaTime: number) {
+    // Apply friction to the ball's velocity
+    this.ball.velocityX *= this.frictionCoefficient
+    this.ball.velocityY *= this.frictionCoefficient
+
+    // Calculate the displacement based on velocity and deltaTime
+    const displacementX = this.ball.velocityX * deltaTime
+    const displacementY = this.ball.velocityY * deltaTime
+
+    // Update the ball's position
+    this.ball.x += displacementX
+    this.ball.y += displacementY
+  }
+
+  updatePlayerPositions(deltaTime: number) {
+    for (const player of this.players) {
+      const speed = player.speed
+      player.velocityX = speed * Math.cos(player.direction)
+      player.velocityY = speed * Math.sin(player.direction)
+
+      // Calculate the displacement based on velocity and deltaTime
+      const displacementX = player.velocityX * deltaTime
+      const displacementY = player.velocityY * deltaTime
+
+      // Update the player's position
+      player.x += displacementX
+      player.y += displacementY
+    }
+  }
+}
+pls move date formatting to DateUtil class
+ChatGPT
+Certainly, you can create a DateUtil class to encapsulate the date formatting functions. Here's how you can refactor the code to achieve that:
+
+typescript
+Copy code
+export class DateUtil {
+  static formatDateTime(date: Date): string {
+    const fdate = new Date(date)
+    const options: Intl.DateTimeFormatOptions = {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false, // Use 24-hour time format
+    }
+
+    return fdate.toLocaleString('pl-PL', options)
+  }
+
+  static formatTime(date: number): string {
+    const fdate = new Date(date)
+    const options: Intl.DateTimeFormatOptions = {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false, // Use 24-hour time format
+    }
+
+    return fdate.toLocaleString('pl-PL', options)
+  }
+}
+Now, you can use the DateUtil class in your Game class:
+
+typescript
+Copy code
+import { DateUtil } from './DateUtil';
+
+// ...
+
+class Game implements IMatch {
+  // ...
+
+  formatDateTime(date: Date): string {
+    return DateUtil.formatDateTime(date);
+  }
+
+  formatTime(date: number): string {
+    return DateUtil.formatTime(date);
+  }
+
+  // ...
+}
+By doing this, you've encapsulated the date formatting logic within the DateUtil class, making your code more organized and maintainable.
+
+
+
+
+User
+import { IPlayer, ITeam } from 'api'
+import { PlayerBuilder } from './PlayerBuilder'
+
+export class Player implements IPlayer {
+  private constructor(
+    public id: string,
+    public name: string,
+    public x: number,
+    public y: number,
+    public velocityX: number,
+    public velocityY: number,
+    public radius: number,
+    public collisionDisabled: boolean,
+    public mass: number,
+    public direction: number,
+    public speed: number,
+    public maxSpeedForward: number,
+    public maxSpeedBackward: number,
+    public turnSpeed: number,
+    public team: ITeam | null,
+    public score: number
+  ) {}
+
+  scorePoint(): void {
+    this.score++
+    if (this.team) this.team.score++
+  }
+
+  static builder(id: string, name: string): PlayerBuilder {
+    return new PlayerBuilder(id, name)
+  }
+
+  static create(
+    id: string,
+    name: string,
+    x: number,
+    y: number,
+    velocityX: number,
+    velocityY: number,
+    radius: number,
+    collisionDisabled: boolean,
+    mass: number,
+    direction: number,
+    speed: number,
+    maxSpeedForward: number,
+    maxSpeedBackward: number,
+    turnSpeed: number,
+    team: ITeam | null,
+    score: number
+  ): IPlayer {
+    return new Player(
+      id,
+      name,
+      x,
+      y,
+      velocityX,
+      velocityY,
+      radius,
+      collisionDisabled,
+      mass,
+      direction,
+      speed,
+      maxSpeedForward,
+      maxSpeedBackward,
+      turnSpeed,
+      team,
+      score
+    )
+  }
+}
+I want to move methods from game to player but i want to not adding more lines to this class, what are my best options  ? inheritance or composition ?
+ChatGPT
+To move methods from the Game class to the Player class without adding more lines to the Player class, you have two main options: inheritance and composition. Let's explore both options:
+
+1. Inheritance:
+
+Inheritance involves creating a subclass of Player that inherits from the base Player class. This subclass can contain the additional methods you want to move from the Game class. Here's how you can do it:
+
+typescript
+Copy code
+export class ExtendedPlayer extends Player {
+  // Move the methods from Game to here
+  // You can add the methods here without modifying the Player class
+
+  newMethod1() {
+    // ...
+  }
+
+  newMethod2() {
+    // ...
+  }
+}
+Then, you can use the ExtendedPlayer class in your code where you need these additional methods.
+
+2. Composition:
+
+Composition involves creating a separate class that contains the methods you want to move, and then using an instance of that class inside the Player class. Here's how you can do it:
+
+typescript
+Copy code
+export class Player {
+  // Existing properties and constructor here
+
+  private additionalFunctionality: AdditionalFunctionality;
+
+  constructor(
+    // Existing constructor parameters here
+  ) {
+    // Initialize the additional functionality class
+    this.additionalFunctionality = new AdditionalFunctionality();
+  }
+
+  scorePoint(): void {
+    this.score++;
+    if (this.team) this.team.score++;
+  }
+
+  // Use the methods from the additional functionality class
+  newMethod1() {
+    this.additionalFunctionality.newMethod1();
+  }
+
+  newMethod2() {
+    this.additionalFunctionality.newMethod2();
+  }
+}
+
+class AdditionalFunctionality {
+  newMethod1() {
+    // Implement newMethod1 logic here
+  }
+
+  newMethod2() {
+    // Implement newMethod2 logic here
+  }
+}
+With this approach, you don't modify the Player class directly, but you delegate the new functionality to another class (AdditionalFunctionality).
+
+Both approaches have their pros and cons:
+
+Inheritance: It's useful when you want to create a new class that extends the behavior of an existing class. However, it can lead to deep inheritance hierarchies, which might become hard to manage.
+
+Composition: It's more flexible and allows you to add functionality without modifying the existing class. It's often preferred when you want to keep classes more focused and avoid deep inheritance hierarchies.
+
+The choice between these two options depends on your specific use case and design preferences. If you anticipate needing to add more functionality in the future, composition is generally more flexible and maintainable.
