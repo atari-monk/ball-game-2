@@ -11,13 +11,13 @@ import {
   GameState,
   MatchDto,
 } from 'api'
-import { BallBuilder } from './BallBuilder'
-import { GateBuilder } from './GateBuilder'
-import { NameGenerator } from './NameGenerator'
-import { PlayerBuilder } from './PlayerBuilder'
-import { PlayerBallCollider } from './collision/PlayerBallCollider'
-import { PlayerWallCollider } from './collision/PlayerWallCollider'
-import { BallWallCollider } from './collision/BallWallCollider'
+import { BallBuilder } from '../BallBuilder'
+import { GateBuilder } from '../GateBuilder'
+import { NameGenerator } from '../NameGenerator'
+import { PlayerBuilder } from '../PlayerBuilder'
+import { PlayerBallCollider } from '../collision/PlayerBallCollider'
+import { PlayerWallCollider } from '../collision/PlayerWallCollider'
+import { BallWallCollider } from '../collision/BallWallCollider'
 
 interface IMatch {
   matchDuration: number

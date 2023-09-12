@@ -3,7 +3,7 @@ import http from 'http'
 import { Server } from 'socket.io'
 import cors from 'cors'
 import initializeSocketIO from './socket'
-import { Game } from './Game'
+import { Game } from './game/Game'
 
 const app = express()
 const server = http.createServer(app)
