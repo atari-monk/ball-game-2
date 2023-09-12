@@ -1,5 +1,5 @@
 import { IBall, IPlayer } from 'api'
-import { Vector2 } from '../Vector2'
+import { Vector2 } from '../utils/Vector2'
 
 export class PlayerBallCollider {
   checkPlayerBallCollision(players: IPlayer[], ball: IBall) {

@@ -1,13 +1,13 @@
 import { Server, Socket } from 'socket.io'
 import { IPlayer, IBall, ITeam, IField, IGates, MatchDto } from 'api'
-import { BallBuilder } from '../BallBuilder'
-import { GateBuilder } from '../GateBuilder'
-import { NameGenerator } from '../NameGenerator'
-import { PlayerBuilder } from '../PlayerBuilder'
+import { BallBuilder } from '../ball/BallBuilder'
+import { GateBuilder } from '../gate/GateBuilder'
+import { NameGenerator } from '../utils/NameGenerator'
+import { PlayerBuilder } from '../player/PlayerBuilder'
 import { PlayerBallCollider } from '../collision/PlayerBallCollider'
 import { PlayerWallCollider } from '../collision/PlayerWallCollider'
 import { BallWallCollider } from '../collision/BallWallCollider'
-import { Messenger } from '../Messenger'
+import { Messenger } from '../utils/Messenger'
 import { GameStateManager } from './GameStateManager'
 
 interface IMatch {

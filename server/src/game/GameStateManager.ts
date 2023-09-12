@@ -1,5 +1,5 @@
 import { GameState, MsgFlag } from 'api'
-import { Messenger } from '../Messenger'
+import { Messenger } from '../utils/Messenger'
 import { Game } from './Game'
 
 export class GameStateManager {
