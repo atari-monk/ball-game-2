@@ -12,6 +12,7 @@ import { GameStateManager } from './GameStateManager'
 import { Team } from '../team/Team'
 import { TeamNameGenerator } from '../team/TeamNameGenerator'
 import { BallGateCollider } from '../collision/BallGateCollider'
+import { DateUtil } from '../utils/DateUtil'
 
 interface IMatch {
   matchDuration: number
@@ -108,7 +109,7 @@ export class Game implements IMatch {
 
   public startMatch() {
     this.matchStartTime = Date.now()
-    this._messenger.sendText(`${this.formatTime(this.matchStartTime)} Begin`)
+    this._messenger.sendText(`${DateUtil.formatTime(this.matchStartTime)} Begin`)
   }
 
   public stopLoop() {
@@ -245,31 +246,6 @@ export class Game implements IMatch {
     return newPlayer
   }
 
-  formatDateTime(date: Date): string {
-    const fdate = new Date(date)
-    const options: Intl.DateTimeFormatOptions = {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: false, // Use 24-hour time format
-    }
-
-    return fdate.toLocaleString('pl-PL', options)
-  }
-
-  formatTime(date: number): string {
-    const fdate = new Date(date)
-    const options: Intl.DateTimeFormatOptions = {
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: false, // Use 24-hour time format
-    }
-
-    return fdate.toLocaleString('pl-PL', options)
-  }
-
   assignPlayerToTeam(player: IPlayer) {
     if (player.team === null) {
       // Find the team with fewer players
@@ -307,7 +283,7 @@ export class Game implements IMatch {
       // Check if the match has ended
       if (elapsedTime >= this.matchDuration) {
         this._messenger.sendText(
-          `${this.formatTime(Date.now())} It's over! ${this.getGameResult()}`
+          `${DateUtil.formatTime(Date.now())} It's over! ${this.getGameResult()}`
         )
         this.matchStartTime = null // Add a method to stop the timer when the match is over
         this._stateManager.transitionToGameOver()
