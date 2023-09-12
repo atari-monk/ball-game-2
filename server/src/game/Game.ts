@@ -11,6 +11,7 @@ import { Messenger } from '../utils/Messenger'
 import { GameStateManager } from './GameStateManager'
 import { Team } from '../team/Team'
 import { TeamNameGenerator } from '../team/TeamNameGenerator'
+import { BallGateCollider } from '../collision/BallGateCollider'
 
 interface IMatch {
   matchDuration: number
@@ -40,7 +41,8 @@ export class Game implements IMatch {
   private lastLogMinute: number = -1
   private playerBallCollider = new PlayerBallCollider()
   private playerWallCollider = new PlayerWallCollider()
-  private ballWallCollision = new BallWallCollider()
+  private ballWallCollider = new BallWallCollider()
+  private ballGateCollider = new BallGateCollider()
   private _messenger: Messenger
   private _stateManager: GameStateManager
   private teamNameGenerator: TeamNameGenerator
@@ -111,58 +113,6 @@ export class Game implements IMatch {
 
   public stopLoop() {
     clearInterval(this.gameLoop)
-  }
-
-  getRandomAnimalTeams(): string[] {
-    const animalTeams = [
-      ['Lions', 'Tigers'],
-      ['Eagles', 'Hawks'],
-      ['Dolphins', 'Sharks'],
-      ['Wolves', 'Bears'],
-      ['Penguins', 'Seals'],
-      ['Cheetahs', 'Leopards'],
-      ['Owls', 'Falcons'],
-      ['Elephants', 'Rhinos'],
-      ['Kangaroos', 'Koalas'],
-      ['Gorillas', 'Chimpanzees'],
-    ]
-
-    const randomIndex = Math.floor(Math.random() * animalTeams.length)
-    return animalTeams[randomIndex]
-  }
-
-  checkGateCollision() {
-    // Check if the ball hits the left gate
-    if (
-      this.ball.x >= this.gates.left.x &&
-      this.ball.x <= this.gates.left.x + this.gates.left.width &&
-      this.ball.y >= this.gates.left.y &&
-      this.ball.y <= this.gates.left.y + this.gates.left.height
-    ) {
-      // Handle left gate collision here
-      if (
-        this.ball.lastHit &&
-        this.ball.lastHit.team?.name !== this.gates.left.team.name
-      ) {
-        this.pointScored()
-      }
-    }
-
-    // Check if the ball hits the right gate
-    if (
-      this.ball.x >= this.gates.right.x &&
-      this.ball.x <= this.gates.right.x + this.gates.right.width &&
-      this.ball.y >= this.gates.right.y &&
-      this.ball.y <= this.gates.right.y + this.gates.right.height
-    ) {
-      // Handle right gate collision here
-      if (
-        this.ball.lastHit &&
-        this.ball.lastHit.team?.name !== this.gates.right.team.name
-      ) {
-        this.pointScored()
-      }
-    }
   }
 
   positionPlayerInLine(player: IPlayer) {
@@ -380,9 +330,9 @@ export class Game implements IMatch {
       deltaTime
     )
 
-    this.ballWallCollision.checkWallCollisionForBall(this.ball, this.field)
+    this.ballWallCollider.checkWallCollisionForBall(this.ball, this.field)
 
-    this.checkGateCollision()
+    this.ballGateCollider.checkGateCollision(this.ball, this.gates, this)
   }
 
   getGameResult() {
