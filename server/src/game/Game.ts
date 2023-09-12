@@ -4,8 +4,6 @@ import {
   IBall,
   ITeam,
   IField,
-  IMessage,
-  MessageDto,
   IGates,
   MsgFlag,
   GameState,
@@ -18,6 +16,7 @@ import { PlayerBuilder } from '../PlayerBuilder'
 import { PlayerBallCollider } from '../collision/PlayerBallCollider'
 import { PlayerWallCollider } from '../collision/PlayerWallCollider'
 import { BallWallCollider } from '../collision/BallWallCollider'
+import { Messanger } from '../Messanger'
 
 interface IMatch {
   matchDuration: number
@@ -41,7 +40,6 @@ export class Game implements IMatch {
     { name: '', color: 'red', playerIds: [], score: 0 },
     { name: '', color: 'blue', playerIds: [], score: 0 },
   ]
-  messages: IMessage[] = []
   matchDuration: number = 5 * 60 * 1000 // 5 minutes in milliseconds
   matchStartTime: number | null = null
   private nameGenerator = new NameGenerator()
@@ -54,12 +52,18 @@ export class Game implements IMatch {
   private playerBallCollider = new PlayerBallCollider()
   private playerWallCollider = new PlayerWallCollider()
   private ballWallCollision = new BallWallCollider()
+  private _messanger: Messanger
+
+  get messanger(): Messanger {
+    return this._messanger
+  }
 
   get CurrentState(): GameState {
     return this._currentState
   }
 
   constructor(private readonly io: Server) {
+    this._messanger = new Messanger(io)
     this._currentState = GameState.Creating
     this.sendServerState()
     this.gates = {
@@ -103,11 +107,11 @@ export class Game implements IMatch {
   transitionToMatchMaking() {
     this._currentState = GameState.MatchMaking
     this.sendServerState()
-    this.sendText('Waiting for players')
+    this._messanger.sendText('Waiting for players')
   }
 
   private sendServerState() {
-    this.sendMsg(
+    this._messanger.sendMsg(
       serverState,
       GameState[this._currentState],
       MsgFlag.ServerState
@@ -117,14 +121,14 @@ export class Game implements IMatch {
   transitionToStartGame() {
     this._currentState = GameState.Start
     this.sendServerState()
-    this.sendText('Starting Game')
+    this._messanger.sendText('Starting Game')
     this.startCounter(() => this.transitionToProgress())
   }
 
   private startCounter(fn: () => void, sec: number = 3, inf: number = 1) {
     let timer = sec
     const intervalId = setInterval(() => {
-      if (timer % inf === 0) this.sendText(`In ${timer}`)
+      if (timer % inf === 0) this._messanger.sendText(`In ${timer}`)
       timer--
       if (timer === 0) {
         clearInterval(intervalId)
@@ -137,7 +141,7 @@ export class Game implements IMatch {
     this._currentState = GameState.Progress
     this.sendServerState()
     this.matchStartTime = Date.now()
-    this.sendText(`${this.formatTime(this.matchStartTime)} Begin`)
+    this._messanger.sendText(`${this.formatTime(this.matchStartTime)} Begin`)
     this.startLoop()
   }
 
@@ -145,7 +149,7 @@ export class Game implements IMatch {
     this.stopLoop()
     this._currentState = GameState.Over
     this.sendServerState()
-    this.sendText('Reset')
+    this._messanger.sendText('Reset')
     this.startCounter(
       () => {
         this.resetGame()
@@ -158,14 +162,6 @@ export class Game implements IMatch {
       20,
       5
     )
-  }
-
-  clearLogOne(socket: Socket) {
-    socket.emit('log-reset')
-  }
-
-  clearLogAll() {
-    this.io.emit('log-reset')
   }
 
   getRandomAnimalTeams(): string[] {
@@ -184,42 +180,6 @@ export class Game implements IMatch {
 
     const randomIndex = Math.floor(Math.random() * animalTeams.length)
     return animalTeams[randomIndex]
-  }
-
-  sendText(text: string) {
-    const message: IMessage = {
-      sender: '',
-      text,
-      flag: MsgFlag.Text,
-    }
-    this.messages.push(message)
-    this.io.emit('log', new MessageDto(message))
-  }
-
-  sendTextToOne(socket: Socket, text: string) {
-    const message: IMessage = {
-      sender: '',
-      text,
-      flag: MsgFlag.Text,
-    }
-    this.messages.push(message)
-    socket.emit('log', new MessageDto(message))
-  }
-
-  sendMsg(sender: string, text: string, flag: MsgFlag) {
-    const message: IMessage = {
-      sender,
-      text,
-      flag,
-    }
-    this.messages.push(message)
-    this.io.emit('log', new MessageDto(message))
-  }
-
-  resendLog(socket: Socket) {
-    this.messages.forEach((msg) => {
-      socket.emit('log', new MessageDto(msg))
-    })
   }
 
   checkGateCollision() {
@@ -293,7 +253,7 @@ export class Game implements IMatch {
   }
 
   resetGame() {
-    this.clearLogAll()
+    this.messanger.clearLogAll()
     // Reset player scores
     for (const player of this.players) {
       player.score = 0
@@ -313,10 +273,6 @@ export class Game implements IMatch {
       team.playerIds = []
     }
 
-    // Clear messages
-    this.messages = []
-
-    // Reset match start time
     this.matchStartTime = null
 
     // Reassign players to teams and position them
@@ -349,7 +305,7 @@ export class Game implements IMatch {
 
   pointScored() {
     this.ball.lastHit?.scorePoint()
-    this.sendText(
+    this._messanger.sendText(
       `Goal by ${this.ball.lastHit?.name}, ${this.teams[0].name} (${this.teams[0].color}): ${this.teams[0].score} - ${this.teams[1].name}: ${this.teams[1].score}`
     )
     this.resetAfterGoal()
@@ -380,7 +336,7 @@ export class Game implements IMatch {
 
     this.positionPlayerInLine(newPlayer)
 
-    this.sendText(
+    this._messanger.sendText(
       `${newPlayer.name} joins team ${newPlayer.team?.name} (${newPlayer.team?.color})`
     )
 
@@ -443,13 +399,15 @@ export class Game implements IMatch {
       const minutesSinceLastLog = minutesPassed - this.lastLogMinute
 
       if (minutesSinceLastLog >= 1 && remainingTimeMinutes >= 0) {
-        this.sendText(`End in ${remainingTimeMinutes.toFixed(1)} minutes`)
+        this._messanger.sendText(
+          `End in ${remainingTimeMinutes.toFixed(1)} minutes`
+        )
         this.lastLogMinute = minutesPassed
       }
 
       // Check if the match has ended
       if (elapsedTime >= this.matchDuration) {
-        this.sendText(
+        this._messanger.sendText(
           `${this.formatTime(Date.now())} It's over! ${this.getGameResult()}`
         )
         this.matchStartTime = null // Add a method to stop the timer when the match is over

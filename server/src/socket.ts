@@ -8,12 +8,10 @@ export default function initializeSocketIO(io: Server, game: Game) {
 
   io.on('connection', (socket: Socket) => {
     if (game.players.length > 14) {
-      game.sendTextToOne(socket, 'Server is at capacity')
+      game.messanger.sendTextToOne(socket, 'Server is at capacity')
     }
-    game.clearLogOne(socket)
-    if (game.messages.length > 0) {
-      game.resendLog(socket)
-    }
+    game.messanger.clearLogOne(socket)
+    game.messanger.resendLog(socket)
 
     socket.on('setPlayerId', (id) => {
       let playerId: string | undefined
@@ -75,7 +73,9 @@ export default function initializeSocketIO(io: Server, game: Game) {
             if (player) {
               const id = player.id
               game.players = game.players.filter((p) => p.id !== id)
-              game.sendText(`${player.team?.name}'s ${player.name} ran away`)
+              game.messanger.sendText(
+                `${player.team?.name}'s ${player.name} ran away`
+              )
               game.resetGame()
               io.emit('update', new MatchDto(game.players, game.ball))
               game.transitionToMatchMaking()
