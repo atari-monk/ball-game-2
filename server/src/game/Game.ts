@@ -9,6 +9,8 @@ import { PlayerWallCollider } from '../collision/PlayerWallCollider'
 import { BallWallCollider } from '../collision/BallWallCollider'
 import { Messenger } from '../utils/Messenger'
 import { GameStateManager } from './GameStateManager'
+import { Team } from '../team/Team'
+import { TeamNameGenerator } from '../team/TeamNameGenerator'
 
 interface IMatch {
   matchDuration: number
@@ -27,10 +29,7 @@ export class Game implements IMatch {
     .build()
   field: IField = { width: 800, height: 600 }
   gates: IGates
-  teams: ITeam[] = [
-    { name: '', color: 'red', playerIds: [], score: 0 },
-    { name: '', color: 'blue', playerIds: [], score: 0 },
-  ]
+  teams: ITeam[] = []
   matchDuration: number = 5 * 60 * 1000 // 5 minutes in milliseconds
   matchStartTime: number | null = null
   private nameGenerator = new NameGenerator()
@@ -44,6 +43,7 @@ export class Game implements IMatch {
   private ballWallCollision = new BallWallCollider()
   private _messenger: Messenger
   private _stateManager: GameStateManager
+  private teamNameGenerator: TeamNameGenerator
 
   get messenger(): Messenger {
     return this._messenger
@@ -56,6 +56,22 @@ export class Game implements IMatch {
   constructor(private readonly io: Server) {
     this._messenger = new Messenger(io)
     this._stateManager = new GameStateManager(this._messenger, this)
+
+    this.teamNameGenerator = new TeamNameGenerator()
+    const [nameA, nameB] = this.teamNameGenerator.getRandomAnimalTeams()
+    const teamA = Team.builder()
+      .withName(nameA)
+      .withColor('red')
+      .withScore(0)
+      .build()
+    const teamB = Team.builder()
+      .withName(nameB)
+      .withColor('blue')
+      .withScore(0)
+      .build()
+    this.teams.push(teamA)
+    this.teams.push(teamB)
+
     this.gates = {
       left: new GateBuilder()
         .withPosition(0, this.field.height / 2 - 50)
@@ -70,9 +86,7 @@ export class Game implements IMatch {
         .withTeam(this.teams[1])
         .build(),
     }
-    const [teamA, teamB] = this.getRandomAnimalTeams()
-    this.teams[0].name = teamA
-    this.teams[1].name = teamB
+
     this._stateManager.transitionToMatchMaking()
   }
 
