@@ -23,12 +23,12 @@ export default function initializeSocketIO(io: Server, game: Game) {
       if (playerId) {
         player = game.players.find((p) => p.id === playerId)
         if (!player) {
-          player = game.addPlayer(playerId, socket)
+          player = game.addPlayer(playerId)
         }
       } else {
         playerId = uuidv4()
         socket.emit('yourPlayerId', playerId)
-        player = game.addPlayer(playerId, socket)
+        player = game.addPlayer(playerId)
       }
 
       playerActivity.set(playerId, Date.now())

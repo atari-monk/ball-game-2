@@ -109,7 +109,9 @@ export class Game implements IMatch {
 
   public startMatch() {
     this.matchStartTime = Date.now()
-    this._messenger.sendText(`${DateUtil.formatTime(this.matchStartTime)} Begin`)
+    this._messenger.sendText(
+      `${DateUtil.formatTime(this.matchStartTime)} Begin`
+    )
   }
 
   public stopLoop() {
@@ -177,7 +179,7 @@ export class Game implements IMatch {
 
     // Reassign players to teams and position them
     for (const player of this.players) {
-      this.assignPlayerToTeam(player)
+      player.assignToTeam(this.teams)
       this.positionPlayerInLine(player)
       player.velocityX = 0
       player.velocityY = 0
@@ -211,7 +213,7 @@ export class Game implements IMatch {
     this.resetAfterGoal()
   }
 
-  addPlayer(id: string, socket: Socket) {
+  addPlayer(id: string) {
     const newPlayer = new PlayerBuilder(
       id,
       this.nameGenerator.getUniqueFunnySingleWordName()
@@ -230,7 +232,7 @@ export class Game implements IMatch {
       .withScore(0)
       .build()
 
-    this.assignPlayerToTeam(newPlayer)
+    newPlayer.assignToTeam(this.teams)
 
     this.players.push(newPlayer)
 
@@ -244,23 +246,6 @@ export class Game implements IMatch {
       this._stateManager.transitionToStartGame()
     }
     return newPlayer
-  }
-
-  assignPlayerToTeam(player: IPlayer) {
-    if (player.team === null) {
-      // Find the team with fewer players
-      const teamA = this.teams[0]
-      const teamB = this.teams[1]
-
-      // Choose the team with fewer players
-      const selectedTeam =
-        teamA.playerIds.length <= teamB.playerIds.length ? teamA : teamB
-
-      // Assign the player to the selected team
-      player.team = selectedTeam
-      // Add the player's ID to the team's list of player IDs
-      selectedTeam.playerIds.push(player.id)
-    }
   }
 
   update(deltaTime: number) {
@@ -283,7 +268,9 @@ export class Game implements IMatch {
       // Check if the match has ended
       if (elapsedTime >= this.matchDuration) {
         this._messenger.sendText(
-          `${DateUtil.formatTime(Date.now())} It's over! ${this.getGameResult()}`
+          `${DateUtil.formatTime(
+            Date.now()
+          )} It's over! ${this.getGameResult()}`
         )
         this.matchStartTime = null // Add a method to stop the timer when the match is over
         this._stateManager.transitionToGameOver()

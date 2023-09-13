@@ -75,4 +75,8 @@ export class Player implements IPlayer {
   scorePoint(): void {
     this.behaviors.scorePoint()
   }
+
+  public assignToTeam(teams: ITeam[]) {
+    this.behaviors.assignToTeam(teams)
+  }
 }

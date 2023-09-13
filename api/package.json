@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "node ./script/copy-package.js && tsc"
+    "build": "node ./script/copy-package.js && tsc",
+    "i-lib": "powershell.exe -ExecutionPolicy Bypass -File .\\script\\i-lib.ps1"
   },
   "keywords": [],
   "author": "",
