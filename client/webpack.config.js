@@ -1,15 +1,10 @@
 const path = require('path')
 const CopyWebpackPlugin = require('copy-webpack-plugin')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
-const webpack = require('webpack')
-const dotenv = require('dotenv').config()
 
-module.exports = (env) => {
-  // Load environment variables from a .env file
-  const envConfig = dotenv.parsed
-
+module.exports = () => {
   return {
-    mode: 'production',
+    mode: 'development',
     entry: './src/client.ts',
     output: {
       filename: 'client.js',
@@ -26,11 +21,8 @@ module.exports = (env) => {
           exclude: /node_modules/,
         },
         {
-          test: /\.css$/, // Handle CSS files
-          use: [
-            MiniCssExtractPlugin.loader, // Extract CSS to separate file
-            'css-loader', // Translates CSS into CommonJS
-          ],
+          test: /\.css$/,
+          use: [MiniCssExtractPlugin.loader, 'css-loader'],
         },
       ],
     },
@@ -39,11 +31,7 @@ module.exports = (env) => {
         patterns: [{ from: 'src/index.html', to: 'index.html' }],
       }),
       new MiniCssExtractPlugin({
-        filename: 'styles.css', // Specify the correct path for the extracted CSS
-      }),
-      // Inject environment variables into your client-side code
-      new webpack.DefinePlugin({
-        'process.env.HOST': JSON.stringify(envConfig?.HOST || 'azure'),
+        filename: 'styles.css',
       }),
     ],
   }
