@@ -25528,3 +25528,233 @@ Inheritance: It's useful when you want to create a new class that extends the be
 Composition: It's more flexible and allows you to add functionality without modifying the existing class. It's often preferred when you want to keep classes more focused and avoid deep inheritance hierarchies.
 
 The choice between these two options depends on your specific use case and design preferences. If you anticipate needing to add more functionality in the future, composition is generally more flexible and maintainable.
+
+export class GameStateManager {
+  private _currentState: GameState
+  private readonly serverState = 'Server State'
+
+  get currentState(): GameState {
+    return this._currentState
+  }
+
+  constructor(
+    private readonly messenger: Messenger,
+    private readonly game: Game
+  ) {
+    this._currentState = this.initGameState(GameState.Creating)
+  }
+
+  private initGameState(state: GameState) {
+    this.sendServerState()
+    return state
+  }
+
+  private setGameState(state: GameState) {
+    this._currentState = state
+    this.sendServerState()
+  }
+
+  private sendServerState() {
+    this.messenger.sendMsg(
+      this.serverState,
+      GameState[this._currentState],
+      MsgFlag.ServerState
+    )
+  }
+
+  public transitionToMatchMaking() {
+    this.setGameState(GameState.MatchMaking)
+    this.messenger.sendText('Waiting for players')
+  }
+
+  public transitionToStartGame() {
+    this.setGameState(GameState.Start)
+    this.messenger.sendText('Starting Game')
+    this.startCounter(() => this.transitionToProgress())
+  }
+
+  private startCounter(fn: () => void, sec: number = 3, inf: number = 1) {
+    let timer = sec
+    const intervalId = setInterval(() => {
+      if (timer % inf === 0) this.messenger.sendText(`In ${timer}`)
+      timer--
+      if (timer === 0) {
+        clearInterval(intervalId)
+        fn()
+      }
+    }, 1000)
+  }
+
+  transitionToProgress() {
+    this.setGameState(GameState.Progress)
+    this.game.startMatch()
+    this.game.startLoop()
+  }
+
+  transitionToGameOver() {
+    this.setGameState(GameState.Over)
+    this.game.stopLoop()
+    this.messenger.sendText('Reset')
+    this.startCounter(
+      () => {
+        this.game.resetGame()
+        if (this.game.players.length === 2) {
+          this.transitionToStartGame()
+        } else {
+          this.transitionToMatchMaking()
+        }
+      },
+      20,
+      5
+    )
+  }
+
+  isNotInProgressState() {
+    return this.currentState !== GameState.Progress
+  }
+}
+//extract interface from this class
+ChatGPT
+To extract an interface from the GameStateManager class, you can define an interface that lists the public methods of the class. Here's the extracted interface:
+
+typescript
+Copy code
+interface IGameStateManager {
+  currentState: GameState;
+  transitionToMatchMaking(): void;
+  transitionToStartGame(): void;
+  transitionToProgress(): void;
+  transitionToGameOver(): void;
+  isNotInProgressState(): boolean;
+}
+You can use this interface to ensure that any class implementing it adheres to the same method signatures as the GameStateManager class.
+
+
+
+
+User
+export class Messenger {
+  private messages: IMessage[] = []
+  private readonly logEvent = 'log'
+  private readonly logResetEvent = 'log-reset'
+
+  constructor(private readonly io: Server) {}
+
+  public sendText(text: string) {
+    const message: IMessage = {
+      sender: '',
+      text,
+      flag: MsgFlag.Text,
+    }
+    this.messages.push(message)
+    this.io.emit(this.logEvent, new MessageDto(message))
+  }
+
+  public sendMsg(sender: string, text: string, flag: MsgFlag) {
+    const message: IMessage = {
+      sender,
+      text,
+      flag,
+    }
+    this.messages.push(message)
+    this.io.emit(this.logEvent, new MessageDto(message))
+  }
+
+  public sendTextToOne(socket: Socket, text: string) {
+    const message: IMessage = {
+      sender: '',
+      text,
+      flag: MsgFlag.Text,
+    }
+    this.messages.push(message)
+    socket.emit(this.logEvent, new MessageDto(message))
+  }
+
+  public resendLog(socket: Socket) {
+    if (this.messages.length === 0) return
+    this.messages.forEach((msg) => {
+      socket.emit(this.logEvent, new MessageDto(msg))
+    })
+  }
+
+  public clear() {
+    this.messages = []
+  }
+
+  public clearLogOne(socket: Socket) {
+    socket.emit(this.logResetEvent)
+  }
+
+  public clearLogAll() {
+    this.io.emit(this.logResetEvent)
+  }
+}
+//extract interface
+ChatGPT
+To extract an interface from the Messenger class, you can define an interface that lists the public methods of the class. Here's the extracted interface:
+
+typescript
+Copy code
+import { Socket } from 'socket.io';
+
+interface IMessenger {
+  sendText(text: string): void;
+  sendMsg(sender: string, text: string, flag: MsgFlag): void;
+  sendTextToOne(socket: Socket, text: string): void;
+  resendLog(socket: Socket): void;
+  clear(): void;
+  clearLogOne(socket: Socket): void;
+  clearLogAll(): void;
+}
+You can use this interface to ensure that any class implementing it adheres to the same method signatures as the Messenger class.
+
+
+
+
+User
+export class NameGenerator {
+  private usedNames: Set<string> = new Set()
+
+  public getUniqueFunnySingleWordName(): string {
+    const funnyNames = [
+      'Whiskerz',
+      'Bubbles',
+      'Wobble',
+      'Squiggles',
+      'Snickers',
+      'Fluffy',
+      'Tater',
+      'Noodle',
+      'Fizzle',
+      'Puddin',
+      'Squishy',
+      'Fuzzy',
+      'Muffin',
+    ]
+
+    const availableNames = funnyNames.filter(
+      (name) => !this.usedNames.has(name)
+    )
+
+    if (availableNames.length === 0) {
+      this.usedNames.clear()
+    }
+
+    const randomIndex = Math.floor(Math.random() * availableNames.length)
+    const selectedName = availableNames[randomIndex]
+    this.usedNames.add(selectedName)
+
+    return selectedName
+  }
+}
+//generate interface for this
+
+ChatGPT
+The NameGenerator class doesn't have any public methods that would be suitable for inclusion in an interface, as it only has a single public method that generates a unique funny single-word name. Instead, you can create a custom type or interface for the function signature of this method. Here's how you can do that:
+
+typescript
+Copy code
+interface INameGenerator {
+  getUniqueFunnySingleWordName(): string;
+}
+You can use this custom interface INameGenerator to define the shape of objects or classes that provide the getUniqueFunnySingleWordName method.
