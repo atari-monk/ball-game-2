@@ -1,4 +1,4 @@
-import { IPlayer, ITeam } from 'api'
+import { IField, IGates, IPlayer, ITeam } from 'api'
 import { PlayerBuilder } from './PlayerBuilder'
 import { BallPlayer } from './BallPlayer'
 
@@ -78,5 +78,9 @@ export class Player implements IPlayer {
 
   public assignToTeam(teams: ITeam[]) {
     this.behaviors.assignToTeam(teams)
+  }
+
+  public positionInLine(teams: ITeam[], gates: IGates, field: IField) {
+    this.behaviors.positionInLine(teams, gates, field)
   }
 }

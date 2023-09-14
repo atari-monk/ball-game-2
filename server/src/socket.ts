@@ -16,7 +16,7 @@ export default function initializeSocketIO(io: Server, game: Game) {
     socket.on('setPlayerId', (id) => {
       let playerId: string | undefined
       playerId = id
-      console.log(`playerId: ${playerId}`)
+      console.log(`playerId: ${playerId || 'first time player'}`)
 
       let player: IPlayer | undefined
 
