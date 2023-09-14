@@ -1,7 +1,7 @@
 export class NameGenerator {
   private usedNames: Set<string> = new Set()
 
-  getUniqueFunnySingleWordName(): string {
+  public getUniqueFunnySingleWordName(): string {
     const funnyNames = [
       'Whiskerz',
       'Bubbles',

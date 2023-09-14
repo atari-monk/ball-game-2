@@ -1,4 +1,10 @@
-import { IField, IGates, IPlayer, ITeam } from 'api'
+import {
+  IField,
+  IGates,
+  INameGenerator,
+  IPlayer,
+  ITeam,
+} from 'api'
 import { PlayerBuilder } from './PlayerBuilder'
 import { BallPlayer } from './BallPlayer'
 
@@ -30,7 +36,7 @@ export class Player implements IPlayer {
     return new PlayerBuilder(id, name)
   }
 
-  static create(
+  public static create(
     id: string,
     name: string,
     x: number,
@@ -68,11 +74,18 @@ export class Player implements IPlayer {
     )
   }
 
-  update(deltaTime: number) {
+  public static getDefaultPlayer(
+    id: string,
+    nameGenerator: INameGenerator
+  ): IPlayer {
+    return BallPlayer.getDefaultPlayer(id, nameGenerator)
+  }
+
+  public update(deltaTime: number) {
     this.behaviors.update(deltaTime)
   }
 
-  scorePoint(): void {
+  public scorePoint(): void {
     this.behaviors.scorePoint()
   }
 

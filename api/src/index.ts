@@ -1,4 +1,9 @@
 //api
+//game
+export { IGameStateManager } from './api/game/IGameStateManager'
+//utils
+export { IMessenger } from './api/utils/IMessenger'
+export { INameGenerator } from './api/utils/INameGenerator'
 export { GameState } from './api/GameState'
 export { IBall } from './api/IBall'
 export { IField } from './api/IField'

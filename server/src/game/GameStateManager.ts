@@ -1,5 +1,4 @@
-import { GameState, MsgFlag } from 'api'
-import { Messenger } from '../utils/Messenger'
+import { GameState, IMessenger, MsgFlag } from 'api'
 import { Game } from './Game'
 
 export class GameStateManager {
@@ -11,7 +10,7 @@ export class GameStateManager {
   }
 
   constructor(
-    private readonly messenger: Messenger,
+    private readonly messenger: IMessenger,
     private readonly game: Game
   ) {
     this._currentState = this.initGameState(GameState.Creating)

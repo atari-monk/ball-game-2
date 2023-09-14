@@ -1,5 +1,14 @@
 import { Server, Socket } from 'socket.io'
-import { IPlayer, IBall, ITeam, IField, IGates, MatchDto } from 'api'
+import {
+  IPlayer,
+  IBall,
+  ITeam,
+  IField,
+  IGates,
+  MatchDto,
+  IMessenger,
+  IGameStateManager,
+} from 'api'
 import { BallBuilder } from '../ball/BallBuilder'
 import { GateBuilder } from '../gate/GateBuilder'
 import { NameGenerator } from '../utils/NameGenerator'
@@ -13,6 +22,7 @@ import { Team } from '../team/Team'
 import { TeamNameGenerator } from '../team/TeamNameGenerator'
 import { BallGateCollider } from '../collision/BallGateCollider'
 import { DateUtil } from '../utils/DateUtil'
+import { Player } from '../player/Player'
 
 interface IMatch {
   matchDuration: number
@@ -32,7 +42,7 @@ export class Game implements IMatch {
   field: IField = { width: 800, height: 600 }
   gates: IGates
   teams: ITeam[] = []
-  matchDuration: number = 5 * 60 * 1000 // 5 minutes in milliseconds
+  matchDuration: number = 5 * 60 * 1000
   matchStartTime: number | null = null
   private nameGenerator = new NameGenerator()
   private frameRate: number = 30
@@ -44,15 +54,15 @@ export class Game implements IMatch {
   private playerWallCollider = new PlayerWallCollider()
   private ballWallCollider = new BallWallCollider()
   private ballGateCollider = new BallGateCollider()
-  private _messenger: Messenger
-  private _stateManager: GameStateManager
+  private _messenger: IMessenger
+  private _stateManager: IGameStateManager
   private teamNameGenerator: TeamNameGenerator
 
-  get messenger(): Messenger {
+  get messenger(): IMessenger {
     return this._messenger
   }
 
-  get stateManager(): GameStateManager {
+  get stateManager(): IGameStateManager {
     return this._stateManager
   }
 
@@ -177,35 +187,14 @@ export class Game implements IMatch {
     this.resetAfterGoal()
   }
 
-  addPlayer(id: string) {
-    const newPlayer = new PlayerBuilder(
-      id,
-      this.nameGenerator.getUniqueFunnySingleWordName()
-    )
-      .withPosition(0, 0)
-      .withVelocity(0, 0)
-      .withRadius(20)
-      .withCollisionDisabled(false)
-      .withMass(20)
-      .withDirection(0)
-      .withSpeed(0)
-      .withMaxSpeedForward(0.1)
-      .withMaxSpeedBackward(-0.05)
-      .withTurnSpeed(0.4)
-      .withTeam(null)
-      .withScore(0)
-      .build()
-
+  public addPlayer(id: string) {
+    const newPlayer = Player.getDefaultPlayer(id, this.nameGenerator)
     newPlayer.assignToTeam(this.teams)
-
     this.players.push(newPlayer)
-
     newPlayer.positionInLine(this.teams, this.gates, this.field)
-
     this._messenger.sendText(
       `${newPlayer.name} joins team ${newPlayer.team?.name} (${newPlayer.team?.color})`
     )
-
     if (this.players.length === 2) {
       this._stateManager.transitionToStartGame()
     }

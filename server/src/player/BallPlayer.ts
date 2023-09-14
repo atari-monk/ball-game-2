@@ -1,7 +1,36 @@
-import { IField, IGates, IPlayer, IPlayerBehavior, ITeam } from 'api'
+import {
+  IField,
+  IGates,
+  INameGenerator,
+  IPlayer,
+  IPlayerBehavior,
+  ITeam,
+} from 'api'
+import { PlayerBuilder } from './PlayerBuilder'
 
 export class BallPlayer implements IPlayerBehavior {
   constructor(private readonly player: IPlayer) {}
+
+  public static getDefaultPlayer(id: string, nameGenerator: INameGenerator) {
+    const newPlayer = new PlayerBuilder(
+      id,
+      nameGenerator.getUniqueFunnySingleWordName()
+    )
+      .withPosition(0, 0)
+      .withVelocity(0, 0)
+      .withRadius(20)
+      .withCollisionDisabled(false)
+      .withMass(20)
+      .withDirection(0)
+      .withSpeed(0)
+      .withMaxSpeedForward(0.1)
+      .withMaxSpeedBackward(-0.05)
+      .withTurnSpeed(0.4)
+      .withTeam(null)
+      .withScore(0)
+      .build()
+    return newPlayer
+  }
 
   public update(deltaTime: number) {
     const speed = this.player.speed
@@ -29,7 +58,7 @@ export class BallPlayer implements IPlayerBehavior {
     selectedTeam.playerIds.push(this.player.id)
   }
 
-  positionInLine(teams: ITeam[], gates: IGates, field: IField) {
+  public positionInLine(teams: ITeam[], gates: IGates, field: IField) {
     if (!this.player.team) throw 'player team must be specified at this point!'
     const playerTeamGoalPost =
       this.player.team === teams[0] ? gates.left : gates.right
