@@ -1,5 +1,5 @@
 import { Socket } from 'socket.io'
-import { MsgFlag } from '../MsgFlag'
+import { MsgFlag } from './MsgFlag'
 
 export interface IMessenger {
   sendText(text: string): void

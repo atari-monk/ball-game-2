@@ -1,5 +1,5 @@
-import { IMessage } from '../api/IMessage'
-import { MsgFlag } from '../api/MsgFlag'
+import { IMessage } from '../api/messanger/IMessage'
+import { MsgFlag } from '../api/messanger/MsgFlag'
 
 export class MessageDto {
   sender: string

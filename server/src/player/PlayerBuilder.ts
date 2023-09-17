@@ -1,5 +1,5 @@
-import { IPlayer, ITeam } from 'api'
-import { Player } from './Player'
+import { IPlayerModel, ITeam } from 'api'
+import { PlayerModel } from './PlayerModel'
 
 export class PlayerBuilder {
   private x = 0
@@ -81,8 +81,8 @@ export class PlayerBuilder {
     return this
   }
 
-  build(): IPlayer {
-    return Player.create(
+  build(): IPlayerModel {
+    return PlayerModel.create(
       this.id,
       this.name,
       this.x,

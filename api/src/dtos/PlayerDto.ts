@@ -1,5 +1,5 @@
-import { IPlayerModel } from '../api/IPlayerModel'
 import { ITeam } from '../api/ITeam'
+import { IPlayer } from '../api/player/IPlayer'
 
 export class PlayerDto {
   id: string
@@ -9,7 +9,7 @@ export class PlayerDto {
   direction: number
   team: ITeam | null
 
-  constructor(player: IPlayerModel) {
+  constructor(player: IPlayer) {
     this.id = player.id
     this.x = player.x
     this.y = player.y

@@ -3,97 +3,137 @@ import {
   IGates,
   INameGenerator,
   IPlayer,
+  IPlayerAction,
+  IPlayerModel,
   ITeam,
 } from 'api'
-import { PlayerBuilder } from './PlayerBuilder'
-import { BallPlayer } from './BallPlayer'
+import { PlayerModel } from './PlayerModel'
+import { PlayerAction } from './PlayerAction'
 
 export class Player implements IPlayer {
-  private behaviors: BallPlayer
+  private readonly _model: IPlayerModel
+  private readonly _action: IPlayerAction
 
-  private constructor(
-    public id: string,
-    public name: string,
-    public x: number,
-    public y: number,
-    public velocityX: number,
-    public velocityY: number,
-    public radius: number,
-    public collisionDisabled: boolean,
-    public mass: number,
-    public direction: number,
-    public speed: number,
-    public maxSpeedForward: number,
-    public maxSpeedBackward: number,
-    public turnSpeed: number,
-    public team: ITeam | null,
-    public score: number
-  ) {
-    this.behaviors = new BallPlayer(this)
+  get id(): string {
+    return this._model.id
   }
 
-  static builder(id: string, name: string): PlayerBuilder {
-    return new PlayerBuilder(id, name)
+  get name(): string {
+    return this._model.name
   }
 
-  public static create(
-    id: string,
-    name: string,
-    x: number,
-    y: number,
-    velocityX: number,
-    velocityY: number,
-    radius: number,
-    collisionDisabled: boolean,
-    mass: number,
-    direction: number,
-    speed: number,
-    maxSpeedForward: number,
-    maxSpeedBackward: number,
-    turnSpeed: number,
-    team: ITeam | null,
-    score: number
-  ): IPlayer {
-    return new Player(
-      id,
-      name,
-      x,
-      y,
-      velocityX,
-      velocityY,
-      radius,
-      collisionDisabled,
-      mass,
-      direction,
-      speed,
-      maxSpeedForward,
-      maxSpeedBackward,
-      turnSpeed,
-      team,
-      score
-    )
+  get x(): number {
+    return this._model.x
   }
 
-  public static getDefaultPlayer(
-    id: string,
-    nameGenerator: INameGenerator
-  ): IPlayer {
-    return BallPlayer.getDefaultPlayer(id, nameGenerator)
+  get y(): number {
+    return this._model.y
   }
 
-  public update(deltaTime: number) {
-    this.behaviors.update(deltaTime)
+  get velocityX(): number {
+    return this._model.velocityX
   }
 
-  public scorePoint(): void {
-    this.behaviors.scorePoint()
+  get velocityY(): number {
+    return this._model.velocityY
   }
 
-  public assignToTeam(teams: ITeam[]) {
-    this.behaviors.assignToTeam(teams)
+  get radius(): number {
+    return this._model.radius
   }
 
-  public positionInLine(teams: ITeam[], gates: IGates, field: IField) {
-    this.behaviors.positionInLine(teams, gates, field)
+  get mass(): number {
+    return this._model.mass
+  }
+
+  get direction(): number {
+    return this._model.direction
+  }
+
+  get speed(): number {
+    return this._model.speed
+  }
+
+  get maxSpeedForward(): number {
+    return this._model.maxSpeedForward
+  }
+
+  get maxSpeedBackward(): number {
+    return this._model.maxSpeedBackward
+  }
+
+  get turnSpeed(): number {
+    return this._model.turnSpeed
+  }
+
+  get team(): ITeam {
+    const team = this._model.team
+    if (!team) throw new Error('Team must be assigned!')
+    return team
+  }
+
+  set velocityX(vx: number) {
+    this._model.velocityX = vx
+  }
+
+  set velocityY(vy: number) {
+    this._model.velocityY = vy
+  }
+
+  set direction(d: number) {
+    this._model.direction = d
+  }
+
+  set x(x: number) {
+    this._model.x = x
+  }
+
+  set y(y: number) {
+    this._model.y = y
+  }
+
+  constructor(id: string, nameGenerator: INameGenerator) {
+    this._model = PlayerModel.getDefaultPlayer(id, nameGenerator)
+    this._action = new PlayerAction(this._model)
+  }
+
+  update(deltaTime: number) {
+    this._action.update(deltaTime)
+  }
+
+  scorePoint(): void {
+    this._action.scorePoint()
+  }
+
+  assignToTeam(teams: ITeam[]) {
+    this._action.assignToTeam(teams)
+  }
+
+  positionInLine(teams: ITeam[], gates: IGates, field: IField) {
+    this._action.positionInLine(teams, gates, field)
+  }
+
+  resetAfterGoal(): void {
+    this._action.resetAfterGoal()
+  }
+
+  resetAfterMatch(): void {
+    this._action.resetAfterMatch()
+  }
+
+  onUp(): void {
+    this._action.onUp()
+  }
+
+  onDown(): void {
+    this._action.onDown()
+  }
+
+  onLeft(): void {
+    this._action.onLeft()
+  }
+
+  onRight(): void {
+    this._action.onRight()
   }
 }

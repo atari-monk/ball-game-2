@@ -46,20 +46,10 @@ export default function initializeSocketIO(io: Server, game: Game) {
           return
         }
         if (player) {
-          if (input.up)
-            player.speed = Math.min(
-              player.speed + player.maxSpeedForward / 2,
-              player.maxSpeedForward
-            )
-          if (input.down) {
-            if (player.speed > 0) {
-              player.speed = 0
-            } else if (player.speed === 0) {
-              player.speed = player.maxSpeedBackward
-            }
-          }
-          if (input.left) player.direction -= player.turnSpeed
-          if (input.right) player.direction += player.turnSpeed
+          if (input.up) player.onUp()
+          if (input.down) player.onDown()
+          if (input.left) player.onLeft()
+          if (input.right) player.onRight()
         }
       })
 

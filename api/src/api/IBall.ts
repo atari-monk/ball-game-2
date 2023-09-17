@@ -1,4 +1,4 @@
-import { IPlayer } from './IPlayer'
+import { IPlayer } from './player/IPlayer'
 
 export interface IBall {
   x: number

@@ -1,4 +1,4 @@
-import { Server, Socket } from 'socket.io'
+import { Server } from 'socket.io'
 import {
   IPlayer,
   IBall,
@@ -12,7 +12,6 @@ import {
 import { BallBuilder } from '../ball/BallBuilder'
 import { GateBuilder } from '../gate/GateBuilder'
 import { NameGenerator } from '../utils/NameGenerator'
-import { PlayerBuilder } from '../player/PlayerBuilder'
 import { PlayerBallCollider } from '../collision/PlayerBallCollider'
 import { PlayerWallCollider } from '../collision/PlayerWallCollider'
 import { BallWallCollider } from '../collision/BallWallCollider'
@@ -130,11 +129,6 @@ export class Game implements IMatch {
 
   resetGame() {
     this.messenger.clearLogAll()
-    // Reset player scores
-    for (const player of this.players) {
-      player.score = 0
-      player.team = null
-    }
 
     // Reset the ball position
     this.ball.x = this.field.width / 2
@@ -151,13 +145,10 @@ export class Game implements IMatch {
 
     this.matchStartTime = null
 
-    // Reassign players to teams and position them
     for (const player of this.players) {
+      player.resetAfterMatch()
       player.assignToTeam(this.teams)
       player.positionInLine(this.teams, this.gates, this.field)
-      player.velocityX = 0
-      player.velocityY = 0
-      player.speed = 0
     }
 
     this.lastLogMinute = -1
@@ -172,10 +163,8 @@ export class Game implements IMatch {
     this.ball.lastHit = null
 
     for (const player of this.players) {
+      player.resetAfterGoal()
       player.positionInLine(this.teams, this.gates, this.field)
-      player.velocityX = 0
-      player.velocityY = 0
-      player.speed = 0
     }
   }
 
@@ -187,8 +176,8 @@ export class Game implements IMatch {
     this.resetAfterGoal()
   }
 
-  public addPlayer(id: string) {
-    const newPlayer = Player.getDefaultPlayer(id, this.nameGenerator)
+  public addPlayer(id: string): IPlayer {
+    const newPlayer = new Player(id, this.nameGenerator)
     newPlayer.assignToTeam(this.teams)
     this.players.push(newPlayer)
     newPlayer.positionInLine(this.teams, this.gates, this.field)
