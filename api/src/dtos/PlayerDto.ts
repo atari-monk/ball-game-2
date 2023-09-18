@@ -6,7 +6,8 @@ export class PlayerDto {
   x: number
   y: number
   radius: number
-  direction: number
+  directionX: number
+  directionY: number
   team: ITeam | null
 
   constructor(player: IPlayer) {
@@ -14,7 +15,8 @@ export class PlayerDto {
     this.x = player.x
     this.y = player.y
     this.radius = player.radius
-    this.direction = player.direction
+    this.directionX = player.directionX
+    this.directionY = player.directionY
     this.team = player.team
   }
 }

@@ -1,6 +1,8 @@
+import { IAnimationFrame } from './IAnimationFrame'
+
 export class SpriteAnimator {
   private image: HTMLImageElement
-  private frames: AnimationFrame[]
+  private frames: IAnimationFrame[]
   private currentFrameIndex: number = 0
   private frameDuration: number
   private timeSinceLastFrame: number = 0

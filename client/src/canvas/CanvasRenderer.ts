@@ -1,16 +1,19 @@
 import { FieldDto, IGateDtos, PlayerDto, BallDto } from 'api'
 import { CanvasInfoProvider } from './CanvasInfoProvider'
 import { CanvasDrawer } from './CanvasDrawer'
+import { PlayerRenderer } from './PlayerRenderer'
 
 export class CanvasRenderer {
   private ctx: CanvasRenderingContext2D
   private canvasDrawer: CanvasDrawer
+  private playerRenderer: PlayerRenderer
 
   constructor() {
     const canvasInfoProvider = new CanvasInfoProvider()
     const canvasInfo = canvasInfoProvider.getCanvasInfo('canvas')
     this.ctx = canvasInfo.ctx
     this.canvasDrawer = new CanvasDrawer(this.ctx)
+    this.playerRenderer = new PlayerRenderer(this.canvasDrawer)
   }
 
   clearCanvas() {
@@ -41,15 +44,7 @@ export class CanvasRenderer {
   }
 
   drawPlayer(player: PlayerDto) {
-    this.canvasDrawer.setFillStyle(player.team?.color ?? 'blue')
-    this.ctx.strokeStyle = 'yellow'
-    this.ctx.lineWidth = 2
-
-    this.canvasDrawer.drawCircle(player.x, player.y, player.radius)
-
-    const directionX = player.x + player.radius * Math.cos(player.direction)
-    const directionY = player.y + player.radius * Math.sin(player.direction)
-    this.canvasDrawer.drawLine(player.x, player.y, directionX, directionY)
+    this.playerRenderer.draw(player)
   }
 
   drawBall(ball: BallDto) {

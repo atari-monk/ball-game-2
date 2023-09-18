@@ -11,6 +11,8 @@ export interface IPlayer extends IPlayerAction {
   radius: number
   mass: number
   direction: number
+  directionX: number
+  directionY: number
   speed: number
   maxSpeedForward: number
   maxSpeedBackward: number

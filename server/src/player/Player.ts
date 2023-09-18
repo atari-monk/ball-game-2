@@ -50,6 +50,14 @@ export class Player implements IPlayer {
     return this._model.direction
   }
 
+  get directionX(): number {
+    return this._model.directionX
+  }
+
+  get directionY(): number {
+    return this._model.directionY
+  }
+
   get speed(): number {
     return this._model.speed
   }

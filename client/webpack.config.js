@@ -24,6 +24,17 @@ module.exports = () => {
           test: /\.css$/,
           use: [MiniCssExtractPlugin.loader, 'css-loader'],
         },
+        {
+          test: /\.(png|jpg|jpeg|gif|svg)$/,
+          use: [
+            {
+              loader: 'file-loader',
+              options: {
+                name: 'assets/sprite/[name].[ext]', // Output path for sprite assets
+              },
+            },
+          ],
+        },
       ],
     },
     plugins: [

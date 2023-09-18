@@ -9,8 +9,22 @@ export class PlayerAction implements IPlayerAction {
 
   update(deltaTime: number) {
     const p = this.player
+    this.computeDirection(p)
+    this.computeVelocity(p)
+    this.computePosition(p, deltaTime)
+  }
+
+  private computeDirection(p: IPlayerModel) {
+    p.directionX = p.x + p.radius * Math.cos(p.direction)
+    p.directionY = p.y + p.radius * Math.sin(p.direction)
+  }
+
+  private computeVelocity(p: IPlayerModel) {
     p.velocityX = p.speed * Math.cos(p.direction)
     p.velocityY = p.speed * Math.sin(p.direction)
+  }
+
+  private computePosition(p: IPlayerModel, deltaTime: number) {
     p.x += p.velocityX * deltaTime
     p.y += p.velocityY * deltaTime
   }

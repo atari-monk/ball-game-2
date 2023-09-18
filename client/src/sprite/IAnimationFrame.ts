@@ -1,4 +1,4 @@
-interface AnimationFrame {
+export interface IAnimationFrame {
   frameX: number
   frameY: number
   frameWidth: number

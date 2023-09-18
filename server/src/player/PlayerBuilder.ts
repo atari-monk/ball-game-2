@@ -10,6 +10,8 @@ export class PlayerBuilder {
   private collisionDisabled = false
   private mass = 20
   private direction = 0
+  private directionX = 0
+  private directionY = 0
   private speed = 0
   private maxSpeedForward = 0
   private maxSpeedBackward = 0
@@ -93,6 +95,8 @@ export class PlayerBuilder {
       this.collisionDisabled,
       this.mass,
       this.direction,
+      this.directionX,
+      this.directionY,
       this.speed,
       this.maxSpeedForward,
       this.maxSpeedBackward,

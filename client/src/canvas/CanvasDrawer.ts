@@ -13,6 +13,11 @@ export class CanvasDrawer {
     this.ctx.fillStyle = color
   }
 
+  setLineStyle(color: string, width: number) {
+    this.ctx.strokeStyle = color
+    this.ctx.lineWidth = width
+  }
+
   drawRectangle(x: number, y: number, width: number, height: number) {
     this.ctx.fillRect(x, y, width, height)
   }

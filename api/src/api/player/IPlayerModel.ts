@@ -11,6 +11,8 @@ export interface IPlayerModel {
   collisionDisabled: boolean
   mass: number
   direction: number
+  directionX: number
+  directionY: number
   speed: number
   maxSpeedForward: number
   maxSpeedBackward: number
