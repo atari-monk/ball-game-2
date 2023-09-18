@@ -1,57 +1,35 @@
 import { FieldDto, IGateDtos, MapDto, MatchDto, MessageDto } from 'api'
 import { hostConfig } from './config/config'
-import { CanvasRenderer } from './CanvasRenderer'
+import { CanvasRenderer } from './canvas/CanvasRenderer'
 import { SocketManager } from './SocketManager'
-import { LogManager } from './LogManager'
+import { LogManager } from './logger/LogManager'
 import { IInput } from './api/IInput'
 
 export class GameClient {
   private socketManager: SocketManager
   private canvasRenderer: CanvasRenderer
   private logManager: LogManager
-  private gates: IGateDtos | null
-  private field: FieldDto | null
+  private gates: IGateDtos | null = null
+  private field: FieldDto | null = null
 
   constructor() {
     this.socketManager = new SocketManager(hostConfig.selectedHost)
     this.canvasRenderer = new CanvasRenderer()
-    this.logManager = new LogManager('log', 'log-filter')
-
-    this.gates = null
-    this.field = null
+    this.logManager = new LogManager()
 
     this.initializeSocketListeners()
     this.initializeEventListeners()
   }
 
   private initializeSocketListeners() {
-    this.socketManager.handleMapEvent((dto: MapDto) => {
-      this.handleMapUpdate(dto)
-    })
-
-    this.socketManager.handleLogEvent((dto: MessageDto) => {
-      this.logManager.logMessage(dto)
-    })
-
-    this.socketManager.handleLogResetEvent(() => {
-      this.logManager.clearTextArea()
-    })
-
-    this.socketManager.handleUpdateEvent((dto: MatchDto) => {
-      this.handleMatchUpdate(dto)
-    })
+    this.socketManager.handleMapUpdate(this.handleMapUpdate.bind(this))
+    this.socketManager.handleLogMessage(this.handleLogMessage.bind(this))
+    this.socketManager.handleLogReset(this.handleLogReset.bind(this))
+    this.socketManager.handleMatchUpdate(this.handleMatchUpdate.bind(this))
   }
 
   private initializeEventListeners() {
-    document.addEventListener('keydown', (event: KeyboardEvent) => {
-      const input: IInput = {
-        up: event.key === 'ArrowUp',
-        down: event.key === 'ArrowDown',
-        left: event.key === 'ArrowLeft',
-        right: event.key === 'ArrowRight',
-      }
-      this.socketManager.sendInput(input)
-    })
+    document.addEventListener('keydown', this.handleKeyDown.bind(this))
   }
 
   private handleMapUpdate(dto: MapDto) {
@@ -59,7 +37,7 @@ export class GameClient {
     this.field = dto.field
     this.canvasRenderer.clearCanvas()
     this.canvasRenderer.drawField(this.field)
-    this.canvasRenderer.drawGates(this.gates)
+    this.canvasRenderer.drawGates(this.gates!)
   }
 
   private handleMatchUpdate(dto: MatchDto) {
@@ -72,5 +50,23 @@ export class GameClient {
       this.canvasRenderer.drawPlayer(players[playerId])
     }
     this.canvasRenderer.drawBall(ball)
+  }
+
+  private handleLogMessage(dto: MessageDto) {
+    this.logManager.logMessage(dto)
+  }
+
+  private handleLogReset() {
+    this.logManager.clearTextArea()
+  }
+
+  private handleKeyDown(event: KeyboardEvent) {
+    const input: IInput = {
+      up: event.key === 'ArrowUp',
+      down: event.key === 'ArrowDown',
+      left: event.key === 'ArrowLeft',
+      right: event.key === 'ArrowRight',
+    }
+    this.socketManager.sendPlayerInput(input)
   }
 }

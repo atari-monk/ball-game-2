@@ -1,30 +1,14 @@
 import { MessageDto, MsgFlag } from 'api'
+import { LogInfoProvider } from './LogInfoProvider'
 
 export class LogManager {
   private textArea: HTMLTextAreaElement | null
   private logFilterOption: string = 'Text'
 
-  constructor(textAreaId: string, logFilterId: string) {
-    this.textArea = document.getElementById(
-      textAreaId
-    ) as HTMLTextAreaElement | null
-
-    if (!this.textArea) {
-      throw new Error('Log text area not available')
-    }
-
-    const logFilter = document.getElementById(
-      logFilterId
-    ) as HTMLSelectElement | null
-
-    if (!logFilter) {
-      throw new Error('Log filter not available')
-    }
-
-    logFilter.value = 'Text'
-    logFilter.addEventListener('change', () => {
-      this.logFilterOption = logFilter.value
-    })
+  constructor() {
+    const logInfoProvider = new LogInfoProvider('log', 'log-filter')
+    this.textArea = logInfoProvider.getTextArea()
+    this.logFilterOption = logInfoProvider.getLogFilterOption()
   }
 
   logMessage(message: MessageDto) {

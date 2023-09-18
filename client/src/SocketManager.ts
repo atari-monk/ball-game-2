@@ -3,49 +3,49 @@ import { Socket, io } from 'socket.io-client'
 import { IInput } from './api/IInput'
 
 export class SocketManager {
-  private _socket: Socket
+  private socket: Socket
 
-  get socket(): Socket {
-    return this._socket
+  get connection(): Socket {
+    return this.socket
   }
 
-  constructor(host: string) {
-    this._socket = io(host)
-    this.configureSocket()
+  constructor(serverHost: string) {
+    this.socket = io(serverHost)
+    this.setupSocket()
   }
 
-  private configureSocket() {
-    this._socket.on('connect', () => {
-      const yourPlayerId = localStorage.getItem('yourPlayerId')
-      this._socket.emit('setPlayerId', yourPlayerId)
+  private setupSocket() {
+    this.socket.on('connect', () => {
+      const playerId = localStorage.getItem('playerId')
+      this.socket.emit('setPlayerId', playerId)
     })
 
-    this._socket.on('yourPlayerId', (id: string) => {
-      localStorage.setItem('yourPlayerId', id)
+    this.socket.on('assignedPlayerId', (id: string) => {
+      localStorage.setItem('playerId', id)
     })
 
-    this._socket.on('ping', () => {
-      this._socket.emit('pong')
+    this.socket.on('ping', () => {
+      this.socket.emit('pong')
     })
   }
 
-  handleMapEvent(callback: (dto: MapDto) => void) {
-    this._socket.on('map', callback)
+  handleMapUpdate(callback: (mapData: MapDto) => void) {
+    this.socket.on('map', callback)
   }
 
-  handleLogEvent(callback: (dto: MessageDto) => void) {
+  handleLogMessage(callback: (message: MessageDto) => void) {
     this.socket.on('log', callback)
   }
 
-  handleLogResetEvent(callback: () => void) {
+  handleLogReset(callback: () => void) {
     this.socket.on('log-reset', callback)
   }
 
-  handleUpdateEvent(callback: (dto: MatchDto) => void) {
+  handleMatchUpdate(callback: (matchData: MatchDto) => void) {
     this.socket.on('update', callback)
   }
 
-  sendInput(input: IInput) {
+  sendPlayerInput(input: IInput) {
     this.socket.emit('input', input)
   }
 }
