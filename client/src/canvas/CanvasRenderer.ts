@@ -43,7 +43,8 @@ export class CanvasRenderer {
     )
   }
 
-  drawPlayer(player: PlayerDto) {
+  drawPlayer(player: PlayerDto, dt: number) {
+    this.playerRenderer.update(dt)
     this.playerRenderer.draw(player)
   }
 

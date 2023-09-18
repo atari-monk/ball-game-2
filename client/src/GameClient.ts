@@ -41,13 +41,13 @@ export class GameClient {
   }
 
   private handleMatchUpdate(dto: MatchDto) {
-    const { players, ball } = dto
+    const { players, ball, dt } = dto
     this.canvasRenderer.clearCanvas()
     this.canvasRenderer.drawField(this.field!)
     this.canvasRenderer.drawGates(this.gates!)
 
     for (const playerId in players) {
-      this.canvasRenderer.drawPlayer(players[playerId])
+      this.canvasRenderer.drawPlayer(players[playerId], dt)
     }
     this.canvasRenderer.drawBall(ball)
   }

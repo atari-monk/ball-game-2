@@ -67,7 +67,7 @@ export default function initializeSocketIO(io: Server, game: Game) {
                 `${player.team?.name}'s ${player.name} ran away`
               )
               game.resetGame()
-              io.emit('update', new MatchDto(game.players, game.ball))
+              io.emit('update', new MatchDto(game.players, game.ball, 16))
               game.stateManager.transitionToMatchMaking()
             }
           }
@@ -75,7 +75,7 @@ export default function initializeSocketIO(io: Server, game: Game) {
       })
 
       socket.emit('map', new MapDto(game.gates, game.field))
-      io.emit('update', new MatchDto(game.players, game.ball))
+      io.emit('update', new MatchDto(game.players, game.ball, 16))
     })
   })
 }

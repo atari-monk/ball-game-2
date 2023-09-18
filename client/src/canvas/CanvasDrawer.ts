@@ -1,6 +1,10 @@
 export class CanvasDrawer {
   private ctx: CanvasRenderingContext2D
 
+  get cctx(): CanvasRenderingContext2D {
+    return this.ctx
+  }
+
   constructor(ctx: CanvasRenderingContext2D) {
     this.ctx = ctx
   }

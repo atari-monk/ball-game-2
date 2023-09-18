@@ -110,7 +110,7 @@ export class Game implements IMatch {
 
       this.update(deltaTime)
 
-      this.io.emit('update', new MatchDto(this.players, this.ball))
+      this.io.emit('update', new MatchDto(this.players, this.ball, deltaTime))
 
       this.lastFrameTime = currentTime
     }, this.frameInterval)
