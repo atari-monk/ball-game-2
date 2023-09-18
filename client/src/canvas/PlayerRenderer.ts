@@ -7,10 +7,10 @@ export class PlayerRenderer {
   constructor(private readonly canvasDrawer: CanvasDrawer) {
     this.sprite = new SpriteAnimator(
       './assets/sprite/player.png',
-      80,
-      80,
-      300,
-      5
+      25,
+      52,
+      500,
+      2
     )
   }
 
@@ -21,7 +21,7 @@ export class PlayerRenderer {
   draw(player: PlayerDto) {
     this.sprite.draw(this.canvasDrawer.cctx, player.x - 22, player.y - 36)
 
-    this.canvasDrawer.setFillStyle(player.team?.color ?? 'blue')
+    this.canvasDrawer.setLineStyle(player.team?.color ?? 'blue', 2)
     this.canvasDrawer.drawCircle(player.x, player.y, player.radius)
 
     this.canvasDrawer.setLineStyle('yellow', 2)

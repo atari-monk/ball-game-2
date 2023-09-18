@@ -29,7 +29,7 @@ export class CanvasDrawer {
   drawCircle(x: number, y: number, radius: number) {
     this.ctx.beginPath()
     this.ctx.arc(x, y, radius, 0, 2 * Math.PI)
-    this.ctx.fill()
+    this.ctx.stroke()
   }
 
   drawLine(x1: number, y1: number, x2: number, y2: number) {
