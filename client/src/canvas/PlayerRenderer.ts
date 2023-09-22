@@ -6,11 +6,11 @@ export class PlayerRenderer {
   private sprite: SpriteAnimator
   constructor(private readonly canvasDrawer: CanvasDrawer) {
     this.sprite = new SpriteAnimator(
-      './assets/sprite/player.png',
-      25,
-      52,
-      500,
-      2
+      './assets/player.png',
+      40,
+      80,
+      80,
+      8
     )
   }
 
@@ -19,7 +19,7 @@ export class PlayerRenderer {
   }
 
   draw(player: PlayerDto) {
-    this.sprite.draw(this.canvasDrawer.cctx, player.x - 22, player.y - 36)
+    this.sprite.draw(this.canvasDrawer.cctx, player.x -27, player.y -64)
 
     this.canvasDrawer.setLineStyle(player.team?.color ?? 'blue', 2)
     this.canvasDrawer.drawCircle(player.x, player.y, player.radius)

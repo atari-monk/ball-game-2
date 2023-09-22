@@ -1,5 +1,5 @@
 import './css/styles.css'
 import { GameClient } from './GameClient'
-import './../assets/sprite/player.png'
+import './../assets/player.png'
 
 new GameClient()

@@ -30,7 +30,7 @@ module.exports = () => {
             {
               loader: 'file-loader',
               options: {
-                name: 'assets/sprite/[name].[ext]',
+                name: 'assets/[name].[ext]',
               },
             },
           ],

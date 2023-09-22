@@ -5,7 +5,9 @@
   "main": "index.js",
   "scripts": {
     "build": "tsc",
-    "start": "node build/generateSpriteSheet.js"
+    "rename": "node build/rename.js",
+    "sprite": "node build/sprite-sheet.js",
+    "files": "node build/file-list.js"
   },
   "keywords": [],
   "author": "",

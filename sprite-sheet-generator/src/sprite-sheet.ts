@@ -1,18 +1,15 @@
-import * as fs from 'fs'
 import * as Jimp from 'jimp' // You'll need to install the 'jimp' package
+import { getListOfFiles } from './file-list'
 
+const folderPath = 'C:/atari-monk/pixel-art/character/idle'
 // Define the paths to your input images
-const imagePaths: string[] = [
-  'assets/in/idle1.png',
-  'assets/in/idle2.png',
-  // Add more image paths as needed
-]
+const imagePaths: string[] = getListOfFiles(folderPath)
 
 // Function to resize and stitch frames into a single row
-async function generateSpriteSheet() {
+export async function generateSpriteSheet() {
   try {
-    const frameWidth = 25 // Specify the width of each frame
-    const frameHeight = 53 // Specify the height of each frame
+    const frameWidth = 40 // Specify the width of each frame
+    const frameHeight = 80 // Specify the height of each frame
 
     const frames = await Promise.all(
       imagePaths.map(async (imagePath) => {
@@ -33,7 +30,9 @@ async function generateSpriteSheet() {
     }
 
     // Save the generated sprite sheet image
-    await spriteSheet.writeAsync('assets/out/sprite.png')
+    await spriteSheet.writeAsync(
+      'C:/atari-monk/code/ball-game-2/client/assets/player.png'
+    )
 
     console.log('Sprite sheet generated successfully!')
   } catch (err) {
