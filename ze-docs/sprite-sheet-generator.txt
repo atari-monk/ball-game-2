@@ -766,3 +766,86 @@ const newName = 'idle'; // Replace with the desired name
 
 renameFilesInFolder(folderPath, newName);
 In this refactored code, the renaming logic is encapsulated in the renameFilesInFolder function, which takes the folderPath and newName as parameters. You can call this function with your desired folder path and new name to rename the files in the folder.
+
+export async function generateSpriteSheet(imagePaths: string[], out: string) {
+  try {
+    const frameWidth = 40 // Specify the width of each frame
+    const frameHeight = 80 // Specify the height of each frame
+
+    const frames = await Promise.all(
+      imagePaths.map(async (imagePath) => {
+        const image = await Jimp.read(imagePath)
+        return image.resize(frameWidth, frameHeight)
+      })
+    )
+
+    const spriteSheet = new Jimp(
+      frameWidth * imagePaths.length, // Width of the sprite sheet
+      frameHeight // Height of the sprite sheet
+    )
+
+    let x = 0
+    for (const frame of frames) {
+      spriteSheet.blit(frame, x, 0)
+      x += frameWidth
+    }
+
+    // Save the generated sprite sheet image
+    await spriteSheet.writeAsync(out)
+
+    console.log('Sprite sheet generated successfully!')
+  } catch (err) {
+    console.error('Error generating sprite sheet:', err)
+  }
+}//pls refactor it so i can provide array of imagePaths, so i can have many animations and they should be in rows, use ts
+ChatGPT
+To refactor the code so that you can provide an array of imagePaths for multiple animations, and each animation is placed in a row in the sprite sheet, you can modify the function like this:
+
+typescript
+Copy code
+import Jimp from 'jimp';
+
+export async function generateSpriteSheet(imagePathsArray: string[][], out: string) {
+  try {
+    const frameWidth = 40; // Specify the width of each frame
+    const frameHeight = 80; // Specify the height of each frame
+
+    // Load images and resize them asynchronously
+    const animationFrames: Jimp[][] = await Promise.all(
+      imagePathsArray.map(async (imagePaths) => {
+        const frames = await Promise.all(
+          imagePaths.map(async (imagePath) => {
+            const image = await Jimp.read(imagePath);
+            return image.resize(frameWidth, frameHeight);
+          })
+        );
+        return frames;
+      })
+    );
+
+    const numAnimations = animationFrames.length;
+    const maxFrames = Math.max(...animationFrames.map((frames) => frames.length));
+
+    const spriteSheet = new Jimp(
+      frameWidth * maxFrames, // Width of the sprite sheet
+      frameHeight * numAnimations // Height of the sprite sheet
+    );
+
+    for (let i = 0; i < numAnimations; i++) {
+      const frames = animationFrames[i];
+      let x = 0;
+      for (const frame of frames) {
+        spriteSheet.blit(frame, x, i * frameHeight);
+        x += frameWidth;
+      }
+    }
+
+    // Save the generated sprite sheet image
+    await spriteSheet.writeAsync(out);
+
+    console.log('Sprite sheet generated successfully!');
+  } catch (err) {
+    console.error('Error generating sprite sheet:', err);
+  }
+}
+With this refactored code, you can provide an array of imagePathsArray, where each element is an array of image paths for a single animation. The code will generate a sprite sheet with each animation placed in separate rows. The maximum number of frames in any animation determines the width of the sprite sheet.
