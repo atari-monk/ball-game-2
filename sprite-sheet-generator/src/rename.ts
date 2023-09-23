@@ -25,8 +25,12 @@ const root = 'C:/atari-monk/pixel-art/character/'
 const anims = {
   idle_blue: root + 'blue-idle',
   idle_red: root + 'red-idle',
+  walk_blue: root + 'blue-walk',
+  walk_red: root + 'red-walk',
 }
-const newName = 'idle'
-
-renameFilesInFolder(anims.idle_blue, newName)
-renameFilesInFolder(anims.idle_red, newName)
+const idle = 'idle'
+renameFilesInFolder(anims.idle_blue, idle)
+renameFilesInFolder(anims.idle_red, idle)
+const walk = 'walk'
+renameFilesInFolder(anims.walk_blue, walk)
+renameFilesInFolder(anims.walk_red, walk)
