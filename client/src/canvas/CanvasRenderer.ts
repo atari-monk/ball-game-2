@@ -1,7 +1,8 @@
 import { FieldDto, IGateDtos, PlayerDto, BallDto } from 'api'
 import { CanvasInfoProvider } from './CanvasInfoProvider'
 import { CanvasDrawer } from './CanvasDrawer'
-import { BluePlayerRenderer, RedPlayerRenderer } from './PlayerRenderer'
+import { BluePlayerRenderer } from './BluePlayerRenderer'
+import { RedPlayerRenderer } from './RedPlayerRenderer'
 
 export class CanvasRenderer {
   private ctx: CanvasRenderingContext2D
@@ -16,6 +17,8 @@ export class CanvasRenderer {
     this.canvasDrawer = new CanvasDrawer(this.ctx)
     this.redplayerRenderer = new RedPlayerRenderer(this.canvasDrawer)
     this.blueplayerRenderer = new BluePlayerRenderer(this.canvasDrawer)
+    this.redplayerRenderer.switchAnimation(0)
+    this.blueplayerRenderer.switchAnimation(0)
   }
 
   clearCanvas() {
