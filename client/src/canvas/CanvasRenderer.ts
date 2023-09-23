@@ -1,19 +1,21 @@
 import { FieldDto, IGateDtos, PlayerDto, BallDto } from 'api'
 import { CanvasInfoProvider } from './CanvasInfoProvider'
 import { CanvasDrawer } from './CanvasDrawer'
-import { PlayerRenderer } from './PlayerRenderer'
+import { BluePlayerRenderer, RedPlayerRenderer } from './PlayerRenderer'
 
 export class CanvasRenderer {
   private ctx: CanvasRenderingContext2D
   private canvasDrawer: CanvasDrawer
-  private playerRenderer: PlayerRenderer
+  private redplayerRenderer: RedPlayerRenderer
+  private blueplayerRenderer: BluePlayerRenderer
 
   constructor() {
     const canvasInfoProvider = new CanvasInfoProvider()
     const canvasInfo = canvasInfoProvider.getCanvasInfo('canvas')
     this.ctx = canvasInfo.ctx
     this.canvasDrawer = new CanvasDrawer(this.ctx)
-    this.playerRenderer = new PlayerRenderer(this.canvasDrawer)
+    this.redplayerRenderer = new RedPlayerRenderer(this.canvasDrawer)
+    this.blueplayerRenderer = new BluePlayerRenderer(this.canvasDrawer)
   }
 
   clearCanvas() {
@@ -44,8 +46,14 @@ export class CanvasRenderer {
   }
 
   drawPlayer(player: PlayerDto, dt: number) {
-    this.playerRenderer.update(dt)
-    this.playerRenderer.draw(player)
+    if (player.team?.color === 'red') {
+      this.redplayerRenderer.update(dt)
+      this.redplayerRenderer.draw(player)
+    }
+    if (player.team?.color === 'blue') {
+      this.blueplayerRenderer.update(dt)
+      this.blueplayerRenderer.draw(player)
+    }
   }
 
   drawBall(ball: BallDto) {

@@ -17,6 +17,6 @@ export function getListOfFiles(folderPath: string): string[] {
   }
 }
 
-const folderPath = 'C:/atari-monk/pixel-art/character/idle' // Replace with your folder path
-const filesList = getListOfFiles(folderPath)
-console.log('List of files in the directory:', filesList)
+//const folderPath = 'C:/atari-monk/pixel-art/character/idle' // Replace with your folder path
+//const filesList = getListOfFiles(folderPath)
+//console.log('List of files in the directory:', filesList)

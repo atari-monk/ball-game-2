@@ -21,7 +21,12 @@ export function renameFilesInFolder(folderPath: string, newName: string): void {
   }
 }
 
-const folderPath = 'C:/atari-monk/pixel-art/character/idle' // Replace with your folder path
-const newName = 'idle' // Replace with the desired name
+const root = 'C:/atari-monk/pixel-art/character/'
+const anims = {
+  idle_blue: root + 'blue-idle',
+  idle_red: root + 'red-idle',
+}
+const newName = 'idle'
 
-renameFilesInFolder(folderPath, newName)
+renameFilesInFolder(anims.idle_blue, newName)
+renameFilesInFolder(anims.idle_red, newName)

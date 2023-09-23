@@ -1,12 +1,7 @@
 import * as Jimp from 'jimp' // You'll need to install the 'jimp' package
 import { getListOfFiles } from './file-list'
 
-const folderPath = 'C:/atari-monk/pixel-art/character/idle'
-// Define the paths to your input images
-const imagePaths: string[] = getListOfFiles(folderPath)
-
-// Function to resize and stitch frames into a single row
-export async function generateSpriteSheet() {
+export async function generateSpriteSheet(imagePaths: string[], out: string) {
   try {
     const frameWidth = 40 // Specify the width of each frame
     const frameHeight = 80 // Specify the height of each frame
@@ -30,9 +25,7 @@ export async function generateSpriteSheet() {
     }
 
     // Save the generated sprite sheet image
-    await spriteSheet.writeAsync(
-      'C:/atari-monk/code/ball-game-2/client/assets/player.png'
-    )
+    await spriteSheet.writeAsync(out)
 
     console.log('Sprite sheet generated successfully!')
   } catch (err) {
@@ -40,5 +33,17 @@ export async function generateSpriteSheet() {
   }
 }
 
-// Call the function to generate the sprite sheet
-generateSpriteSheet()
+const root = 'C:/atari-monk/pixel-art/character/'
+const anims = {
+  idle_blue: root + 'blue-idle',
+  idle_red: root + 'red-idle',
+}
+
+generateSpriteSheet(
+  getListOfFiles(anims.idle_blue),
+  'C:/atari-monk/code/ball-game-2/client/assets/blue-player.png'
+)
+generateSpriteSheet(
+  getListOfFiles(anims.idle_red),
+  'C:/atari-monk/code/ball-game-2/client/assets/red-player.png'
+)
