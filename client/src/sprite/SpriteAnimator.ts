@@ -1,4 +1,4 @@
-import { AnimationConfig } from './AnimationConfig'
+import { AnimationConfig, AnimationType } from './AnimationConfig'
 import { IAnimationFrame } from './IAnimationFrame'
 
 export class SpriteAnimator {
@@ -8,10 +8,13 @@ export class SpriteAnimator {
   private currentFrameIndex: number = 0
   private timeSinceLastFrame: number = 0
   private frameDurations: number[]
+  private animationType: AnimationType
+  private isForward: boolean = true
 
   constructor(private readonly animationConfigs: AnimationConfig[]) {
     this.image = new Image()
     this.image.src = animationConfigs[0].imagePath
+    this.animationType = animationConfigs[0].animationType
     this.animations = animationConfigs.map((config, index) =>
       this.createAnimationFrames(config, index)
     )
@@ -36,12 +39,45 @@ export class SpriteAnimator {
     return frames
   }
 
-  update(
-    deltaTime: number //, log: boolean = false
-  ) {
+  update(deltaTime: number) {
+    switch (this.animationType) {
+      case AnimationType.Cyclic:
+        this.cyclic(deltaTime)
+        break
+      case AnimationType.Sequential:
+        this.sequential(deltaTime)
+        break
+      default:
+        break
+    }
+  }
+
+  cyclic(deltaTime: number) {
     this.timeSinceLastFrame += deltaTime
 
     // Check if it's time to switch to the next frame
+    if (
+      this.timeSinceLastFrame >= this.frameDurations[this.currentAnimationIndex]
+    ) {
+      if (
+        this.currentFrameIndex <
+          this.animations[this.currentAnimationIndex].length - 1 &&
+        this.isForward
+      ) {
+        this.currentFrameIndex++
+      } else if (this.currentFrameIndex > 0 && !this.isForward) {
+        this.currentFrameIndex--
+      } else {
+        // Change the direction when reaching the start or end of frames
+        this.isForward = !this.isForward
+      }
+      this.timeSinceLastFrame = 0
+    }
+  }
+
+  private sequential(deltaTime: number) {
+    this.timeSinceLastFrame += deltaTime
+
     if (
       this.timeSinceLastFrame >= this.frameDurations[this.currentAnimationIndex]
     ) {
@@ -51,12 +87,10 @@ export class SpriteAnimator {
       ) {
         this.currentFrameIndex++
       } else {
-        this.currentFrameIndex = 0 // Reset to the first frame if it's the last frame
+        this.currentFrameIndex = 0
       }
       this.timeSinceLastFrame = 0
     }
-    //if (log)
-    //  console.log(`anim ${this.currentAnimationIndex}:`, this.currentFrameIndex)
   }
 
   switchAnimation(animationIndex: number) {
@@ -65,18 +99,13 @@ export class SpriteAnimator {
       this.currentFrameIndex = 0
       this.timeSinceLastFrame = 0
 
-      this.image.src = this.animationConfigs[animationIndex].imagePath
+      const config = this.animationConfigs[animationIndex]
+      this.image.src = config.imagePath
+      this.animationType = config.animationType
     }
   }
 
-  draw(
-    ctx: CanvasRenderingContext2D,
-    x: number,
-    y: number
-    //log: boolean = false
-  ) {
-    //if (log)
-    //  console.log(`anim ${this.currentAnimationIndex}:`, this.currentFrameIndex)
+  draw(ctx: CanvasRenderingContext2D, x: number, y: number) {
     const currentFrame =
       this.animations[this.currentAnimationIndex][this.currentFrameIndex]
     ctx.drawImage(

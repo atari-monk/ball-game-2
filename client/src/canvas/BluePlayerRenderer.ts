@@ -1,7 +1,7 @@
 import { PlayerDto } from 'api'
 import { CanvasDrawer } from './CanvasDrawer'
 import { SpriteAnimator } from '../sprite/SpriteAnimator'
-import { AnimationConfig } from '../sprite/AnimationConfig'
+import { AnimationConfig, AnimationType } from '../sprite/AnimationConfig'
 
 export class BluePlayerRenderer {
   private sprite: SpriteAnimator
@@ -10,16 +10,18 @@ export class BluePlayerRenderer {
     const idle: AnimationConfig = {
       imagePath: sprite,
       frameCount: 13,
-      frameDuration: 80,
+      frameDuration: 100,
       frameWidth: 40,
       frameHeight: 80,
+      animationType: AnimationType.Sequential,
     }
     const walk: AnimationConfig = {
       imagePath: sprite,
       frameCount: 16,
-      frameDuration: 80,
+      frameDuration: 100,
       frameWidth: 40,
       frameHeight: 80,
+      animationType: AnimationType.Sequential,
     }
     this.sprite = new SpriteAnimator([idle, walk])
   }

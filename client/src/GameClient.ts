@@ -1,24 +1,28 @@
-import { FieldDto, IGateDtos, MapDto, MatchDto, MessageDto } from 'api'
+import { MapDto, MatchDto, MessageDto } from 'api'
 import { hostConfig } from './config/config'
 import { CanvasRenderer } from './canvas/CanvasRenderer'
 import { SocketManager } from './SocketManager'
 import { LogManager } from './logger/LogManager'
 import { IInput } from './api/IInput'
+import { AnimationLoop } from './canvas/AnimationLoop'
 
 export class GameClient {
   private socketManager: SocketManager
   private canvasRenderer: CanvasRenderer
   private logManager: LogManager
-  private gates: IGateDtos | null = null
-  private field: FieldDto | null = null
+  private map: MapDto | null = null
+  private match: MatchDto | null = null
+  private animationLoop: AnimationLoop
 
   constructor() {
     this.socketManager = new SocketManager(hostConfig.selectedHost)
     this.canvasRenderer = new CanvasRenderer()
     this.logManager = new LogManager()
+    this.animationLoop = new AnimationLoop(this.render.bind(this))
 
     this.initializeSocketListeners()
     this.initializeEventListeners()
+    this.animationLoop.start()
   }
 
   private initializeSocketListeners() {
@@ -33,23 +37,11 @@ export class GameClient {
   }
 
   private handleMapUpdate(dto: MapDto) {
-    this.gates = dto.gates
-    this.field = dto.field
-    this.canvasRenderer.clearCanvas()
-    this.canvasRenderer.drawField(this.field)
-    this.canvasRenderer.drawGates(this.gates!)
+    this.map = dto
   }
 
   private handleMatchUpdate(dto: MatchDto) {
-    const { players, ball, dt } = dto
-    this.canvasRenderer.clearCanvas()
-    this.canvasRenderer.drawField(this.field!)
-    this.canvasRenderer.drawGates(this.gates!)
-
-    for (const playerId in players) {
-      this.canvasRenderer.drawPlayer(players[playerId], dt)
-    }
-    this.canvasRenderer.drawBall(ball)
+    this.match = dto
   }
 
   private handleLogMessage(dto: MessageDto) {
@@ -68,5 +60,25 @@ export class GameClient {
       right: event.key === 'ArrowRight',
     }
     this.socketManager.sendPlayerInput(input)
+  }
+
+  private render(cdt: number) {
+    this.canvasRenderer.clearCanvas()
+    if (this.map) {
+      const { gates, field } = this.map
+      this.canvasRenderer.drawField(field)
+      this.canvasRenderer.drawGates(gates)
+    }
+    if (this.match) {
+      const { players, ball } = this.match
+      for (const playerId in players) {
+        this.canvasRenderer.drawPlayer(players[playerId], cdt)
+      }
+      this.canvasRenderer.drawBall(ball)
+    }
+  }
+
+  public stopGame() {
+    this.animationLoop.stop()
   }
 }

@@ -27,10 +27,12 @@ const anims = {
   idle_red: root + 'red-idle',
   walk_blue: root + 'blue-walk',
   walk_red: root + 'red-walk',
+  test: root + 'test'
 }
-const idle = 'idle'
-renameFilesInFolder(anims.idle_blue, idle)
-renameFilesInFolder(anims.idle_red, idle)
-const walk = 'walk'
-renameFilesInFolder(anims.walk_blue, walk)
-renameFilesInFolder(anims.walk_red, walk)
+// const idle = 'idle'
+// renameFilesInFolder(anims.idle_blue, idle)
+// renameFilesInFolder(anims.idle_red, idle)
+// const walk = 'walk'
+// renameFilesInFolder(anims.walk_blue, walk)
+// renameFilesInFolder(anims.walk_red, walk)
+renameFilesInFolder(anims.test, 'test')

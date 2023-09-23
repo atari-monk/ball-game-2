@@ -31174,3 +31174,831 @@ Mixed Files: It appears that two different files, "4SpriteAnimator.ts" and "6Spr
 Debug Information: The log only provides animation indices without any additional context. To identify potential problems, you might need to look at the code where these logs are generated and see if there are any issues with the animation logic or loop.
 
 To provide a more specific solution, I would need to see the relevant code where these logs are generated and the logic for your sprite animation. If you can share that code or provide more context, I can offer more targeted assistance.
+
+import { FieldDto, IGateDtos, MapDto, MatchDto, MessageDto } from 'api'
+import { hostConfig } from './config/config'
+import { CanvasRenderer } from './canvas/CanvasRenderer'
+import { SocketManager } from './SocketManager'
+import { LogManager } from './logger/LogManager'
+import { IInput } from './api/IInput'
+
+export class GameClient {
+  private socketManager: SocketManager
+  private canvasRenderer: CanvasRenderer
+  private logManager: LogManager
+  private gates: IGateDtos | null = null
+  private field: FieldDto | null = null
+
+  constructor() {
+    this.socketManager = new SocketManager(hostConfig.selectedHost)
+    this.canvasRenderer = new CanvasRenderer()
+    this.logManager = new LogManager()
+
+    this.initializeSocketListeners()
+    this.initializeEventListeners()
+  }
+
+  private initializeSocketListeners() {
+    this.socketManager.handleMapUpdate(this.handleMapUpdate.bind(this))
+    this.socketManager.handleLogMessage(this.handleLogMessage.bind(this))
+    this.socketManager.handleLogReset(this.handleLogReset.bind(this))
+    this.socketManager.handleMatchUpdate(this.handleMatchUpdate.bind(this))
+  }
+
+  private initializeEventListeners() {
+    document.addEventListener('keydown', this.handleKeyDown.bind(this))
+  }
+
+  private handleMapUpdate(dto: MapDto) {
+    this.gates = dto.gates
+    this.field = dto.field
+    this.canvasRenderer.clearCanvas()
+    this.canvasRenderer.drawField(this.field)
+    this.canvasRenderer.drawGates(this.gates!)
+  }
+
+  private handleMatchUpdate(dto: MatchDto) {
+    const { players, ball, dt } = dto
+    this.canvasRenderer.clearCanvas()
+    this.canvasRenderer.drawField(this.field!)
+    this.canvasRenderer.drawGates(this.gates!)
+
+    for (const playerId in players) {
+      this.canvasRenderer.drawPlayer(players[playerId], dt)
+    }
+    this.canvasRenderer.drawBall(ball)
+  }
+
+  private handleLogMessage(dto: MessageDto) {
+    this.logManager.logMessage(dto)
+  }
+
+  private handleLogReset() {
+    this.logManager.clearTextArea()
+  }
+
+  private handleKeyDown(event: KeyboardEvent) {
+    const input: IInput = {
+      up: event.key === 'ArrowUp',
+      down: event.key === 'ArrowDown',
+      left: event.key === 'ArrowLeft',
+      right: event.key === 'ArrowRight',
+    }
+    this.socketManager.sendPlayerInput(input)
+  }
+}
+//pls add me a method with proper canvas animation loop i will use it to draw sprites
+ChatGPT
+To add a method for a simple canvas animation loop in your GameClient class, you can create a method like startAnimationLoop that continuously updates and renders the game on the canvas. Here's a simple implementation:
+
+typescript
+Copy code
+export class GameClient {
+  // ... (your existing code)
+
+  private animationRequestId: number | null = null;
+
+  // ... (your existing code)
+
+  private startAnimationLoop() {
+    const updateAndRender = () => {
+      // Update your game state here, if needed.
+      // For example, you can update player positions, game logic, etc.
+
+      // Render the game on the canvas.
+      this.canvasRenderer.clearCanvas();
+      this.canvasRenderer.drawField(this.field!);
+      this.canvasRenderer.drawGates(this.gates!);
+      // Add more rendering logic as needed.
+
+      // Request the next frame of the animation.
+      this.animationRequestId = requestAnimationFrame(updateAndRender);
+    };
+
+    // Start the animation loop.
+    this.animationRequestId = requestAnimationFrame(updateAndRender);
+  }
+
+  private stopAnimationLoop() {
+    // Cancel the animation loop when needed (e.g., when the game ends).
+    if (this.animationRequestId !== null) {
+      cancelAnimationFrame(this.animationRequestId);
+      this.animationRequestId = null;
+    }
+  }
+
+  // ... (your existing code)
+
+  constructor() {
+    // ... (your existing code)
+
+    this.startAnimationLoop(); // Start the animation loop when the GameClient is created.
+  }
+
+  // ... (your existing code)
+
+  // You can call this method when you want to stop the animation loop, e.g., when the game ends.
+  public stopGame() {
+    this.stopAnimationLoop();
+  }
+}
+With this setup, the startAnimationLoop method uses requestAnimationFrame to continuously update and render the game on the canvas. You can call stopGame to stop the animation loop when needed, such as when the game ends.
+
+
+
+
+User
+pls make separete class for this, only with loop, do not draw anything there yet
+ChatGPT
+Certainly, you can create a separate class for managing the canvas animation loop. Here's a simple implementation of an AnimationLoop class that you can use:
+
+typescript
+Copy code
+export class AnimationLoop {
+  private animationRequestId: number | null = null;
+  private callback: () => void;
+
+  constructor(callback: () => void) {
+    this.callback = callback;
+  }
+
+  start() {
+    const updateAndRender = () => {
+      this.callback(); // Call the provided callback function.
+
+      // Request the next frame of the animation.
+      this.animationRequestId = requestAnimationFrame(updateAndRender);
+    };
+
+    // Start the animation loop.
+    this.animationRequestId = requestAnimationFrame(updateAndRender);
+  }
+
+  stop() {
+    // Cancel the animation loop when needed.
+    if (this.animationRequestId !== null) {
+      cancelAnimationFrame(this.animationRequestId);
+      this.animationRequestId = null;
+    }
+  }
+}
+Now, you can use this AnimationLoop class to manage the animation loop in your GameClient class:
+
+typescript
+Copy code
+import { AnimationLoop } from './AnimationLoop';
+
+export class GameClient {
+  // ... (your existing code)
+
+  private animationLoop: AnimationLoop;
+
+  // ... (your existing code)
+
+  constructor() {
+    // ... (your existing code)
+
+    this.animationLoop = new AnimationLoop(this.updateAndRender.bind(this));
+    this.animationLoop.start(); // Start the animation loop when the GameClient is created.
+  }
+
+  // ... (your existing code)
+
+  private updateAndRender() {
+    // Update your game state here, if needed.
+    // For example, you can update player positions, game logic, etc.
+
+    // Render the game on the canvas.
+    this.canvasRenderer.clearCanvas();
+    this.canvasRenderer.drawField(this.field!);
+    this.canvasRenderer.drawGates(this.gates!);
+    // Add more rendering logic as needed.
+  }
+
+  // ... (your existing code)
+
+  // You can call this method when you want to stop the animation loop, e.g., when the game ends.
+  public stopGame() {
+    this.animationLoop.stop();
+  }
+}
+This separates the animation loop management into its own class, making your code more modular and easier to maintain.
+
+
+
+
+User
+export class AnimationLoop {
+  private animationRequestId: number | null = null
+  private callback: () => void
+
+  constructor(callback: () => void) {
+    this.callback = callback
+  }
+
+  start() {
+    const updateAndRender = () => {
+      this.callback() // Call the provided callback function.
+
+      // Request the next frame of the animation.
+      this.animationRequestId = requestAnimationFrame(updateAndRender)
+    }
+
+    // Start the animation loop.
+    this.animationRequestId = requestAnimationFrame(updateAndRender)
+  }
+
+  stop() {
+    // Cancel the animation loop when needed.
+    if (this.animationRequestId !== null) {
+      cancelAnimationFrame(this.animationRequestId)
+      this.animationRequestId = null
+    }
+  }
+}
+// pls add here calculation of time elapsed during frame so that animation is consistent and pass it to callback
+ChatGPT
+Sure, you can add the calculation of time elapsed during each frame and pass it to the callback function to ensure consistent animation. Here's an updated AnimationLoop class with this feature:
+
+typescript
+Copy code
+export class AnimationLoop {
+  private animationRequestId: number | null = null;
+  private callback: (timeElapsed: number) => void;
+  private lastFrameTime: number | null = null;
+
+  constructor(callback: (timeElapsed: number) => void) {
+    this.callback = callback;
+  }
+
+  start() {
+    const updateAndRender = (timestamp: number) => {
+      if (this.lastFrameTime === null) {
+        this.lastFrameTime = timestamp;
+      }
+
+      const timeElapsed = timestamp - this.lastFrameTime;
+      this.lastFrameTime = timestamp;
+
+      this.callback(timeElapsed);
+
+      // Request the next frame of the animation.
+      this.animationRequestId = requestAnimationFrame(updateAndRender);
+    };
+
+    // Start the animation loop.
+    this.animationRequestId = requestAnimationFrame(updateAndRender);
+  }
+
+  stop() {
+    // Cancel the animation loop when needed.
+    if (this.animationRequestId !== null) {
+      cancelAnimationFrame(this.animationRequestId);
+      this.animationRequestId = null;
+      this.lastFrameTime = null;
+    }
+  }
+}
+Now, the updateAndRender function calculates the timeElapsed between frames and passes it to the callback function. You can use timeElapsed in your GameClient or any other class that utilizes this AnimationLoop to update your game state or perform animations based on the elapsed time.
+
+
+
+
+User
+import { AnimationConfig } from './AnimationConfig'
+import { IAnimationFrame } from './IAnimationFrame'
+
+export class SpriteAnimator {
+  private image: HTMLImageElement
+  private animations: IAnimationFrame[][]
+  private currentAnimationIndex: number = 0
+  private currentFrameIndex: number = 0
+  private timeSinceLastFrame: number = 0
+  private frameDurations: number[]
+
+  constructor(private readonly animationConfigs: AnimationConfig[]) {
+    this.image = new Image()
+    this.image.src = animationConfigs[0].imagePath
+    this.animations = animationConfigs.map((config, index) =>
+      this.createAnimationFrames(config, index)
+    )
+    this.frameDurations = animationConfigs.map((config) => config.frameDuration)
+  }
+
+  private createAnimationFrames(
+    config: AnimationConfig,
+    animIndex: number
+  ): IAnimationFrame[] {
+    const frames: IAnimationFrame[] = []
+    for (let i = 0; i < config.frameCount; i++) {
+      const frameX = i * config.frameWidth
+      const frameY = animIndex * config.frameHeight
+      frames.push({
+        frameX,
+        frameY,
+        frameWidth: config.frameWidth,
+        frameHeight: config.frameHeight,
+      })
+    }
+    return frames
+  }
+
+  update(
+    deltaTime: number //, log: boolean = false
+  ) {
+    this.timeSinceLastFrame += deltaTime
+
+    // Check if it's time to switch to the next frame
+    if (
+      this.timeSinceLastFrame >= this.frameDurations[this.currentAnimationIndex]
+    ) {
+      if (
+        this.currentFrameIndex <
+        this.animations[this.currentAnimationIndex].length - 1
+      ) {
+        this.currentFrameIndex++
+      } else {
+        this.currentFrameIndex = 0 // Reset to the first frame if it's the last frame
+      }
+      this.timeSinceLastFrame = 0
+    }
+    //if (log)
+    //  console.log(`anim ${this.currentAnimationIndex}:`, this.currentFrameIndex)
+  }
+
+  switchAnimation(animationIndex: number) {
+    if (animationIndex >= 0 && animationIndex < this.animations.length) {
+      this.currentAnimationIndex = animationIndex
+      this.currentFrameIndex = 0
+      this.timeSinceLastFrame = 0
+
+      this.image.src = this.animationConfigs[animationIndex].imagePath
+    }
+  }
+
+  draw(
+    ctx: CanvasRenderingContext2D,
+    x: number,
+    y: number
+    //log: boolean = false
+  ) {
+    //if (log)
+    //  console.log(`anim ${this.currentAnimationIndex}:`, this.currentFrameIndex)
+    const currentFrame =
+      this.animations[this.currentAnimationIndex][this.currentFrameIndex]
+    ctx.drawImage(
+      this.image,
+      currentFrame.frameX,
+      currentFrame.frameY,
+      currentFrame.frameWidth,
+      currentFrame.frameHeight,
+      x,
+      y,
+      currentFrame.frameWidth,
+      currentFrame.frameHeight
+    )
+  }
+}
+//ok i see it, this is cyclic anim it needs to go from 0 to frames-1 and then from frames-1 to 0 in loop, can u update that ?
+ChatGPT
+Certainly, to make the animation loop cyclic, where it goes from 0 to frames - 1 and then from frames - 1 back to 0, you can modify the update method in your SpriteAnimator class. Here's an updated version of the update method to achieve the cyclic animation:
+
+typescript
+Copy code
+update(deltaTime: number) {
+  this.timeSinceLastFrame += deltaTime;
+
+  // Check if it's time to switch to the next frame
+  if (this.timeSinceLastFrame >= this.frameDurations[this.currentAnimationIndex]) {
+    if (this.currentFrameIndex < this.animations[this.currentAnimationIndex].length - 1) {
+      this.currentFrameIndex++;
+    } else {
+      // Reset to the first frame if it's the last frame
+      this.currentFrameIndex = 0;
+    }
+    this.timeSinceLastFrame = 0;
+  }
+}
+With this modification, when the currentFrameIndex reaches the last frame of the animation, it will reset back to 0, creating a cyclic animation loop as you described.
+
+
+
+
+User
+export interface AnimationConfig {
+  imagePath: string
+  frameWidth: number
+  frameHeight: number
+  frameDuration: number
+  frameCount: number
+}
+pls add some enum cyclic, sequencial and add it to interface
+ChatGPT
+You can add an enumeration (enum) to represent animation types (cyclic and sequential) and then include it in your AnimationConfig interface. Here's how you can do it:
+
+typescript
+Copy code
+export enum AnimationType {
+  Cyclic,
+  Sequential,
+}
+
+export interface AnimationConfig {
+  imagePath: string;
+  frameWidth: number;
+  frameHeight: number;
+  frameDuration: number;
+  frameCount: number;
+  animationType: AnimationType; // Add the animation type to the interface.
+}
+Now, you can specify the animation type when creating an instance of AnimationConfig. For example:
+
+typescript
+Copy code
+const config: AnimationConfig = {
+  imagePath: 'animation.png',
+  frameWidth: 32,
+  frameHeight: 32,
+  frameDuration: 100,
+  frameCount: 10,
+  animationType: AnimationType.Cyclic, // Specify the animation type here.
+};
+You can update your AnimationConfig instances accordingly to indicate whether an animation is cyclic or sequential.
+
+
+
+
+User
+cyclic(deltaTime: number) {
+    this.timeSinceLastFrame += deltaTime
+
+    if (
+      this.timeSinceLastFrame >= this.frameDurations[this.currentAnimationIndex]
+    ) {
+      if (
+        this.currentFrameIndex <
+        this.animations[this.currentAnimationIndex].length - 1
+      ) {
+        this.currentFrameIndex++
+      } else {
+        this.currentFrameIndex = 0
+      }
+      this.timeSinceLastFrame = 0
+    }
+  } this not goes down counting at all
+ChatGPT
+I apologize for the confusion. If you want an animation that goes back and forth (cyclic) between frames, you should modify the update method in the SpriteAnimator class to handle this behavior. Here's an updated version of the update method that alternates between frames:
+
+typescript
+Copy code
+update(deltaTime: number) {
+  this.timeSinceLastFrame += deltaTime;
+
+  // Check if it's time to switch to the next frame
+  if (this.timeSinceLastFrame >= this.frameDurations[this.currentAnimationIndex]) {
+    if (this.currentFrameIndex < this.animations[this.currentAnimationIndex].length - 1 && this.isForward) {
+      this.currentFrameIndex++;
+    } else if (this.currentFrameIndex > 0 && !this.isForward) {
+      this.currentFrameIndex--;
+    } else {
+      // Change the direction when reaching the start or end of frames
+      this.isForward = !this.isForward;
+    }
+    this.timeSinceLastFrame = 0;
+  }
+}
+In this version, we introduce a boolean variable isForward to keep track of whether the animation is currently moving forward or backward. When the animation reaches the start or end of frames, it changes direction (isForward) to create a cyclic animation that goes back and forth.
+
+Make sure to initialize isForward appropriately in your SpriteAnimator class. For example:
+
+typescript
+Copy code
+constructor(private readonly animationConfigs: AnimationConfig[]) {
+  // ... (your existing code)
+  this.isForward = true; // Initialize isForward to true for forward animation.
+}
+With this modification, your animation should cycle back and forth between frames.
+
+
+
+
+User
+Property 'isForward' does not exist on type 'SpriteAnimator'.
+ChatGPT
+I apologize for the oversight. It seems I missed adding the isForward property to the SpriteAnimator class. Let's add it to the class:
+
+typescript
+Copy code
+export class SpriteAnimator {
+  private image: HTMLImageElement;
+  private animations: IAnimationFrame[][];
+  private currentAnimationIndex: number = 0;
+  private currentFrameIndex: number = 0;
+  private timeSinceLastFrame: number = 0;
+  private frameDurations: number[];
+  private isForward: boolean = true; // Add isForward property
+
+  constructor(private readonly animationConfigs: AnimationConfig[]) {
+    this.image = new Image();
+    this.image.src = animationConfigs[0].imagePath;
+    this.animations = animationConfigs.map((config, index) =>
+      this.createAnimationFrames(config, index)
+    );
+    this.frameDurations = animationConfigs.map((config) => config.frameDuration);
+  }
+
+  // ... (rest of your code)
+
+  update(deltaTime: number) {
+    this.timeSinceLastFrame += deltaTime;
+
+    // Check if it's time to switch to the next frame
+    if (this.timeSinceLastFrame >= this.frameDurations[this.currentAnimationIndex]) {
+      if (this.currentFrameIndex < this.animations[this.currentAnimationIndex].length - 1 && this.isForward) {
+        this.currentFrameIndex++;
+      } else if (this.currentFrameIndex > 0 && !this.isForward) {
+        this.currentFrameIndex--;
+      } else {
+        // Change the direction when reaching the start or end of frames
+        this.isForward = !this.isForward;
+      }
+      this.timeSinceLastFrame = 0;
+    }
+  }
+
+  // ... (rest of your code)
+}
+Now, the isForward property is added to the SpriteAnimator class, and it should work as expected to create a cyclic animation that goes back and forth between frames.
+
+
+
+
+User
+it seems like it stops for longer on first and last frame
+ChatGPT
+I apologize for the issue you're experiencing. It's possible that the delay is caused by rounding errors accumulating over time. To address this, you can adjust the update logic to ensure that the time spent on the first and last frames is consistent. Here's an updated update method that should help:
+
+typescript
+Copy code
+update(deltaTime: number) {
+  this.timeSinceLastFrame += deltaTime;
+
+  // Calculate the total duration for the animation cycle
+  const totalAnimationDuration = this.frameDurations.reduce(
+    (acc, duration) => acc + duration,
+    0
+  );
+
+  // Check if it's time to switch to the next frame
+  if (this.timeSinceLastFrame >= totalAnimationDuration) {
+    this.currentFrameIndex = 0;
+    this.timeSinceLastFrame = 0;
+    this.isForward = true;
+  } else {
+    // Determine the current frame based on elapsed time
+    let elapsedDuration = 0;
+    for (let i = 0; i < this.frameDurations.length; i++) {
+      if (this.timeSinceLastFrame >= elapsedDuration) {
+        this.currentFrameIndex = i;
+      } else {
+        break;
+      }
+      elapsedDuration += this.frameDurations[i];
+    }
+
+    // Change direction if necessary
+    if (this.currentFrameIndex === 0 || this.currentFrameIndex === this.frameDurations.length - 1) {
+      this.isForward = !this.isForward;
+    }
+  }
+}
+This updated logic should provide a more consistent frame transition, even when moving between the first and last frames of the animation.
+
+
+
+
+User
+cyclic(deltaTime: number) {
+    this.timeSinceLastFrame += deltaTime
+
+    // Check if it's time to switch to the next frame
+    if (
+      this.timeSinceLastFrame >= this.frameDurations[this.currentAnimationIndex]
+    ) {
+      if (
+        this.currentFrameIndex <
+          this.animations[this.currentAnimationIndex].length - 1 &&
+        this.isForward
+      ) {
+        this.currentFrameIndex++
+      } else if (this.currentFrameIndex > 0 && !this.isForward) {
+        this.currentFrameIndex--
+      } else {
+        // Change the direction when reaching the start or end of frames
+        this.isForward = !this.isForward
+      }
+      this.timeSinceLastFrame = 0
+    }
+  }// i mean this, when i have 1, 2, 3, 4, 5, 6, 7 frames and duration is 500ms, on 1 and 7 it seems to stay longer, like 1s it seems
+ChatGPT
+I understand the issue you're facing. To ensure that each frame is displayed for the same duration, regardless of its position in the animation, you can calculate the time interval for each frame based on the total animation duration and evenly distribute it among the frames. Here's an updated cyclic method that should achieve this:
+
+typescript
+Copy code
+cyclic(deltaTime: number) {
+  const totalAnimationDuration = this.frameDurations.reduce(
+    (acc, duration) => acc + duration,
+    0
+  );
+
+  // Calculate the time interval for each frame
+  const frameInterval = totalAnimationDuration / this.animations[this.currentAnimationIndex].length;
+
+  this.timeSinceLastFrame += deltaTime;
+
+  // Calculate the current frame based on elapsed time and frame intervals
+  if (this.isForward) {
+    this.currentFrameIndex = Math.floor(this.timeSinceLastFrame / frameInterval);
+  } else {
+    // When going in reverse, subtract the current frame index from the total frames
+    this.currentFrameIndex = this.animations[this.currentAnimationIndex].length - 1 - Math.floor(this.timeSinceLastFrame / frameInterval);
+  }
+
+  // Ensure the frame index stays within bounds
+  this.currentFrameIndex %= this.animations[this.currentAnimationIndex].length;
+
+  // Check if it's time to change direction
+  if (this.currentFrameIndex === 0 || this.currentFrameIndex === this.animations[this.currentAnimationIndex].length - 1) {
+    this.isForward = !this.isForward;
+  }
+}
+This code calculates the frameInterval by dividing the total animation duration by the number of frames. It then calculates the current frame based on the elapsed time and frame intervals, ensuring that each frame is displayed for the same duration. Additionally, it checks if it's time to change the direction of the animation.
+
+
+
+
+User
+import { AnimationConfig, AnimationType } from './AnimationConfig'
+import { IAnimationFrame } from './IAnimationFrame'
+
+export class SpriteAnimator {
+  private image: HTMLImageElement
+  private animations: IAnimationFrame[][]
+  private currentAnimationIndex: number = 0
+  private currentFrameIndex: number = 0
+  private timeSinceLastFrame: number = 0
+  private frameDurations: number[]
+  private animationType: AnimationType
+  private isForward: boolean = true
+
+  constructor(private readonly animationConfigs: AnimationConfig[]) {
+    this.image = new Image()
+    this.image.src = animationConfigs[0].imagePath
+    this.animationType = animationConfigs[0].animationType
+    this.animations = animationConfigs.map((config, index) =>
+      this.createAnimationFrames(config, index)
+    )
+    this.frameDurations = animationConfigs.map((config) => config.frameDuration)
+  }
+
+  private createAnimationFrames(
+    config: AnimationConfig,
+    animIndex: number
+  ): IAnimationFrame[] {
+    const frames: IAnimationFrame[] = []
+    for (let i = 0; i < config.frameCount; i++) {
+      const frameX = i * config.frameWidth
+      const frameY = animIndex * config.frameHeight
+      frames.push({
+        frameX,
+        frameY,
+        frameWidth: config.frameWidth,
+        frameHeight: config.frameHeight,
+      })
+    }
+    return frames
+  }
+
+  update(deltaTime: number) {
+    switch (this.animationType) {
+      case AnimationType.Cyclic:
+        this.cyclic(deltaTime)
+        break
+      case AnimationType.Sequential:
+        this.sequential(deltaTime)
+      default:
+        break
+    }
+  }
+
+  cyclic(deltaTime: number) {
+    this.timeSinceLastFrame += deltaTime
+
+    // Check if it's time to switch to the next frame
+    if (
+      this.timeSinceLastFrame >= this.frameDurations[this.currentAnimationIndex]
+    ) {
+      if (
+        this.currentFrameIndex <
+          this.animations[this.currentAnimationIndex].length - 1 &&
+        this.isForward
+      ) {
+        this.currentFrameIndex++
+      } else if (this.currentFrameIndex > 0 && !this.isForward) {
+        this.currentFrameIndex--
+      } else {
+        // Change the direction when reaching the start or end of frames
+        this.isForward = !this.isForward
+      }
+      this.timeSinceLastFrame = 0
+    }
+  }
+
+  private sequential(deltaTime: number) {
+    this.timeSinceLastFrame += deltaTime
+
+    if (
+      this.timeSinceLastFrame >= this.frameDurations[this.currentAnimationIndex]
+    ) {
+      if (
+        this.currentFrameIndex <
+        this.animations[this.currentAnimationIndex].length - 1
+      ) {
+        this.currentFrameIndex++
+      } else {
+        this.currentFrameIndex = 0
+      }
+      this.timeSinceLastFrame = 0
+    }
+  }
+
+  switchAnimation(animationIndex: number) {
+    if (animationIndex >= 0 && animationIndex < this.animations.length) {
+      this.currentAnimationIndex = animationIndex
+      this.currentFrameIndex = 0
+      this.timeSinceLastFrame = 0
+
+      const config = this.animationConfigs[animationIndex]
+      this.image.src = config.imagePath
+      this.animationType = config.animationType
+    }
+  }
+
+  draw(ctx: CanvasRenderingContext2D, x: number, y: number) {
+    const currentFrame =
+      this.animations[this.currentAnimationIndex][this.currentFrameIndex]
+    ctx.drawImage(
+      this.image,
+      currentFrame.frameX,
+      currentFrame.frameY,
+      currentFrame.frameWidth,
+      currentFrame.frameHeight,
+      x,
+      y,
+      currentFrame.frameWidth,
+      currentFrame.frameHeight
+    )
+  }
+}
+//prev splution disnt work
+ChatGPT
+I apologize for the previous issues. It seems there was an oversight in handling the animation types. Let's ensure that the cyclic and sequential animations work correctly based on the animationType property. Here's an updated update method and cyclic method:
+
+typescript
+Copy code
+update(deltaTime: number) {
+  switch (this.animationType) {
+    case AnimationType.Cyclic:
+      this.cyclic(deltaTime);
+      break;
+    case AnimationType.Sequential:
+      this.sequential(deltaTime);
+      break; // Add the break statement here.
+    default:
+      break;
+  }
+}
+
+cyclic(deltaTime: number) {
+  this.timeSinceLastFrame += deltaTime;
+
+  // Check if it's time to switch to the next frame
+  if (
+    this.timeSinceLastFrame >= this.frameDurations[this.currentAnimationIndex]
+  ) {
+    if (
+      this.currentFrameIndex <
+        this.animations[this.currentAnimationIndex].length - 1 &&
+      this.isForward
+    ) {
+      this.currentFrameIndex++;
+    } else if (this.currentFrameIndex > 0 && !this.isForward) {
+      this.currentFrameIndex--;
+    } else {
+      // Change the direction when reaching the start or end of frames
+      this.isForward = !this.isForward;
+    }
+    this.timeSinceLastFrame = 0;
+  }
+}
+In this code, I've added a break statement after handling the sequential animation in the update method to ensure that the correct animation logic is executed. This should help ensure that both cyclic and sequential animations work as expected.

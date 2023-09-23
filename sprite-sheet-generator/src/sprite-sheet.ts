@@ -56,6 +56,8 @@ const anims = {
   idle_red: root + 'red-idle',
   walk_blue: root + 'blue-walk',
   walk_red: root + 'red-walk',
+  test1: root + 'test-1',
+  test2: root + 'test-2',
 }
 
 generateSpriteSheet(
@@ -65,4 +67,8 @@ generateSpriteSheet(
 generateSpriteSheet(
   [getListOfFiles(anims.idle_red), getListOfFiles(anims.walk_red)],
   'C:/atari-monk/code/ball-game-2/client/assets/red-player.png'
+)
+generateSpriteSheet(
+  [getListOfFiles(anims.test1), getListOfFiles(anims.test2)],
+  'C:/atari-monk/code/ball-game-2/client/assets/test.png'
 )

@@ -4,4 +4,10 @@ export interface AnimationConfig {
   frameHeight: number
   frameDuration: number
   frameCount: number
+  animationType: AnimationType
+}
+
+export enum AnimationType {
+  Cyclic,
+  Sequential,
 }
