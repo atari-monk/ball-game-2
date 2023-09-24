@@ -9,38 +9,21 @@ export class RedPlayerRenderer {
     const sprite = './assets/red-player.png'
     const idle: AnimationConfig = {
       imagePath: sprite,
-      frameCount: 13,
-      frameDuration: 100,
-      frameWidth: 40,
-      frameHeight: 80,
-      animationType: AnimationType.Sequential,
+      frameCount: 20,
+      frameDuration: 1000,
+      frameWidth: 80,
+      frameHeight: 160,
+      animationType: AnimationType.Cyclic,
     }
     const walk: AnimationConfig = {
       imagePath: sprite,
-      frameCount: 16,
-      frameDuration: 100,
-      frameWidth: 40,
-      frameHeight: 80,
+      frameCount: 17,
+      frameDuration: 1000,
+      frameWidth: 80,
+      frameHeight: 160,
       animationType: AnimationType.Sequential,
     }
     this.sprite = new SpriteAnimator([idle, walk])
-    // const test1: AnimationConfig = {
-    //   imagePath: './assets/test.png',
-    //   frameCount: 6,
-    //   frameDuration: 1000,
-    //   frameWidth: 40,
-    //   frameHeight: 80,
-    //   animationType: AnimationType.Sequential,
-    // }
-    // const test2: AnimationConfig = {
-    //   imagePath: './assets/test.png',
-    //   frameCount: 7,
-    //   frameDuration: 500,
-    //   frameWidth: 40,
-    //   frameHeight: 80,
-    //   animationType: AnimationType.Cyclic,
-    // }
-    // this.sprite = new SpriteAnimator([test1, test2])
   }
 
   update(deltaTime: number) {

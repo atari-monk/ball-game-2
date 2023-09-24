@@ -9,18 +9,18 @@ export class BluePlayerRenderer {
     const sprite = './assets/blue-player.png'
     const idle: AnimationConfig = {
       imagePath: sprite,
-      frameCount: 13,
-      frameDuration: 100,
-      frameWidth: 40,
-      frameHeight: 80,
+      frameCount: 20,
+      frameDuration: 1000,
+      frameWidth: 80,
+      frameHeight: 160,
       animationType: AnimationType.Sequential,
     }
     const walk: AnimationConfig = {
       imagePath: sprite,
-      frameCount: 16,
-      frameDuration: 100,
-      frameWidth: 40,
-      frameHeight: 80,
+      frameCount: 17,
+      frameDuration: 1000,
+      frameWidth: 80,
+      frameHeight: 160,
       animationType: AnimationType.Sequential,
     }
     this.sprite = new SpriteAnimator([idle, walk])
