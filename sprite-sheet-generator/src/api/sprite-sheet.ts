@@ -1,5 +1,11 @@
 import * as Jimp from 'jimp'
 
+function naturalSort(array: string[]): string[] {
+  return array.sort((a, b) => {
+    return a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' })
+  })
+}
+
 export async function generateSpriteSheet(
   imagePathsArray: string[][],
   out: string,
@@ -9,8 +15,10 @@ export async function generateSpriteSheet(
   try {
     const animationFrames: Jimp[][] = await Promise.all(
       imagePathsArray.map(async (imagePaths) => {
+        const sortedImagePaths = naturalSort(imagePaths) // Sort imagePaths naturally
         const frames = await Promise.all(
-          imagePaths.map(async (imagePath) => {
+          sortedImagePaths.map(async (imagePath) => {
+            console.log('imagePath:', imagePath)
             const image = await Jimp.read(imagePath)
             return image.resize(frameWidth, frameHeight)
           })

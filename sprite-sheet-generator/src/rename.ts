@@ -1,12 +1,9 @@
 import { renameFilesInFolder } from './api/rename'
 import { sprites } from './data'
 
-let name = 'idle'
-renameFilesInFolder(sprites.idle_blue, name)
-renameFilesInFolder(sprites.idle_red, name)
-name = 'walk'
-renameFilesInFolder(sprites.walk_blue, name)
-renameFilesInFolder(sprites.walk_red, name)
-name = 'test'
-renameFilesInFolder(sprites.test1, name)
-renameFilesInFolder(sprites.test2, name)
+renameFilesInFolder(sprites.character.idle_blue, 'idle')
+renameFilesInFolder(sprites.character.walk_blue, 'walk')
+renameFilesInFolder(sprites.character.idle_red, 'idle')
+renameFilesInFolder(sprites.character.walk_red, 'walk')
+renameFilesInFolder(sprites.character_test.idle_red, 'idle')
+renameFilesInFolder(sprites.character_test.walk_red, 'walk')

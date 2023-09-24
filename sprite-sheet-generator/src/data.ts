@@ -1,10 +1,19 @@
-export const character = 'C:/atari-monk/pixel-art/character/'
-export const test = 'C:/atari-monk/pixel-art/test/'
+const folders = {
+  character: 'C:/atari-monk/pixel-art/character/',
+  character_test: 'C:/atari-monk/pixel-art/character-test/',
+}
+
 export const sprites = {
-  idle_blue: character + 'blue-idle',
-  idle_red: character + 'red-idle',
-  walk_blue: character + 'blue-walk',
-  walk_red: character + 'red-walk',
-  test1: test + 'test1',
-  test2: test + 'test2',
+  character: {
+    folder: folders.character,
+    idle_red: folders.character + 'red-idle',
+    walk_red: folders.character + 'red-walk',
+    idle_blue: folders.character + 'blue-idle',
+    walk_blue: folders.character + 'blue-walk',
+  },
+  character_test: {
+    folder: folders.character_test,
+    idle_red: folders.character_test + 'red-idle',
+    walk_red: folders.character_test + 'red-walk',
+  },
 }

@@ -849,3 +849,256 @@ export async function generateSpriteSheet(imagePathsArray: string[][], out: stri
   }
 }
 With this refactored code, you can provide an array of imagePathsArray, where each element is an array of image paths for a single animation. The code will generate a sprite sheet with each animation placed in separate rows. The maximum number of frames in any animation determines the width of the sprite sheet.
+
+import * as Jimp from 'jimp'
+
+export async function generateSpriteSheet(
+  imagePathsArray: string[][],
+  out: string,
+  frameWidth: number,
+  frameHeight: number
+) {
+  try {
+    const animationFrames: Jimp[][] = await Promise.all(
+      imagePathsArray.map(async (imagePaths) => {
+        const frames = await Promise.all(
+          imagePaths.map(async (imagePath) => {
+            const image = await Jimp.read(imagePath)
+            return image.resize(frameWidth, frameHeight)
+          })
+        )
+        return frames
+      })
+    )
+
+    const numAnimations = animationFrames.length
+    const maxFrames = Math.max(
+      ...animationFrames.map((frames) => frames.length)
+    )
+
+    const spriteSheet = new Jimp(
+      frameWidth * maxFrames,
+      frameHeight * numAnimations
+    )
+
+    for (let i = 0; i < numAnimations; i++) {
+      const frames = animationFrames[i]
+      let x = 0
+      for (const frame of frames) {
+        spriteSheet.blit(frame, x, i * frameHeight)
+        x += frameWidth
+      }
+    }
+
+    await spriteSheet.writeAsync(out)
+
+    console.log('Sprite sheet generated successfully!')
+  } catch (err) {
+    console.error('Error generating sprite sheet:', err)
+  }
+}
+//i need a way to control order of images that are merged here becouse this dosent work corectly list of files idle1.png, idle2.png ... is not keept in order
+ChatGPT
+To ensure that the order of images is maintained correctly when generating the sprite sheet, you can modify your code to read and process the images sequentially from the imagePathsArray. Here's a simplified solution that accomplishes this:
+
+javascript
+Copy code
+import * as Jimp from 'jimp';
+
+export async function generateSpriteSheet(
+  imagePathsArray: string[][],
+  out: string,
+  frameWidth: number,
+  frameHeight: number
+) {
+  try {
+    const spriteSheet = new Jimp(
+      frameWidth * imagePathsArray[0].length,
+      frameHeight * imagePathsArray.length
+    );
+
+    for (let i = 0; i < imagePathsArray.length; i++) {
+      const imagePaths = imagePathsArray[i];
+      let x = 0;
+
+      for (const imagePath of imagePaths) {
+        const image = await Jimp.read(imagePath);
+        await image.resize(frameWidth, frameHeight);
+        spriteSheet.blit(image, x, i * frameHeight);
+        x += frameWidth;
+      }
+    }
+
+    await spriteSheet.writeAsync(out);
+
+    console.log('Sprite sheet generated successfully!');
+  } catch (err) {
+    console.error('Error generating sprite sheet:', err);
+  }
+}
+In this modified code:
+
+We create the spriteSheet image with the dimensions based on the total number of frames and animations.
+We iterate through imagePathsArray and within each animation, we iterate through the imagePaths. This ensures that images are processed sequentially, preserving their order.
+We load each image, resize it, and then paste it onto the spriteSheet at the correct position.
+Finally, we write the resulting sprite sheet to the specified output file.
+This code will correctly maintain the order of images as specified in imagePathsArray.
+
+
+
+
+User
+listen this produces 1 10 11 12 13 14 15 16 17 18 19 2 20 3 4 5 6 7 8 9 i want 1 2 3 4...
+ChatGPT
+I see the issue with the ordering of images. To ensure that the images are processed in the correct order, you can sort the imagePathsArray before processing it. Here's the updated code:
+
+javascript
+Copy code
+import * as Jimp from 'jimp';
+
+export async function generateSpriteSheet(
+  imagePathsArray: string[][],
+  out: string,
+  frameWidth: number,
+  frameHeight: number
+) {
+  try {
+    // Flatten the 2D array and sort the image paths
+    const flattenedPaths = imagePathsArray.flat().sort();
+
+    const spriteSheet = new Jimp(
+      frameWidth * flattenedPaths.length,
+      frameHeight
+    );
+
+    let x = 0;
+
+    for (const imagePath of flattenedPaths) {
+      const image = await Jimp.read(imagePath);
+      await image.resize(frameWidth, frameHeight);
+      spriteSheet.blit(image, x, 0);
+      x += frameWidth;
+    }
+
+    await spriteSheet.writeAsync(out);
+
+    console.log('Sprite sheet generated successfully!');
+  } catch (err) {
+    console.error('Error generating sprite sheet:', err);
+  }
+}
+In this updated code:
+
+We first flatten the imagePathsArray and then sort the flattened array, which ensures that the images are processed in ascending order based on their file names.
+
+We create the spriteSheet with dimensions based on the sorted and flattened array.
+
+We iterate through the sorted image paths, load each image, resize it, and paste it onto the spriteSheet at the correct position.
+
+This code will generate a sprite sheet with images in the order you desire.
+
+
+
+
+User
+in ts how to sort like files in windows folder ?
+ChatGPT
+To sort files in TypeScript like they are sorted in a Windows folder (which usually uses a natural sorting order that considers numbers within file names), you can use a custom sorting function. Here's an example of how you can achieve this:
+
+typescript
+Copy code
+export function naturalSort(array: string[]): string[] {
+  return array.sort((a, b) => {
+    return a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' });
+  });
+}
+You can use this naturalSort function to sort an array of file names in a way that resembles the sorting order in a Windows folder:
+
+typescript
+Copy code
+const fileNames = ['1.txt', '10.txt', '2.txt', '20.txt', '3.txt'];
+
+const sortedFileNames = naturalSort(fileNames);
+
+console.log(sortedFileNames); // Output: ['1.txt', '2.txt', '3.txt', '10.txt', '20.txt']
+In this code:
+
+We define a naturalSort function that takes an array of strings as input.
+Inside the sorting function, we use localeCompare with { numeric: true, sensitivity: 'base' } options. This configuration ensures that the sorting is done in a natural order, considering numeric values within the strings.
+We apply this sorting function to your array of file names, and it will produce the desired sorting order.
+
+
+
+User
+const animationFrames: Jimp[][] = await Promise.all(
+      imagePathsArray.map(async (imagePaths) => {
+        const frames = await Promise.all(
+          imagePaths.map(async (imagePath) => {
+            console.log('imagePath:', imagePath)
+            const image = await Jimp.read(imagePath)
+            return image.resize(frameWidth, frameHeight)
+          })
+        )
+        return frames
+      })// can u do it for imagePaths ?
+ChatGPT
+If you want to sort the imagePaths array within each animation, you can apply the natural sorting function I provided earlier to imagePaths before processing it. Here's how you can do that within your existing code:
+
+typescript
+Copy code
+import * as Jimp from 'jimp';
+
+function naturalSort(array: string[]): string[] {
+  return array.sort((a, b) => {
+    return a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' });
+  });
+}
+
+export async function generateSpriteSheet(
+  imagePathsArray: string[][],
+  out: string,
+  frameWidth: number,
+  frameHeight: number
+) {
+  try {
+    const animationFrames: Jimp[][] = await Promise.all(
+      imagePathsArray.map(async (imagePaths) => {
+        const sortedImagePaths = naturalSort(imagePaths); // Sort imagePaths naturally
+        const frames = await Promise.all(
+          sortedImagePaths.map(async (imagePath) => {
+            console.log('imagePath:', imagePath);
+            const image = await Jimp.read(imagePath);
+            return image.resize(frameWidth, frameHeight);
+          })
+        );
+        return frames;
+      })
+    );
+
+    const numAnimations = animationFrames.length;
+    const maxFrames = Math.max(
+      ...animationFrames.map((frames) => frames.length)
+    );
+
+    const spriteSheet = new Jimp(
+      frameWidth * maxFrames,
+      frameHeight * numAnimations
+    );
+
+    for (let i = 0; i < numAnimations; i++) {
+      const frames = animationFrames[i];
+      let x = 0;
+      for (const frame of frames) {
+        spriteSheet.blit(frame, x, i * frameHeight);
+        x += frameWidth;
+      }
+    }
+
+    await spriteSheet.writeAsync(out);
+
+    console.log('Sprite sheet generated successfully!');
+  } catch (err) {
+    console.error('Error generating sprite sheet:', err);
+  }
+}
+In this code, I've added the naturalSort function and applied it to the imagePaths array within each animation before processing the images. This ensures that the images within each animation are sorted naturally before resizing and adding them to the sprite sheet.

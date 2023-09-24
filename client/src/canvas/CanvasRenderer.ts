@@ -17,8 +17,8 @@ export class CanvasRenderer {
     this.canvasDrawer = new CanvasDrawer(this.ctx)
     this.redplayerRenderer = new RedPlayerRenderer(this.canvasDrawer)
     this.blueplayerRenderer = new BluePlayerRenderer(this.canvasDrawer)
-    this.redplayerRenderer.switchAnimation(0)
-    this.blueplayerRenderer.switchAnimation(0)
+    this.redplayerRenderer.switchAnimation(1)
+    this.blueplayerRenderer.switchAnimation(1)
   }
 
   clearCanvas() {

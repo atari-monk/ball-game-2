@@ -10,15 +10,15 @@ export class RedPlayerRenderer {
     const idle: AnimationConfig = {
       imagePath: sprite,
       frameCount: 20,
-      frameDuration: 1000,
+      frameDuration: 100,
       frameWidth: 80,
       frameHeight: 160,
-      animationType: AnimationType.Cyclic,
+      animationType: AnimationType.Sequential,
     }
     const walk: AnimationConfig = {
       imagePath: sprite,
       frameCount: 17,
-      frameDuration: 1000,
+      frameDuration: 100,
       frameWidth: 80,
       frameHeight: 160,
       animationType: AnimationType.Sequential,
