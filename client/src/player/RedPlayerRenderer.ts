@@ -1,5 +1,5 @@
 import { PlayerDto } from 'api'
-import { CanvasDrawer } from './CanvasDrawer'
+import { CanvasDrawer } from '../canvas/CanvasDrawer'
 import { SpriteAnimator } from '../sprite/SpriteAnimator'
 import { AnimationConfig, AnimationType } from '../sprite/AnimationConfig'
 

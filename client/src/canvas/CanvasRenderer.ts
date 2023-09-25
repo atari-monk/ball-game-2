@@ -1,8 +1,8 @@
 import { FieldDto, IGateDtos, PlayerDto, BallDto } from 'api'
 import { CanvasInfoProvider } from './CanvasInfoProvider'
 import { CanvasDrawer } from './CanvasDrawer'
-import { BluePlayerRenderer } from './BluePlayerRenderer'
-import { RedPlayerRenderer } from './RedPlayerRenderer'
+import { BluePlayerRenderer } from '../player/BluePlayerRenderer'
+import { RedPlayerRenderer } from '../player/RedPlayerRenderer'
 
 export class CanvasRenderer {
   private ctx: CanvasRenderingContext2D
