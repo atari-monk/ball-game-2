@@ -1,8 +1,11 @@
 import { IField, IGates, IPlayerAction, IPlayerModel, ITeam } from 'api'
-import { CarController } from './CarController'
+import { IPlayerController } from './movement/IPlayerController'
+import { SoccerPlayerController } from './movement/SoccerPlayerController'
 
 export class PlayerAction implements IPlayerAction {
-  private controller = new CarController(this.player)
+  private controller: IPlayerController = new SoccerPlayerController(
+    this.player
+  )
 
   constructor(private readonly player: IPlayerModel) {}
 
