@@ -1,32 +1,29 @@
 import { IField, IGates, IPlayerAction, IPlayerModel, ITeam } from 'api'
+import { CarController } from './CarController'
 
 export class PlayerAction implements IPlayerAction {
-  private readonly speedLevel1: number
+  private controller = new CarController(this.player)
 
-  constructor(private readonly player: IPlayerModel) {
-    this.speedLevel1 = player.maxSpeedForward / 2
+  constructor(private readonly player: IPlayerModel) {}
+
+  onUp(): void {
+    this.controller.onUp()
+  }
+
+  onDown(): void {
+    this.controller.onDown()
+  }
+
+  onLeft(): void {
+    this.controller.onLeft()
+  }
+
+  onRight(): void {
+    this.controller.onRight()
   }
 
   update(deltaTime: number) {
-    const p = this.player
-    this.computeDirection(p)
-    this.computeVelocity(p)
-    this.computePosition(p, deltaTime)
-  }
-
-  private computeDirection(p: IPlayerModel) {
-    p.directionX = p.x + p.radius * Math.cos(p.direction)
-    p.directionY = p.y + p.radius * Math.sin(p.direction)
-  }
-
-  private computeVelocity(p: IPlayerModel) {
-    p.velocityX = p.speed * Math.cos(p.direction)
-    p.velocityY = p.speed * Math.sin(p.direction)
-  }
-
-  private computePosition(p: IPlayerModel, deltaTime: number) {
-    p.x += p.velocityX * deltaTime
-    p.y += p.velocityY * deltaTime
+    this.controller.update(deltaTime)
   }
 
   scorePoint(): void {
@@ -73,29 +70,5 @@ export class PlayerAction implements IPlayerAction {
     this.resetAfterGoal()
     this.player.score = 0
     this.player.team = null
-  }
-
-  onUp() {
-    const p = this.player
-    p.speed = Math.min(p.speed + this.speedLevel1, p.maxSpeedForward)
-  }
-
-  onDown(): void {
-    const p = this.player
-    if (p.speed > 0) {
-      p.speed = 0
-    } else if (p.speed === 0) {
-      p.speed = p.maxSpeedBackward
-    }
-  }
-
-  onLeft(): void {
-    const p = this.player
-    p.direction -= p.turnSpeed
-  }
-
-  onRight(): void {
-    const p = this.player
-    p.direction += p.turnSpeed
   }
 }
