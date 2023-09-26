@@ -5,6 +5,7 @@ import { AnimationConfig, AnimationType } from '../sprite/AnimationConfig'
 
 export class RedPlayerRenderer {
   private sprite: SpriteAnimator
+  private isDirection: boolean = false
   constructor(private readonly canvasDrawer: CanvasDrawer) {
     const sprite = './assets/red-player.png'
     const idle: AnimationConfig = {
@@ -36,6 +37,7 @@ export class RedPlayerRenderer {
     this.canvasDrawer.setLineStyle(player.team?.color ?? 'blue', 1)
     this.canvasDrawer.drawCircle(player.x, player.y, player.radius)
 
+    if (!this.isDirection) return
     this.canvasDrawer.setLineStyle('yellow', 1)
     this.canvasDrawer.drawLine(
       player.x,
