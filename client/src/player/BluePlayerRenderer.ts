@@ -31,12 +31,12 @@ export class BluePlayerRenderer {
   }
 
   draw(player: PlayerDto) {
-    this.sprite.draw(this.canvasDrawer.cctx, player.x - 27, player.y - 64)
+    this.sprite.draw(this.canvasDrawer.cctx, player.x - 41, player.y - 120)
 
-    // this.canvasDrawer.setLineStyle(player.team?.color ?? 'blue', 2)
-    // this.canvasDrawer.drawCircle(player.x, player.y, player.radius)
+    this.canvasDrawer.setLineStyle(player.team?.color ?? 'blue', 1)
+    this.canvasDrawer.drawCircle(player.x, player.y, player.radius)
 
-    this.canvasDrawer.setLineStyle('yellow', 2)
+    this.canvasDrawer.setLineStyle('yellow', 1)
     this.canvasDrawer.drawLine(
       player.x,
       player.y,
