@@ -49,23 +49,11 @@ export class SocketManager {
 
   onConnect() {
     const playerId = localStorage.getItem('playerId')
-    if (playerId) {
-      if (!this.players.find((p) => p.id === playerId)) {
-        const newPlayer = new PlayerModel()
-        newPlayer.id = playerId
-        this.players.push(newPlayer)
-      }
-    }
     this.socket.emit('setPlayerId', playerId)
   }
 
   onYourPlayerId(id: string) {
     localStorage.setItem('playerId', id)
-    if (!this.players.find((p) => p.id === id)) {
-      const newPlayer = new PlayerModel()
-      newPlayer.id = id
-      this.players.push(newPlayer)
-    }
   }
 
   handleConnect(callback: () => void) {

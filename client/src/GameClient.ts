@@ -1,4 +1,4 @@
-import { MapDto, MatchDto, MessageDto, TeamDto } from 'api'
+import { MapDto, MatchDto, MessageDto, PlayerDto, TeamDto } from 'api'
 import { hostConfig } from './config/config'
 import { CanvasRenderer } from './canvas/CanvasRenderer'
 import { SocketManager } from './SocketManager'
@@ -32,11 +32,20 @@ export class GameClient {
   }
 
   private initializeSocketListeners() {
+    this.socketManager.handleNewPlayer(this.onNewPlayer.bind(this))
     this.socketManager.handleMapUpdate(this.handleMapUpdate.bind(this))
     this.socketManager.handleTeamUpdate(this.handleTeamUpdate.bind(this))
     this.socketManager.handleLogMessage(this.handleLogMessage.bind(this))
     this.socketManager.handleLogReset(this.handleLogReset.bind(this))
     this.socketManager.handleMatchUpdate(this.handleMatchUpdate.bind(this))
+  }
+
+  private onNewPlayer(dto: PlayerDto) {
+    if (!this.players.find((p) => p.id === dto.id)) {
+      const newPlayer = new PlayerModel()
+      newPlayer.id = dto.id
+      this.players.push(newPlayer)
+    }
   }
 
   private initializeEventListeners() {

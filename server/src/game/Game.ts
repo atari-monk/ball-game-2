@@ -8,6 +8,8 @@ import {
   MatchDto,
   IMessenger,
   IGameStateManager,
+  PlayerDto,
+  TeamDto,
 } from 'api'
 import { BallBuilder } from '../ball/BallBuilder'
 import { GateBuilder } from '../gate/GateBuilder'
@@ -121,6 +123,13 @@ export class Game implements IMatch {
     this._messenger.sendText(
       `${DateUtil.formatTime(this.matchStartTime)} Begin`
     )
+    this.players.forEach((p) => {
+      this.io.emit('newPlayer', new PlayerDto(p))
+      const team = this.teams.find((t) =>
+        t.playerIds.find((id) => id === p.id)
+      )
+      if (team) this.io.emit('team', new TeamDto(team))
+    })
   }
 
   public stopLoop() {
