@@ -5,6 +5,7 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 module.exports = () => {
   return {
     mode: 'development',
+    devtool: false,
     entry: './src/client.ts',
     output: {
       filename: 'client.js',

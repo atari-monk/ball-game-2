@@ -1,4 +1,3 @@
-import { ITeam } from '../api/ITeam'
 import { IPlayer } from '../api/player/IPlayer'
 
 export class PlayerDto {
@@ -8,7 +7,6 @@ export class PlayerDto {
   radius: number
   directionX: number
   directionY: number
-  team: ITeam | null
 
   constructor(player: IPlayer) {
     this.id = player.id
@@ -17,6 +15,5 @@ export class PlayerDto {
     this.radius = player.radius
     this.directionX = player.directionX
     this.directionY = player.directionY
-    this.team = player.team
   }
 }

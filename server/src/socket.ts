@@ -1,7 +1,8 @@
 import { Server, Socket } from 'socket.io'
 import { v4 as uuidv4 } from 'uuid'
-import { IPlayer, MapDto, MatchDto } from 'api'
+import { IPlayer, MapDto, MatchDto, PlayerDto, TeamDto } from 'api'
 import { Game } from './game/Game'
+import { Team } from './team/Team'
 
 export default function initializeSocketIO(io: Server, game: Game) {
   const playerActivity = new Map()
@@ -24,12 +25,18 @@ export default function initializeSocketIO(io: Server, game: Game) {
         player = game.players.find((p) => p.id === playerId)
         if (!player) {
           player = game.addPlayer(playerId)
+          io.emit('newPlayer', new PlayerDto(player))
         }
       } else {
         playerId = uuidv4()
         socket.emit('yourPlayerId', playerId)
         player = game.addPlayer(playerId)
+        io.emit('newPlayer', new PlayerDto(player))
       }
+      const team = game.teams.find((t) =>
+        t.playerIds.find((id) => id === playerId)
+      )
+      if (team) io.emit('team', new TeamDto(team))
 
       playerActivity.set(playerId, Date.now())
 

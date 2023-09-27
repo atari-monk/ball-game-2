@@ -2,6 +2,7 @@ import { PlayerDto } from 'api'
 import { CanvasDrawer } from '../canvas/CanvasDrawer'
 import { SpriteAnimator } from '../sprite/SpriteAnimator'
 import { AnimationConfig, AnimationType } from '../sprite/AnimationConfig'
+import { PlayerModel } from './PlayerModel'
 
 export class RedPlayerRenderer {
   private sprite: SpriteAnimator
@@ -31,20 +32,16 @@ export class RedPlayerRenderer {
     this.sprite.update(deltaTime)
   }
 
-  draw(player: PlayerDto) {
-    this.sprite.draw(this.canvasDrawer.cctx, player.x - 41, player.y - 120)
+  draw(player: PlayerModel) {
+    const p = player.moveDto
+    this.sprite.draw(this.canvasDrawer.cctx, p.x - 41, p.y - 120)
 
-    this.canvasDrawer.setLineStyle(player.team?.color ?? 'blue', 1)
-    this.canvasDrawer.drawCircle(player.x, player.y, player.radius)
+    this.canvasDrawer.setLineStyle(player.teamColor, 1)
+    this.canvasDrawer.drawCircle(p.x, p.y, player.radius)
 
     if (!this.isDirection) return
     this.canvasDrawer.setLineStyle('yellow', 1)
-    this.canvasDrawer.drawLine(
-      player.x,
-      player.y,
-      player.directionX,
-      player.directionY
-    )
+    this.canvasDrawer.drawLine(p.x, p.y, p.directionX, p.directionY)
   }
 
   switchAnimation(animationIndex: number) {

@@ -3,6 +3,7 @@ import { CanvasInfoProvider } from './CanvasInfoProvider'
 import { CanvasDrawer } from './CanvasDrawer'
 import { BluePlayerRenderer } from '../player/BluePlayerRenderer'
 import { RedPlayerRenderer } from '../player/RedPlayerRenderer'
+import { PlayerModel } from '../player/PlayerModel'
 
 export class CanvasRenderer {
   private ctx: CanvasRenderingContext2D
@@ -48,12 +49,12 @@ export class CanvasRenderer {
     )
   }
 
-  drawPlayer(player: PlayerDto, dt: number) {
-    if (player.team?.color === 'red') {
+  drawPlayer(player: PlayerModel, dt: number) {
+    if (player.teamColor === 'red') {
       this.redplayerRenderer.update(dt)
       this.redplayerRenderer.draw(player)
     }
-    if (player.team?.color === 'blue') {
+    if (player.teamColor === 'blue') {
       this.blueplayerRenderer.update(dt)
       this.blueplayerRenderer.draw(player)
     }
