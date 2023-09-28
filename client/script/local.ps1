@@ -3,8 +3,7 @@ $server = 'C:\atari-monk\Code\ball-game-2\server\build\'
 $port = '3000'
 $domain = 'http://127.0.0.1:' 
 $client = '/client/build/index.html'
-$url1 = $domain + $port + $client
-$url2 = $domain + $port + $client
+$url = $domain + $port + $client
 $chrome = "C:\Program Files\Google\Chrome\Application\chrome.exe"
 
 function start-chrome {
@@ -14,7 +13,7 @@ function start-chrome {
     )
 
     try {
-        Start-Process -FilePath "chrome.exe" -ArgumentList $url -ErrorAction Stop
+        Start-Process -FilePath $chrome -ArgumentList $url -ErrorAction Stop
     }
     catch {
         Write-Host "An error occurred while trying to start Chrome with URL: $url"
@@ -41,8 +40,7 @@ function start-server {
 }
 
 try {
-  start-chrome -url $url1
-  start-chrome -url $url2
+  start-chrome -url $url
   set-folder ($server)
   start-server
   set-folder ($script)
