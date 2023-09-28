@@ -13,8 +13,8 @@ export default function initializeSocketIO(io: Server, game: Game) {
     game.messenger.clearLogOne(socket)
     game.messenger.resendLog(socket)
 
-    socket.on('setPlayerId', (id) => {
-      let playerId: string | undefined
+    socket.on('setPlayerId', (id: string) => {
+      let playerId: string
       playerId = id
       console.log(`playerId: ${playerId || 'first time player'}`)
 
