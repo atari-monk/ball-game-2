@@ -65,6 +65,7 @@ export class GameClient {
     if (!this.players.find((p) => p.id === dto.id)) {
       const newPlayer = new PlayerModel()
       newPlayer.id = dto.id
+      newPlayer.radius = dto.radius
       this.players.push(newPlayer)
     }
   }

@@ -4,4 +4,5 @@ export interface IPlayerController {
   onDown(): void
   onLeft(): void
   onRight(): void
+  onInactive(): void
 }

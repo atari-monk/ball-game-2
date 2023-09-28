@@ -144,4 +144,8 @@ export class Player implements IPlayer {
   onRight(): void {
     this._action.onRight()
   }
+
+  onInactive(): void {
+    this._action.onInactive()
+  }
 }

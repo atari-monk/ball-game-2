@@ -13,4 +13,5 @@ export interface IPlayerAction {
   onDown(): void
   onLeft(): void
   onRight(): void
+  onInactive(): void
 }

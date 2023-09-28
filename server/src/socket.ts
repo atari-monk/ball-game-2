@@ -50,6 +50,8 @@ export default function initializeSocketIO(io: Server, game: Game) {
           if (input.down) player.onDown()
           if (input.left) player.onLeft()
           if (input.right) player.onRight()
+          if (!input.up && !input.down && !input.left && !input.right)
+            player.onInactive()
         }
       })
 

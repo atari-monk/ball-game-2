@@ -27,4 +27,8 @@ export class PrimitiveController implements IPlayerController {
     const p = this.player
     p.y += p.speed // Adjust 'speed' as needed
   }
+
+  onInactive(): void {
+      
+  }
 }

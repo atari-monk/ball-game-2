@@ -2,13 +2,20 @@ import { IPlayerModel } from 'api'
 import { IPlayerController } from './IPlayerController'
 
 export class SoccerPlayerController implements IPlayerController {
-  constructor(private readonly player: IPlayerModel) {}
+  private p: IPlayerModel
+
+  constructor(player: IPlayerModel) {
+    this.p = player
+  }
 
   update(deltaTime: number) {
-    const p = this.player
-    this.computePosition(p, deltaTime)
-    p.velocityX *= .9
-    p.velocityY *= .9
+    this.computeDirection(this.p)
+    this.computePosition(this.p, deltaTime)
+  }
+
+  private computeDirection(p: IPlayerModel) {
+    p.directionX = p.x + p.radius * Math.cos(p.direction)
+    p.directionY = p.y + p.radius * Math.sin(p.direction)
   }
 
   private computePosition(p: IPlayerModel, deltaTime: number) {
@@ -17,22 +24,23 @@ export class SoccerPlayerController implements IPlayerController {
   }
 
   onLeft(): void {
-    const p = this.player
-    p.velocityX = -0.1
+    this.p.velocityX = -0.04
   }
 
   onRight(): void {
-    const p = this.player
-    p.velocityX = 0.1
+    this.p.velocityX = 0.04
   }
 
   onUp(): void {
-    const p = this.player
-    p.velocityY = -0.1
+    this.p.velocityY = -0.04
   }
 
   onDown(): void {
-    const p = this.player
-    p.velocityY = 0.1
+    this.p.velocityY = 0.04
+  }
+
+  onInactive(): void {
+    this.p.velocityX = 0
+    this.p.velocityY = 0
   }
 }

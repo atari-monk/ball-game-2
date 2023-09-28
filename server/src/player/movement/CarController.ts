@@ -53,4 +53,6 @@ export class CarController implements IPlayerController {
     const p = this.player
     p.direction += p.turnSpeed
   }
+
+  onInactive(): void {}
 }
