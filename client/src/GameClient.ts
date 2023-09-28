@@ -1,14 +1,21 @@
 import { MapDto, MatchDto, MessageDto, PlayerDto, TeamDto } from 'api'
 import { hostConfig } from './config/config'
 import { CanvasRenderer } from './canvas/CanvasRenderer'
-import { SocketManager } from './SocketManager'
+import { SocketInManager } from './socket/SocketInManager'
 import { LogManager } from './logger/LogManager'
-import { IInput } from './api/IInput'
 import { AnimationLoop } from './canvas/AnimationLoop'
 import { PlayerModel } from './player/PlayerModel'
+import { InputHandler } from './input/InputHandler'
+import { ISocketIo } from './socket/ISocketIo'
+import { MySocketIo } from './socket/MySocketIo'
+import { ISocketInManager } from './socket/ISocketInManager'
+import { ISocketOutManager } from './socket/ISocketOutManager'
+import { SocketOutManager } from './socket/SocketOutManager'
 
 export class GameClient {
-  private socketManager: SocketManager
+  private mysocket: ISocketIo
+  private socketInManager: ISocketInManager
+  private socketOutManager: ISocketOutManager
   private canvasRenderer: CanvasRenderer
   private logManager: LogManager
   private map: MapDto | null = null
@@ -16,28 +23,42 @@ export class GameClient {
   private match: MatchDto | null = null
   private animationLoop: AnimationLoop
   private players: PlayerModel[] = []
+  private inputHandler: InputHandler
 
   constructor() {
-    this.socketManager = new SocketManager(
-      hostConfig.selectedHost,
-      this.players
-    )
+    this.mysocket = new MySocketIo(hostConfig.selectedHost)
+    this.socketInManager = new SocketInManager(this.mysocket)
+    this.socketOutManager = new SocketOutManager(this.mysocket)
     this.canvasRenderer = new CanvasRenderer()
     this.logManager = new LogManager()
     this.animationLoop = new AnimationLoop(this.render.bind(this))
+    this.inputHandler = new InputHandler(this.socketOutManager)
 
     this.initializeSocketListeners()
-    this.initializeEventListeners()
     this.animationLoop.start()
   }
 
   private initializeSocketListeners() {
-    this.socketManager.handleNewPlayer(this.onNewPlayer.bind(this))
-    this.socketManager.handleMapUpdate(this.handleMapUpdate.bind(this))
-    this.socketManager.handleTeamUpdate(this.handleTeamUpdate.bind(this))
-    this.socketManager.handleLogMessage(this.handleLogMessage.bind(this))
-    this.socketManager.handleLogReset(this.handleLogReset.bind(this))
-    this.socketManager.handleMatchUpdate(this.handleMatchUpdate.bind(this))
+    this.socketInManager.handleConnect(this.onConnect.bind(this))
+    this.socketInManager.handleYourPlayerId(this.onYourPlayerId.bind(this))
+    this.socketInManager.handlePing(() =>
+      this.socketOutManager.sendPong.bind(this)
+    )
+    this.socketInManager.handleNewPlayer(this.onNewPlayer.bind(this))
+    this.socketInManager.handleMapUpdate(this.handleMapUpdate.bind(this))
+    this.socketInManager.handleTeamUpdate(this.handleTeamUpdate.bind(this))
+    this.socketInManager.handleLogMessage(this.handleLogMessage.bind(this))
+    this.socketInManager.handleLogReset(this.handleLogReset.bind(this))
+    this.socketInManager.handleMatchUpdate(this.handleMatchUpdate.bind(this))
+  }
+
+  private onConnect() {
+    const playerId = localStorage.getItem('playerId')
+    if (playerId) this.socketOutManager.sendPlayerId(playerId)
+  }
+
+  onYourPlayerId(id: string) {
+    localStorage.setItem('playerId', id)
   }
 
   private onNewPlayer(dto: PlayerDto) {
@@ -46,10 +67,6 @@ export class GameClient {
       newPlayer.id = dto.id
       this.players.push(newPlayer)
     }
-  }
-
-  private initializeEventListeners() {
-    document.addEventListener('keydown', this.handleKeyDown.bind(this))
   }
 
   private handleMapUpdate(dto: MapDto) {
@@ -77,16 +94,6 @@ export class GameClient {
 
   private handleLogReset() {
     this.logManager.clearTextArea()
-  }
-
-  private handleKeyDown(event: KeyboardEvent) {
-    const input: IInput = {
-      up: event.key === 'ArrowUp',
-      down: event.key === 'ArrowDown',
-      left: event.key === 'ArrowLeft',
-      right: event.key === 'ArrowRight',
-    }
-    this.socketManager.sendPlayerInput(input)
   }
 
   private render(dt: number) {
