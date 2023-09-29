@@ -1,4 +1,4 @@
-import { IBall, IPlayer } from 'api'
+import { IBall, IPlayer } from 'game-api'
 
 export class Ball implements IBall {
   private constructor(

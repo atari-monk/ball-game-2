@@ -1,4 +1,4 @@
-import { MapDto, MatchDto, MessageDto, PlayerDto, TeamDto } from 'api'
+import { MapDto, MatchDto, MessageDto, PlayerDto, TeamDto } from 'dtos'
 import { Socket } from 'socket.io-client'
 import { ISocketIo } from './ISocketIo'
 import { ISocketInManager } from './ISocketInManager'

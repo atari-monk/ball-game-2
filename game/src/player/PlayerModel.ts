@@ -1,4 +1,4 @@
-import { INameGenerator, IPlayerModel, ITeam, PlayerState } from 'api'
+import { INameGenerator, IPlayerModel, ITeam, PlayerState } from 'game-api'
 import { PlayerBuilder } from './PlayerBuilder'
 
 export class PlayerModel implements IPlayerModel {

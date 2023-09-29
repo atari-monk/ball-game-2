@@ -1,4 +1,4 @@
-import { IBall } from '../api/IBall'
+import { IBall } from 'game-api'
 
 export class BallDto {
   x: number

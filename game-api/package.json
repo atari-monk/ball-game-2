@@ -1,5 +1,5 @@
 {
-  "name": "game",
+  "name": "game-api",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -10,11 +10,10 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "dependencies": {
-    "dtos": "file:dtos-1.0.0.tgz",
-    "game-api": "file:game-api-1.0.0.tgz"
-  },
   "devDependencies": {
     "typescript": "^5.2.2"
+  },
+  "dependencies": {
+    "socket.io": "^4.7.2"
   }
 }

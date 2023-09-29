@@ -1,4 +1,5 @@
-import { IMessage, MessageDto, MsgFlag } from 'api'
+import { MessageDto } from 'dtos'
+import { IMessage, MsgFlag } from 'game-api'
 import { Server, Socket } from 'socket.io'
 
 export class Messenger {

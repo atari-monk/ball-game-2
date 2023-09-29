@@ -1,4 +1,4 @@
-import { IField } from '../api/IField'
+import { IField } from "game-api"
 
 export class FieldDto {
   width: number

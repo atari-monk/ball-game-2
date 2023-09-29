@@ -1,4 +1,4 @@
-import { ITeam } from '../api/ITeam'
+import { ITeam } from 'game-api'
 
 export class TeamDto {
   name: string

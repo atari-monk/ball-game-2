@@ -1,4 +1,4 @@
-import { IBall, IPlayer } from 'api'
+import { IBall, IPlayer } from 'game-api'
 import { Vector2 } from '../utils/Vector2'
 
 export class PlayerBallCollider {

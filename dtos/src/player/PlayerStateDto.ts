@@ -1,5 +1,4 @@
-import { IPlayer } from '../../api/player/IPlayer'
-import { PlayerState } from '../../api/player/state/PlayerState'
+import { IPlayer, PlayerState } from 'game-api'
 
 export class PlayerStateDto {
   id: string

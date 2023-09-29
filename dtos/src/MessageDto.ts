@@ -1,5 +1,4 @@
-import { IMessage } from '../api/messanger/IMessage'
-import { MsgFlag } from '../api/messanger/MsgFlag'
+import { IMessage, MsgFlag } from "game-api"
 
 export class MessageDto {
   sender: string

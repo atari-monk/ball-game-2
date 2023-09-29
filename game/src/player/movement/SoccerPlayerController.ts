@@ -1,4 +1,4 @@
-import { IPlayerModel } from 'api'
+import { IPlayerModel } from 'game-api'
 import { IPlayerController } from './IPlayerController'
 
 export class SoccerPlayerController implements IPlayerController {

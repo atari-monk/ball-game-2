@@ -1,5 +1,5 @@
 {
-  "name": "src",
+  "name": "client",
   "version": "1.0.0",
   "description": "",
   "main": "client.js",
@@ -13,7 +13,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "api": "file:api-1.0.0.tgz",
+    "dtos": "file:dtos-1.0.0.tgz",
+    "game-api": "file:game-api-1.0.0.tgz",
     "socket.io-client": "^4.7.2"
   },
   "devDependencies": {

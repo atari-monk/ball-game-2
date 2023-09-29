@@ -1,4 +1,4 @@
-import { PlayerDto } from 'api'
+import { PlayerDto } from 'dtos'
 
 export class PlayerModel {
   private _id: string = ''

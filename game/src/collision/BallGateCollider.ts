@@ -1,4 +1,4 @@
-import { IBall, IGates } from 'api'
+import { IBall, IGates } from 'game-api'
 import { Game } from '../game/Game'
 
 export class BallGateCollider {

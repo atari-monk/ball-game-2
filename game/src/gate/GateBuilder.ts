@@ -1,4 +1,4 @@
-import { IGate, ITeam } from 'api'
+import { IGate, ITeam } from 'game-api'
 import { Gate } from './Gate'
 
 export class GateBuilder {

@@ -1,4 +1,4 @@
-import { FieldDto, IGateDtos, PlayerDto, BallDto } from 'api'
+import { FieldDto, IGateDtos, BallDto } from 'dtos'
 import { CanvasInfoProvider } from './CanvasInfoProvider'
 import { CanvasDrawer } from './CanvasDrawer'
 import { BluePlayerRenderer } from '../player/BluePlayerRenderer'

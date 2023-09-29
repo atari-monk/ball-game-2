@@ -1,4 +1,4 @@
-import { IField, IGates, IPlayerAction, IPlayerModel, ITeam } from 'api'
+import { IField, IGates, IPlayerAction, IPlayerModel, ITeam } from 'game-api'
 import { IPlayerController } from './movement/IPlayerController'
 import { SoccerPlayerController } from './movement/SoccerPlayerController'
 import { CarController } from './movement/CarController'

@@ -1,5 +1,4 @@
-import { IField } from '../api/IField'
-import { IGates } from '../api/IGates'
+import { IField, IGates } from 'game-api'
 import { FieldDto } from './FieldDto'
 import { GateDto } from './GateDto'
 import { IGateDtos } from './IGateDtos'

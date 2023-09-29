@@ -1,4 +1,4 @@
-import { IBall, IField } from 'api'
+import { IBall, IField } from 'game-api'
 
 export class BallWallCollider {
   checkWallCollisionForBall(ball: IBall, field: IField) {

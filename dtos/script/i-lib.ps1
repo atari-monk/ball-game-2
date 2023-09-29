@@ -6,8 +6,8 @@ Set-Location build
 npm pack
 #paths
 $proj = "C:\atari-monk\Code\ball-game-2\"
-$pack = "api-1.0.0.tgz"
-$folder = "api\build\"
+$pack = "dtos-1.0.0.tgz"
+$folder = "dtos\build\"
 $api = $proj + $folder + $pack
 #install in game
 $game = $proj + "game\"

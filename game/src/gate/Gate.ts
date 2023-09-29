@@ -1,4 +1,4 @@
-import { IGate, ITeam } from 'api'
+import { IGate, ITeam } from 'game-api'
 
 export class Gate implements IGate {
   private constructor(

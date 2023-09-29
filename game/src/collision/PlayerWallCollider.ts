@@ -1,4 +1,4 @@
-import { IField, IPlayer } from 'api'
+import { IField, IPlayer } from 'game-api'
 
 export class PlayerWallCollider {
   public checkWallCollision(

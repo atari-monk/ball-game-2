@@ -1,5 +1,4 @@
-import { IGate } from '../api/IGate'
-import { ITeam } from '../api/ITeam'
+import { IGate, ITeam } from "game-api"
 
 export class GateDto {
   x: number

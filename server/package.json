@@ -12,10 +12,11 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "api": "file:api-1.0.0.tgz",
     "cors": "^2.8.5",
+    "dtos": "file:dtos-1.0.0.tgz",
     "express": "^4.18.2",
     "game": "file:game-1.0.0.tgz",
+    "game-api": "file:game-api-1.0.0.tgz",
     "socket.io": "^4.7.2",
     "uuid": "^9.0.0"
   },

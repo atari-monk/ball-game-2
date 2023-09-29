@@ -1,4 +1,4 @@
-import { IPlayer } from 'api'
+import { IPlayer } from 'game-api'
 import { Ball } from './Ball'
 
 export class BallBuilder {

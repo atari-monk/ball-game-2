@@ -5,12 +5,9 @@ import {
   ITeam,
   IField,
   IGates,
-  MatchDto,
   IMessenger,
   IGameStateManager,
-  PlayerDto,
-  TeamDto,
-} from 'api'
+} from 'game-api'
 import { BallBuilder } from '../ball/BallBuilder'
 import { GateBuilder } from '../gate/GateBuilder'
 import { NameGenerator } from '../utils/NameGenerator'
@@ -25,6 +22,7 @@ import { BallGateCollider } from '../collision/BallGateCollider'
 import { DateUtil } from '../utils/DateUtil'
 import { Player } from '../player/Player'
 import { IMatch } from './IMatch'
+import { MatchDto, PlayerDto, TeamDto } from 'dtos'
 
 export class Game implements IMatch {
   private readonly frictionCoefficient: number = 0.99

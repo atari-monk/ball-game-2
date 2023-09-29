@@ -1,4 +1,4 @@
-import { MapDto, MatchDto, MessageDto, PlayerDto, TeamDto } from 'api'
+import { MapDto, MatchDto, MessageDto, PlayerDto, TeamDto } from 'dtos'
 import { hostConfig } from './config/config'
 import { CanvasRenderer } from './canvas/CanvasRenderer'
 import { SocketInManager } from './socket/SocketInManager'

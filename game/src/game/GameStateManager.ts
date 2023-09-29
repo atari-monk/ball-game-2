@@ -1,4 +1,4 @@
-import { GameState, IMessenger, MsgFlag } from 'api'
+import { GameState, IMessenger, MsgFlag } from 'game-api'
 import { Game } from './Game'
 
 export class GameStateManager {

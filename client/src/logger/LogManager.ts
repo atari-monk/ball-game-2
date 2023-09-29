@@ -1,5 +1,6 @@
-import { MessageDto, MsgFlag } from 'api'
+import { MessageDto } from 'dtos'
 import { LogInfoProvider } from './LogInfoProvider'
+import { MsgFlag } from 'game-api'
 
 export class LogManager {
   private textArea: HTMLTextAreaElement | null

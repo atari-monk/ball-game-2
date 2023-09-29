@@ -1,5 +1,4 @@
-import { IBall } from '../api/IBall'
-import { IPlayer } from '../api/player/IPlayer'
+import { IBall, IPlayer } from 'game-api'
 import { BallDto } from './BallDto'
 import { PlayerDto } from './player/PlayerDto'
 

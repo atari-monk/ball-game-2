@@ -7,7 +7,7 @@ import {
   IPlayerModel,
   ITeam,
   PlayerState,
-} from 'api'
+} from 'game-api'
 import { PlayerModel } from './PlayerModel'
 import { PlayerAction } from './PlayerAction'
 

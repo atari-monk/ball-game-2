@@ -1,4 +1,4 @@
-import { ITeam } from 'api'
+import { ITeam } from 'game-api'
 import { TeamBuilder } from './TeamBuilder'
 
 export class Team implements ITeam {
