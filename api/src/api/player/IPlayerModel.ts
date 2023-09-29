@@ -1,4 +1,5 @@
 import { ITeam } from '../ITeam'
+import { PlayerState } from './state/PlayerState'
 
 export interface IPlayerModel {
   id: string
@@ -19,4 +20,5 @@ export interface IPlayerModel {
   turnSpeed: number
   team: ITeam | null
   score: number
+  state: PlayerState
 }

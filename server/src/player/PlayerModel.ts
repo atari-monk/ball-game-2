@@ -1,4 +1,4 @@
-import { INameGenerator, IPlayerModel, ITeam } from 'api'
+import { INameGenerator, IPlayerModel, ITeam, PlayerState } from 'api'
 import { PlayerBuilder } from './PlayerBuilder'
 
 export class PlayerModel implements IPlayerModel {
@@ -20,7 +20,8 @@ export class PlayerModel implements IPlayerModel {
     public maxSpeedBackward: number,
     public turnSpeed: number,
     public team: ITeam | null,
-    public score: number
+    public score: number,
+    public state: PlayerState
   ) {}
 
   static getDefaultPlayer(id: string, nameGenerator: INameGenerator) {
@@ -66,7 +67,8 @@ export class PlayerModel implements IPlayerModel {
     maxSpeedBackward: number,
     turnSpeed: number,
     team: ITeam | null,
-    score: number
+    score: number,
+    state: PlayerState
   ): IPlayerModel {
     return new PlayerModel(
       id,
@@ -86,7 +88,8 @@ export class PlayerModel implements IPlayerModel {
       maxSpeedBackward,
       turnSpeed,
       team,
-      score
+      score,
+      state
     )
   }
 }

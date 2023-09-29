@@ -1,7 +1,7 @@
 import { IBall } from '../api/IBall'
 import { IPlayer } from '../api/player/IPlayer'
 import { BallDto } from './BallDto'
-import { PlayerDto } from './PlayerDto'
+import { PlayerDto } from './player/PlayerDto'
 
 export class MatchDto {
   players: PlayerDto[]

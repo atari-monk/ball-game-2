@@ -1,5 +1,6 @@
 import { ITeam } from '../ITeam'
 import { IPlayerAction } from './IPlayerAction'
+import { PlayerState } from './state/PlayerState'
 
 export interface IPlayer extends IPlayerAction {
   id: string
@@ -18,4 +19,5 @@ export interface IPlayer extends IPlayerAction {
   maxSpeedBackward: number
   turnSpeed: number
   team: ITeam
+  state: PlayerState
 }

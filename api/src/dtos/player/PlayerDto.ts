@@ -1,4 +1,4 @@
-import { IPlayer } from '../api/player/IPlayer'
+import { IPlayer } from '../../api/player/IPlayer'
 
 export class PlayerDto {
   id: string

@@ -6,6 +6,7 @@ import {
   IPlayerAction,
   IPlayerModel,
   ITeam,
+  PlayerState,
 } from 'api'
 import { PlayerModel } from './PlayerModel'
 import { PlayerAction } from './PlayerAction'
@@ -78,6 +79,10 @@ export class Player implements IPlayer {
     const team = this._model.team
     if (!team) throw new Error('Team must be assigned!')
     return team
+  }
+
+  get state(): PlayerState {
+    return this._model.state
   }
 
   set velocityX(vx: number) {

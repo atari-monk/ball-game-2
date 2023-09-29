@@ -1,4 +1,4 @@
-import { IPlayerModel, ITeam } from 'api'
+import { IPlayerModel, ITeam, PlayerState, PlayerStateType } from 'api'
 import { PlayerModel } from './PlayerModel'
 
 export class PlayerBuilder {
@@ -18,6 +18,7 @@ export class PlayerBuilder {
   private turnSpeed = 0
   private team: ITeam | null = null
   private score = 0
+  private state: PlayerState = { type: PlayerStateType.Idle }
 
   constructor(private readonly id: string, private readonly name: string) {}
 
@@ -102,7 +103,8 @@ export class PlayerBuilder {
       this.maxSpeedBackward,
       this.turnSpeed,
       this.team,
-      this.score
+      this.score,
+      this.state
     )
   }
 }
