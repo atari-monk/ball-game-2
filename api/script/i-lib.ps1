@@ -9,6 +9,11 @@ $proj = "C:\atari-monk\Code\ball-game-2\"
 $pack = "api-1.0.0.tgz"
 $folder = "api\build\"
 $api = $proj + $folder + $pack
+#install in game
+$game = $proj + "game\"
+Copy-Item $api $game
+Set-Location $game
+npm i (Get-Item $pack).Name
 #install in server
 $server = $proj + "server\"
 Copy-Item $api $server

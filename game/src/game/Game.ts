@@ -24,11 +24,7 @@ import { TeamNameGenerator } from '../team/TeamNameGenerator'
 import { BallGateCollider } from '../collision/BallGateCollider'
 import { DateUtil } from '../utils/DateUtil'
 import { Player } from '../player/Player'
-
-interface IMatch {
-  matchDuration: number
-  matchStartTime: number | null
-}
+import { IMatch } from './IMatch'
 
 export class Game implements IMatch {
   private readonly frictionCoefficient: number = 0.99
@@ -125,9 +121,7 @@ export class Game implements IMatch {
     )
     this.players.forEach((p) => {
       this.io.emit('newPlayer', new PlayerDto(p))
-      const team = this.teams.find((t) =>
-        t.playerIds.find((id) => id === p.id)
-      )
+      const team = this.teams.find((t) => t.playerIds.find((id) => id === p.id))
       if (team) this.io.emit('team', new TeamDto(team))
     })
   }
