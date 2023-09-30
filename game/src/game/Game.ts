@@ -20,9 +20,9 @@ import { Team } from '../team/Team'
 import { TeamNameGenerator } from '../team/TeamNameGenerator'
 import { BallGateCollider } from '../collision/BallGateCollider'
 import { DateUtil } from '../utils/DateUtil'
-import { PlayerActionProxy } from '../player/PlayerActionProxy'
 import { IMatch } from './IMatch'
 import { MatchDto, PlayerDto, TeamDto } from 'dtos'
+import { Player } from '../player/Player'
 
 export class Game implements IMatch {
   private readonly frictionCoefficient: number = 0.99
@@ -105,7 +105,8 @@ export class Game implements IMatch {
       const deltaTime = currentTime - this.lastFrameTime
 
       this.update(deltaTime)
-
+      console.log('players', this.players)
+      console.log('player.x', this.players[0].x)
       this.io.emit('update', new MatchDto(this.players, this.ball, deltaTime))
 
       this.lastFrameTime = currentTime
@@ -118,7 +119,10 @@ export class Game implements IMatch {
       `${DateUtil.formatTime(this.matchStartTime)} Begin`
     )
     this.players.forEach((p) => {
-      this.io.emit('newPlayer', new PlayerDto(p))
+      this.io.emit(
+        'newPlayer',
+        new PlayerDto(p.id, p.x, p.y, p.radius, p.directionX, p.directionY)
+      )
       const team = this.teams.find((t) => t.playerIds.find((id) => id === p.id))
       if (team) this.io.emit('team', new TeamDto(team))
     })
@@ -178,7 +182,7 @@ export class Game implements IMatch {
   }
 
   public addPlayer(id: string): IPlayer {
-    const newPlayer = new PlayerActionProxy(id, this.nameGenerator)
+    const newPlayer: IPlayer = new Player(id, this.nameGenerator, this.io)
     newPlayer.assignToTeam(this.teams)
     this.players.push(newPlayer)
     newPlayer.positionInLine(this.teams, this.gates, this.field)
