@@ -1,11 +1,11 @@
-import { IPlayer, PlayerState } from 'game-api'
+import { PlayerState } from 'game-api'
 
 export class PlayerStateDto {
   id: string
   state: PlayerState
 
-  constructor(player: IPlayer) {
-    this.id = player.id
-    this.state = player.state
+  constructor(id: string, state: PlayerState) {
+    this.id = id
+    this.state = state
   }
 }

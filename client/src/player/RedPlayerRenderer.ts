@@ -35,8 +35,6 @@ export class RedPlayerRenderer {
     const p = player.moveDto
     this.sprite.draw(this.canvasDrawer.cctx, p.x - 41, p.y - 120)
 
-    console.log('player.teamColor:', player.teamColor)
-    console.log('player.radius:', player.radius)
     this.canvasDrawer.setLineStyle(player.teamColor, 1)
     this.canvasDrawer.drawCircle(p.x, p.y, player.radius)
 
