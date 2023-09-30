@@ -20,7 +20,7 @@ import { Team } from '../team/Team'
 import { TeamNameGenerator } from '../team/TeamNameGenerator'
 import { BallGateCollider } from '../collision/BallGateCollider'
 import { DateUtil } from '../utils/DateUtil'
-import { Player } from '../player/Player'
+import { PlayerActionProxy } from '../player/PlayerActionProxy'
 import { IMatch } from './IMatch'
 import { MatchDto, PlayerDto, TeamDto } from 'dtos'
 
@@ -178,7 +178,7 @@ export class Game implements IMatch {
   }
 
   public addPlayer(id: string): IPlayer {
-    const newPlayer = new Player(id, this.nameGenerator)
+    const newPlayer = new PlayerActionProxy(id, this.nameGenerator)
     newPlayer.assignToTeam(this.teams)
     this.players.push(newPlayer)
     newPlayer.positionInLine(this.teams, this.gates, this.field)
