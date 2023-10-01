@@ -1,4 +1,3 @@
-import { IPlayer } from 'game-api'
-import { PlayerAction } from './PlayerAction'
+import { PlayerState } from './PlayerState'
 
-export class Player extends PlayerAction implements IPlayer {}
+export class Player extends PlayerState {}

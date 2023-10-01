@@ -1,11 +1,12 @@
+import { Server } from 'socket.io'
 import { IPlayer, ITeam } from 'game-api'
 import { Player } from './Player'
 
 export class PlayerBuilder {
   private _player: IPlayer
 
-  constructor() {
-    this._player = new Player()
+  constructor(io: Server) {
+    this._player = new Player(io)
   }
 
   withId(id: string): PlayerBuilder {
