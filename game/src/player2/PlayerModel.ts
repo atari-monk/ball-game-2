@@ -93,6 +93,10 @@ export class PlayerModel implements IPlayerModel {
     return this._speed
   }
 
+  set speed(s: number) {
+    this._speed = s
+  }
+
   public get maxSpeedForward(): number {
     return this._maxSpeedForward
   }
@@ -110,8 +114,16 @@ export class PlayerModel implements IPlayerModel {
     return this._team
   }
 
+  set team(t: ITeam | null) {
+    this._team = t
+  }
+
   public get score(): number {
     return this._score
+  }
+
+  set score(s: number) {
+    this._score = s
   }
 
   public get state(): PlayerState {

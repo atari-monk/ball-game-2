@@ -1,7 +1,7 @@
 import { Server } from 'socket.io'
 import {
-    IField,
-    IGates,
+  IField,
+  IGates,
   INameGenerator,
   IPlayer,
   IPlayerAction,
@@ -11,7 +11,7 @@ import {
   PlayerState,
 } from 'game-api'
 import { PlayerModel } from './PlayerModel'
-import { IdleState } from './state/IdleState'
+import { IdleState } from '../player/state/IdleState'
 import { PlayerAction } from './PlayerAction'
 
 export class Player implements IPlayer {
