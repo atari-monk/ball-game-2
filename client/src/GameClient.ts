@@ -1,4 +1,13 @@
-import { MapDto, MatchDto, MessageDto, PlayerDto, TeamDto } from 'dtos'
+import {
+  BallDto,
+  FieldDto,
+  IGateDtos,
+  MapDto,
+  MatchDto,
+  MessageDto,
+  PlayerDto,
+  TeamDto,
+} from 'dtos'
 import { hostConfig } from './config/config'
 import { CanvasRenderer } from './canvas/CanvasRenderer'
 import { SocketInManager } from './socket/SocketInManager'
@@ -18,12 +27,12 @@ export class GameClient {
   private socketOutManager: ISocketOutManager
   private canvasRenderer: CanvasRenderer
   private logManager: LogManager
-  private map: MapDto | null = null
   private teams: TeamDto[] = []
-  private match: MatchDto | null = null
   private animationLoop: AnimationLoop
+  private gates: IGateDtos | null = null
+  private field: FieldDto | null = null
   private players: PlayerModel[] = []
-  private inputHandler: InputHandler
+  private ball: BallDto | null = null
 
   constructor() {
     this.mysocket = new MySocketIo(hostConfig.selectedHost)
@@ -32,7 +41,7 @@ export class GameClient {
     this.canvasRenderer = new CanvasRenderer()
     this.logManager = new LogManager()
     this.animationLoop = new AnimationLoop(this.render.bind(this))
-    this.inputHandler = new InputHandler(this.socketOutManager)
+    new InputHandler(this.socketOutManager)
 
     this.initializeSocketListeners()
     this.animationLoop.start()
@@ -71,7 +80,9 @@ export class GameClient {
   }
 
   private handleMapUpdate(dto: MapDto) {
-    this.map = dto
+    const { gates, field } = dto
+    this.gates = gates
+    this.field = field
   }
 
   private handleTeamUpdate(dto: TeamDto) {
@@ -86,7 +97,14 @@ export class GameClient {
   }
 
   private handleMatchUpdate(dto: MatchDto) {
-    this.match = dto
+    const { players, ball } = dto
+    this.ball = ball
+    this.players.forEach((player) => {
+      const playerDto = players.find((p) => p.id === player.id)
+      if (playerDto) {
+        player.moveDto = playerDto
+      }
+    })
   }
 
   private handleLogMessage(dto: MessageDto) {
@@ -99,22 +117,12 @@ export class GameClient {
 
   private render(dt: number) {
     this.canvasRenderer.clearCanvas()
-    if (this.map) {
-      const { gates, field } = this.map
-      this.canvasRenderer.drawField(field)
-      this.canvasRenderer.drawGates(gates)
-    }
-    if (this.match) {
-      const { players, ball } = this.match
-      players.forEach((player) => {
-        const myplayer = this.players.find((p) => p.id === player.id)
-        if (myplayer) {
-          myplayer.moveDto = player
-          this.canvasRenderer.drawPlayer(myplayer, dt)
-        }
-      })
-      this.canvasRenderer.drawBall(ball)
-    }
+    if (this.field) this.canvasRenderer.drawField(this.field)
+    if (this.gates) this.canvasRenderer.drawGates(this.gates)
+    this.players.forEach((player) => {
+      this.canvasRenderer.drawPlayer(player, dt)
+    })
+    if (this.ball) this.canvasRenderer.drawBall(this.ball)
   }
 
   public stopGame() {

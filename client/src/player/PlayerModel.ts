@@ -30,8 +30,7 @@ export class PlayerModel {
     this._teamColor = value
   }
 
-  get moveDto(): PlayerDto {
-    if (!this._moveDto) throw new Error('no moveDto')
+  get moveDto(): PlayerDto | null {
     return this._moveDto
   }
 

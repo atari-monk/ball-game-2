@@ -1,23 +1,29 @@
 import { FieldDto, IGateDtos, BallDto } from 'dtos'
 import { CanvasInfoProvider } from './CanvasInfoProvider'
 import { CanvasDrawer } from './CanvasDrawer'
-import { BluePlayerRenderer } from '../player/BluePlayerRenderer'
-import { RedPlayerRenderer } from '../player/RedPlayerRenderer'
 import { PlayerModel } from '../player/PlayerModel'
+import { PlayerRenderer } from '../player/PlayerRenderer'
+import { blueAnimations, redAnimations } from '../player/playerData'
 
 export class CanvasRenderer {
   private ctx: CanvasRenderingContext2D
   private canvasDrawer: CanvasDrawer
-  private redplayerRenderer: RedPlayerRenderer
-  private blueplayerRenderer: BluePlayerRenderer
+  private redplayerRenderer: PlayerRenderer
+  private blueplayerRenderer: PlayerRenderer
 
   constructor() {
     const canvasInfoProvider = new CanvasInfoProvider()
     const canvasInfo = canvasInfoProvider.getCanvasInfo('canvas')
     this.ctx = canvasInfo.ctx
     this.canvasDrawer = new CanvasDrawer(this.ctx)
-    this.redplayerRenderer = new RedPlayerRenderer(this.canvasDrawer)
-    this.blueplayerRenderer = new BluePlayerRenderer(this.canvasDrawer)
+    this.redplayerRenderer = new PlayerRenderer(
+      this.canvasDrawer,
+      redAnimations
+    )
+    this.blueplayerRenderer = new PlayerRenderer(
+      this.canvasDrawer,
+      blueAnimations
+    )
     this.redplayerRenderer.switchAnimation(0)
     this.blueplayerRenderer.switchAnimation(0)
   }

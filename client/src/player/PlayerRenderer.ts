@@ -1,30 +1,17 @@
 import { CanvasDrawer } from '../canvas/CanvasDrawer'
+import { AnimationConfig } from '../sprite/AnimationConfig'
 import { SpriteAnimator } from '../sprite/SpriteAnimator'
-import { AnimationConfig, AnimationType } from '../sprite/AnimationConfig'
 import { PlayerModel } from './PlayerModel'
 
-export class RedPlayerRenderer {
+export class PlayerRenderer {
   private sprite: SpriteAnimator
   private isDirection: boolean = true
-  constructor(private readonly canvasDrawer: CanvasDrawer) {
-    const sprite = './assets/red-player.png'
-    const idle: AnimationConfig = {
-      imagePath: sprite,
-      frameCount: 20,
-      frameDuration: 100,
-      frameWidth: 80,
-      frameHeight: 160,
-      animationType: AnimationType.Sequential,
-    }
-    const walk: AnimationConfig = {
-      imagePath: sprite,
-      frameCount: 17,
-      frameDuration: 100,
-      frameWidth: 80,
-      frameHeight: 160,
-      animationType: AnimationType.Sequential,
-    }
-    this.sprite = new SpriteAnimator([idle, walk])
+
+  constructor(
+    private readonly canvasDrawer: CanvasDrawer,
+    animations: AnimationConfig[]
+  ) {
+    this.sprite = new SpriteAnimator(animations)
   }
 
   update(deltaTime: number) {
@@ -33,6 +20,7 @@ export class RedPlayerRenderer {
 
   draw(player: PlayerModel) {
     const p = player.moveDto
+    if (!p) return
     this.sprite.draw(this.canvasDrawer.cctx, p.x - 41, p.y - 120)
 
     this.canvasDrawer.setLineStyle(player.teamColor, 1)
