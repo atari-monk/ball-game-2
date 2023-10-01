@@ -25,8 +25,16 @@ export class PlayerModel implements IPlayerModel {
     return this._id
   }
 
+  public set id(id: string) {
+    this._id = id
+  }
+
   public get name(): string {
     return this._name
+  }
+
+  set name(name: string) {
+    this._name = name
   }
 
   public get x(): number {
@@ -34,46 +42,58 @@ export class PlayerModel implements IPlayerModel {
   }
 
   set x(x: number) {
-    this.x = x
+    this._x = x
   }
 
-  public get y(): number {
+  get y(): number {
     return this._y
   }
 
   set y(y: number) {
-    this.y = y
+    this._y = y
   }
 
-  public get velocityX(): number {
+  get velocityX(): number {
     return this._velocityX
   }
 
   set velocityX(vx: number) {
-    this.velocityX = vx
+    this._velocityX = vx
   }
 
-  public get velocityY(): number {
+  get velocityY(): number {
     return this._velocityY
   }
 
   set velocityY(vy: number) {
-    this.velocityY = vy
+    this._velocityY = vy
   }
 
-  public get radius(): number {
+  get radius(): number {
     return this._radius
   }
 
-  public get collisionDisabled(): boolean {
+  set radius(r: number) {
+    this._radius = r
+  }
+
+  get collisionDisabled(): boolean {
     return this._collisionDisabled
   }
 
-  public get mass(): number {
+  set collisionDisabled(c: boolean) {
+    this._collisionDisabled = c
+  }
+
+  get mass(): number {
     return this._mass
   }
 
-  public get direction(): number {
+  set mass(m: number) {
+    this._mass = m
+  }
+
+  get direction(): number {
     return this._direction
   }
 
@@ -81,15 +101,23 @@ export class PlayerModel implements IPlayerModel {
     this._direction = d
   }
 
-  public get directionX(): number {
+  get directionX(): number {
     return this._directionX
   }
 
-  public get directionY(): number {
+  set directionX(dx: number) {
+    this._directionX = dx
+  }
+
+  get directionY(): number {
     return this._directionY
   }
 
-  public get speed(): number {
+  set directionY(dy: number) {
+    this._directionY = dy
+  }
+
+  get speed(): number {
     return this._speed
   }
 
@@ -97,19 +125,31 @@ export class PlayerModel implements IPlayerModel {
     this._speed = s
   }
 
-  public get maxSpeedForward(): number {
+  get maxSpeedForward(): number {
     return this._maxSpeedForward
   }
 
-  public get maxSpeedBackward(): number {
+  set maxSpeedForward(maxsf: number) {
+    this._maxSpeedForward = maxsf
+  }
+
+  get maxSpeedBackward(): number {
     return this._maxSpeedBackward
   }
 
-  public get turnSpeed(): number {
+  set maxSpeedBackward(maxsb: number) {
+    this._maxSpeedBackward = maxsb
+  }
+
+  get turnSpeed(): number {
     return this._turnSpeed
   }
 
-  public get team(): ITeam {
+  set turnSpeed(ts: number) {
+    this._turnSpeed = ts
+  }
+
+  get team(): ITeam {
     if (!this._team) throw new Error('Team must be assigned!')
     return this._team
   }
@@ -118,7 +158,7 @@ export class PlayerModel implements IPlayerModel {
     this._team = t
   }
 
-  public get score(): number {
+  get score(): number {
     return this._score
   }
 
@@ -126,7 +166,7 @@ export class PlayerModel implements IPlayerModel {
     this._score = s
   }
 
-  public get state(): PlayerState {
+  get state(): PlayerState {
     return this._state
   }
 

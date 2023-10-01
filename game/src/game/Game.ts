@@ -22,7 +22,7 @@ import { BallGateCollider } from '../collision/BallGateCollider'
 import { DateUtil } from '../utils/DateUtil'
 import { IMatch } from './IMatch'
 import { MatchDto, PlayerDto, TeamDto } from 'dtos'
-import { Player } from '../player1/Player'
+import { Player } from '../player2/Player'
 
 export class Game implements IMatch {
   private readonly frictionCoefficient: number = 0.99
@@ -180,7 +180,11 @@ export class Game implements IMatch {
   }
 
   public addPlayer(id: string): IPlayer {
-    const newPlayer: IPlayer = new Player(id, this.nameGenerator, this.io)
+    const newPlayer: IPlayer = Player.getDefaultPlayer(
+      this.io,
+      id,
+      this.nameGenerator
+    )
     newPlayer.assignToTeam(this.teams)
     this.players.push(newPlayer)
     newPlayer.positionInLine(this.teams, this.gates, this.field)
