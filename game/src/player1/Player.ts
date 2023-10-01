@@ -60,6 +60,10 @@ export class Player implements IPlayer {
     return this._model.radius
   }
 
+  public get collisionDisabled(): boolean {
+    return this._model.collisionDisabled
+  }
+
   public get mass(): number {
     return this._model.mass
   }
@@ -120,6 +124,14 @@ export class Player implements IPlayer {
 
   set y(y: number) {
     this._model.y = y
+  }
+
+  public get score(): number {
+    return this._model.score
+  }
+
+  set score(s: number) {
+    this._model.score = s
   }
 
   set state(state: PlayerState) {
