@@ -1,5 +1,4 @@
-import { IInput } from 'client-api'
-import { ISocketOutManager } from '../socket/ISocketOutManager'
+import { IInput, ISocketOutManager } from 'client-api'
 
 export class InputHandler {
   private input: IInput = {

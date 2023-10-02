@@ -1,4 +1,4 @@
-import { IInput } from 'client-api'
+import { IInput } from "../IInput"
 
 export interface ISocketOutManager {
   sendPlayerInput(input: IInput): void

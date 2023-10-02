@@ -15,11 +15,9 @@ import { LogManager } from './logger/LogManager'
 import { AnimationLoop } from './canvas/AnimationLoop'
 import { PlayerModel } from './player/PlayerModel'
 import { InputHandler } from './input/InputHandler'
-import { ISocketIo } from './socket/ISocketIo'
 import { MySocketIo } from './socket/MySocketIo'
-import { ISocketInManager } from './socket/ISocketInManager'
-import { ISocketOutManager } from './socket/ISocketOutManager'
 import { SocketOutManager } from './socket/SocketOutManager'
+import { ISocketIo, ISocketInManager, ISocketOutManager } from 'client-api'
 
 export class GameClient {
   private mysocket: ISocketIo

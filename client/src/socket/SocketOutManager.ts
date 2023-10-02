@@ -1,7 +1,5 @@
 import { Socket } from 'socket.io-client'
-import { IInput } from 'client-api'
-import { ISocketOutManager } from './ISocketOutManager'
-import { ISocketIo } from './ISocketIo'
+import { IInput, ISocketIo, ISocketOutManager } from 'client-api'
 import { OutEvents } from './SocketOutEvent'
 
 export class SocketOutManager implements ISocketOutManager {

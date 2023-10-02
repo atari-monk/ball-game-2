@@ -6,8 +6,8 @@
   "scripts": {
     "build-ts": "tsc",
     "build": "npx webpack --config webpack.config.js",
-    "local": "powershell ./script/local.ps1",
-    "server": "powershell ./script/server.ps1"
+    "local": "powershell.exe -ExecutionPolicy Bypass -File ./script/local.ps1",
+    "server": "powershell.exe -ExecutionPolicy Bypass -File ./script/server.ps1"
   },
   "keywords": [],
   "author": "",

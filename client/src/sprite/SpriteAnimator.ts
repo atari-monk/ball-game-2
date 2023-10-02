@@ -1,5 +1,4 @@
-import { AnimationConfig, AnimationType } from './AnimationConfig'
-import { IAnimationFrame } from './IAnimationFrame'
+import { AnimationConfig, AnimationType, IAnimationFrame } from 'client-api'
 
 export class SpriteAnimator {
   private image: HTMLImageElement
@@ -55,7 +54,6 @@ export class SpriteAnimator {
   cyclic(deltaTime: number) {
     this.timeSinceLastFrame += deltaTime
 
-    // Check if it's time to switch to the next frame
     if (
       this.timeSinceLastFrame >= this.frameDurations[this.currentAnimationIndex]
     ) {
@@ -68,7 +66,6 @@ export class SpriteAnimator {
       } else if (this.currentFrameIndex > 0 && !this.isForward) {
         this.currentFrameIndex--
       } else {
-        // Change the direction when reaching the start or end of frames
         this.isForward = !this.isForward
       }
       this.timeSinceLastFrame = 0

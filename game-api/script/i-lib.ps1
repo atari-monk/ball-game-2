@@ -24,6 +24,11 @@ $server = $proj + "server\"
 Copy-Item $api $server
 Set-Location $server
 npm i (Get-Item $pack).Name
+#install in client-api
+$clientApi = $proj + "client-api\"
+Copy-Item $api $clientApi
+Set-Location $clientApi
+npm i (Get-Item $pack).Name
 #install in client
 $client = $proj + "client\"
 Copy-Item $api $client

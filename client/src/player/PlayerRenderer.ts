@@ -1,5 +1,5 @@
+import { AnimationConfig } from 'client-api'
 import { CanvasDrawer } from '../canvas/CanvasDrawer'
-import { AnimationConfig } from '../sprite/AnimationConfig'
 import { SpriteAnimator } from '../sprite/SpriteAnimator'
 import { PlayerModel } from './PlayerModel'
 

@@ -1,8 +1,6 @@
+import { ISocketInManager, ISocketIo, InEvents } from 'client-api'
 import { MapDto, MatchDto, MessageDto, PlayerDto, TeamDto } from 'dtos'
 import { Socket } from 'socket.io-client'
-import { ISocketIo } from './ISocketIo'
-import { ISocketInManager } from './ISocketInManager'
-import { InEvents } from './SocketInEvent'
 
 export class SocketInManager implements ISocketInManager {
   private socket: Socket

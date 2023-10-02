@@ -1,3 +1,5 @@
+import { AnimationType } from './AnimationType'
+
 export interface AnimationConfig {
   imagePath: string
   frameWidth: number
@@ -5,9 +7,4 @@ export interface AnimationConfig {
   frameDuration: number
   frameCount: number
   animationType: AnimationType
-}
-
-export enum AnimationType {
-  Cyclic,
-  Sequential,
 }

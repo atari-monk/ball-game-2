@@ -1,4 +1,4 @@
-import { AnimationConfig, AnimationType } from '../sprite/AnimationConfig'
+import { AnimationType, AnimationConfig } from "client-api"
 
 const redSprite = './assets/red-player.png'
 const blueSprite = './assets/blue-player.png'

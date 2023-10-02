@@ -1,5 +1,5 @@
+import { ISocketIo } from 'client-api'
 import { Socket, io } from 'socket.io-client'
-import { ISocketIo } from './ISocketIo'
 
 export class MySocketIo implements ISocketIo {
   private _socket: Socket
