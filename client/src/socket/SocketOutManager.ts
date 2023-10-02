@@ -1,6 +1,6 @@
 import { Socket } from 'socket.io-client'
 import { IInput, ISocketIo, ISocketOutManager } from 'client-api'
-import { OutEvents } from './SocketOutEvent'
+import { SocketEvents } from 'shared-api'
 
 export class SocketOutManager implements ISocketOutManager {
   private socket: Socket
@@ -10,14 +10,14 @@ export class SocketOutManager implements ISocketOutManager {
   }
 
   sendPlayerInput(input: IInput) {
-    this.socket.emit(OutEvents.Input, input)
+    this.socket.emit(SocketEvents.Input, input)
   }
 
   sendPlayerId(playerId: string) {
-    this.socket.emit(OutEvents.SetPlayerId, playerId)
+    this.socket.emit(SocketEvents.SetPlayerId, playerId)
   }
 
   sendPong() {
-    this.socket.emit(OutEvents.Pong)
+    this.socket.emit(SocketEvents.Pong)
   }
 }

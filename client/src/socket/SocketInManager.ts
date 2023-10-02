@@ -1,5 +1,6 @@
-import { ISocketInManager, ISocketIo, InEvents } from 'client-api'
+import { ISocketInManager, ISocketIo } from 'client-api'
 import { MapDto, MatchDto, MessageDto, PlayerDto, TeamDto } from 'dtos'
+import { SocketEvents } from 'shared-api'
 import { Socket } from 'socket.io-client'
 
 export class SocketInManager implements ISocketInManager {
@@ -9,39 +10,39 @@ export class SocketInManager implements ISocketInManager {
     this.socket = socket.socket
   }
 
-  handlePing(callback: () => void) {
-    this.socket.on(InEvents.Ping, callback)
+  handleConnect(callback: () => void) {
+    this.socket.on(SocketEvents.Connect, callback)
   }
 
-  handleConnect(callback: () => void) {
-    this.socket.on(InEvents.Connect, callback)
+  handlePing(callback: () => void) {
+    this.socket.on(SocketEvents.Ping, callback)
   }
 
   handleYourPlayerId(callback: (id: string) => void) {
-    this.socket.on(InEvents.YourPlayerId, callback)
+    this.socket.on(SocketEvents.YourPlayerId, callback)
   }
 
   handleNewPlayer(callback: (dto: PlayerDto) => void) {
-    this.socket.on(InEvents.NewPlayer, callback)
+    this.socket.on(SocketEvents.NewPlayer, callback)
   }
 
   handleMapUpdate(callback: (mapData: MapDto) => void) {
-    this.socket.on(InEvents.Map, callback)
+    this.socket.on(SocketEvents.Map, callback)
   }
 
   handleTeamUpdate(callback: (teamData: TeamDto) => void) {
-    this.socket.on(InEvents.Team, callback)
+    this.socket.on(SocketEvents.Team, callback)
   }
 
   handleLogMessage(callback: (message: MessageDto) => void) {
-    this.socket.on(InEvents.Log, callback)
+    this.socket.on(SocketEvents.Log, callback)
   }
 
   handleLogReset(callback: () => void) {
-    this.socket.on(InEvents.LogReset, callback)
+    this.socket.on(SocketEvents.LogReset, callback)
   }
 
   handleMatchUpdate(callback: (matchData: MatchDto) => void) {
-    this.socket.on(InEvents.MatchUpdate, callback)
+    this.socket.on(SocketEvents.MatchUpdate, callback)
   }
 }

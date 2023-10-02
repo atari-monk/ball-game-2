@@ -1,0 +1,22 @@
+{
+  "name": "shared-api",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "node ./script/copy-package.js && tsc",
+    "i-lib": "powershell.exe -ExecutionPolicy Bypass -File .\\script\\i-lib.ps1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "typescript": "^5.2.2"
+  },
+  "dependencies": {
+    "dtos": "file:dtos-1.0.0.tgz",
+    "game-api": "file:game-api-1.0.0.tgz",
+    "socket.io": "^4.7.2",
+    "socket.io-client": "^4.7.2"
+  }
+}

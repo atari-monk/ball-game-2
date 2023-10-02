@@ -3,18 +3,19 @@ import { v4 as uuidv4 } from 'uuid'
 import { MapDto, MatchDto } from 'dtos'
 import { Game } from 'game'
 import { IPlayer } from 'game-api'
+import { SocketEvents } from 'shared-api'
 
 export default function initializeSocketIO(io: Server, game: Game) {
   const playerActivity = new Map()
 
-  io.on('connect', (socket: Socket) => {
+  io.on(SocketEvents.Connect, (socket: Socket) => {
     if (game.players.length > 14) {
       game.messenger.sendTextToOne(socket, 'Server is at capacity')
     }
     game.messenger.clearLogOne(socket)
     game.messenger.resendLog(socket)
 
-    socket.on('setPlayerId', (id: string) => {
+    socket.on(SocketEvents.SetPlayerId, (id: string) => {
       let playerId: string
       playerId = id
       console.log(`playerId: ${playerId || 'first time player'}`)
@@ -28,21 +29,21 @@ export default function initializeSocketIO(io: Server, game: Game) {
         }
       } else {
         playerId = uuidv4()
-        socket.emit('yourPlayerId', playerId)
+        socket.emit(SocketEvents.YourPlayerId, playerId)
         player = game.addPlayer(playerId)
       }
 
       playerActivity.set(playerId, Date.now())
 
       const pingInterval = setInterval(() => {
-        socket.emit('ping')
+        socket.emit(SocketEvents.Ping)
       }, 2000)
 
-      socket.on('pong', () => {
+      socket.on(SocketEvents.Pong, () => {
         playerActivity.set(playerId, Date.now())
       })
 
-      socket.on('input', (input: any) => {
+      socket.on(SocketEvents.Input, (input: any) => {
         if (game.stateManager.isNotInProgressState()) {
           return
         }
@@ -56,7 +57,7 @@ export default function initializeSocketIO(io: Server, game: Game) {
         }
       })
 
-      socket.on('disconnect', () => {
+      socket.on(SocketEvents.Disconnect, () => {
         clearInterval(pingInterval)
         setTimeout(() => {
           if (Date.now() - playerActivity.get(playerId) >= 2000) {
@@ -70,15 +71,21 @@ export default function initializeSocketIO(io: Server, game: Game) {
                 `${player.team?.name}'s ${player.name} ran away`
               )
               game.resetGame()
-              io.emit('update', new MatchDto(game.players, game.ball, 16))
+              io.emit(
+                SocketEvents.MatchUpdate,
+                new MatchDto(game.players, game.ball, 16)
+              )
               game.stateManager.transitionToMatchMaking()
             }
           }
         }, 2000)
       })
 
-      socket.emit('map', new MapDto(game.gates, game.field))
-      io.emit('update', new MatchDto(game.players, game.ball, 16))
+      socket.emit(SocketEvents.Map, new MapDto(game.gates, game.field))
+      io.emit(
+        SocketEvents.MatchUpdate,
+        new MatchDto(game.players, game.ball, 16)
+      )
     })
   })
 }

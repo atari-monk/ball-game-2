@@ -1,6 +1,8 @@
-export const InEvents = {
+export const SocketEvents = {
   Ping: 'ping',
+  Pong: 'pong',
   Connect: 'connect',
+  SetPlayerId: 'setPlayerId',
   YourPlayerId: 'yourPlayerId',
   NewPlayer: 'newPlayer',
   Map: 'map',
@@ -8,6 +10,8 @@ export const InEvents = {
   Log: 'log',
   LogReset: 'log-reset',
   MatchUpdate: 'update',
+  Input: 'input',
+  Disconnect: 'disconnect',
 } as const
 
-export type SocketInEvent = keyof typeof InEvents
+export type SocketEvent = keyof typeof SocketEvents
