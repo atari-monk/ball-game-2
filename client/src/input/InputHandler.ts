@@ -1,4 +1,4 @@
-import { IInput } from '../api/IInput'
+import { IInput } from 'client-api'
 import { ISocketOutManager } from '../socket/ISocketOutManager'
 
 export class InputHandler {

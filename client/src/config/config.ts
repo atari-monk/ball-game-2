@@ -1,4 +1,4 @@
-import { IHostConfig } from '../api/config/IHostConfig'
+import { IHostConfig } from 'client-api'
 import { host } from './host'
 
 export const hostConfig: IHostConfig = {

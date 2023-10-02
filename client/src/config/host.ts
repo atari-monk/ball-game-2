@@ -1,4 +1,4 @@
-import { IHosts } from '../api/config/IHosts'
+import { IHosts } from 'client-api'
 
 export const host: IHosts = {
   localhost: 'http://localhost:3001',

@@ -1,5 +1,5 @@
 import { Socket } from 'socket.io-client'
-import { IInput } from '../api/IInput'
+import { IInput } from 'client-api'
 import { ISocketOutManager } from './ISocketOutManager'
 import { ISocketIo } from './ISocketIo'
 import { OutEvents } from './SocketOutEvent'

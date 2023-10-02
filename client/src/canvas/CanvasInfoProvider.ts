@@ -1,5 +1,5 @@
 import { DOMUtils } from './../utils/DOMUtils'
-import { ICanvasInfo } from '../api/ICanvasInfo'
+import { ICanvasInfo } from 'client-api'
 
 export class CanvasInfoProvider {
   getCanvasInfo(id: string): ICanvasInfo {
