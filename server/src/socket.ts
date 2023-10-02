@@ -7,7 +7,7 @@ import { IPlayer } from 'game-api'
 export default function initializeSocketIO(io: Server, game: Game) {
   const playerActivity = new Map()
 
-  io.on('connection', (socket: Socket) => {
+  io.on('connect', (socket: Socket) => {
     if (game.players.length > 14) {
       game.messenger.sendTextToOne(socket, 'Server is at capacity')
     }

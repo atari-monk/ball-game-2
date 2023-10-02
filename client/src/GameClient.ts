@@ -61,7 +61,7 @@ export class GameClient {
 
   private onConnect() {
     const playerId = localStorage.getItem('playerId')
-    if (playerId) this.socketOutManager.sendPlayerId(playerId)
+    this.socketOutManager.sendPlayerId(playerId ?? '')
   }
 
   onYourPlayerId(id: string) {
