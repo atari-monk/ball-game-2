@@ -1,4 +1,11 @@
-import { MapDto, MatchDto, MessageDto, PlayerDto, TeamDto } from 'dtos'
+import {
+  MapDto,
+  MatchDto,
+  MessageDto,
+  PlayerDto,
+  PlayerStateDto,
+  TeamDto,
+} from 'dtos'
 
 export interface ISocketInManager {
   handlePing(callback: () => void): void
@@ -10,4 +17,5 @@ export interface ISocketInManager {
   handleLogMessage(callback: (message: MessageDto) => void): void
   handleLogReset(callback: () => void): void
   handleMatchUpdate(callback: (matchData: MatchDto) => void): void
+  handlePlayerSate(callback: (playerStateData: PlayerStateDto) => void): void
 }

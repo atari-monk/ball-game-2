@@ -16,6 +16,7 @@
   "dependencies": {
     "dtos": "file:dtos-1.0.0.tgz",
     "game-api": "file:game-api-1.0.0.tgz",
+    "shared-api": "file:shared-api-1.0.0.tgz",
     "socket.io": "^4.7.2",
     "socket.io-client": "^4.7.2"
   }
