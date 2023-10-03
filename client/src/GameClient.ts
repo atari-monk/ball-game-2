@@ -6,6 +6,7 @@ import {
   MatchDto,
   MessageDto,
   PlayerDto,
+  PlayerStateDto,
   TeamDto,
 } from 'dtos'
 import { hostConfig } from './config/config'
@@ -13,11 +14,13 @@ import { CanvasRenderer } from './canvas/CanvasRenderer'
 import { SocketInManager } from './socket/SocketInManager'
 import { LogManager } from './logger/LogManager'
 import { AnimationLoop } from './canvas/AnimationLoop'
-import { PlayerModel } from './player/PlayerModel'
 import { InputHandler } from './input/InputHandler'
 import { MySocketIo } from './socket/MySocketIo'
 import { SocketOutManager } from './socket/SocketOutManager'
 import { ISocketIo, ISocketInManager, ISocketOutManager } from 'client-api'
+import { Player } from './player/Player'
+import { PlayerStateType } from 'game-api'
+import { IdleState } from './player/state/IdleState'
 
 export class GameClient {
   private mysocket: ISocketIo
@@ -29,7 +32,7 @@ export class GameClient {
   private animationLoop: AnimationLoop
   private gates: IGateDtos | null = null
   private field: FieldDto | null = null
-  private players: PlayerModel[] = []
+  private players: Player[] = []
   private ball: BallDto | null = null
 
   constructor() {
@@ -57,6 +60,7 @@ export class GameClient {
     this.socketInManager.handleLogMessage(this.handleLogMessage.bind(this))
     this.socketInManager.handleLogReset(this.handleLogReset.bind(this))
     this.socketInManager.handleMatchUpdate(this.handleMatchUpdate.bind(this))
+    this.socketInManager.handlePlayerSate(this.handlePlayerState.bind(this))
   }
 
   private onConnect() {
@@ -70,11 +74,18 @@ export class GameClient {
 
   private onNewPlayer(dto: PlayerDto) {
     if (!this.players.find((p) => p.id === dto.id)) {
-      const newPlayer = new PlayerModel()
+      const newPlayer = new Player()
       newPlayer.id = dto.id
       newPlayer.radius = dto.radius
       this.players.push(newPlayer)
     }
+  }
+
+  private handlePlayerState(dto: PlayerStateDto) {
+    const player = this.players.find((p) => p.id === dto.id)
+    if (!player) return
+    if (dto.state.type === PlayerStateType.Idle)
+      player.setState(new IdleState(player))
   }
 
   private handleMapUpdate(dto: MapDto) {

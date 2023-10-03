@@ -1,5 +1,5 @@
 import { ISocketInManager, ISocketIo } from 'client-api'
-import { MapDto, MatchDto, MessageDto, PlayerDto, TeamDto } from 'dtos'
+import { MapDto, MatchDto, MessageDto, PlayerDto, PlayerStateDto, TeamDto } from 'dtos'
 import { SocketEvents } from 'shared-api'
 import { Socket } from 'socket.io-client'
 
@@ -44,5 +44,9 @@ export class SocketInManager implements ISocketInManager {
 
   handleMatchUpdate(callback: (matchData: MatchDto) => void) {
     this.socket.on(SocketEvents.MatchUpdate, callback)
+  }
+
+  handlePlayerSate(callback: (playerStateData: PlayerStateDto) => void) {
+    this.socket.on(SocketEvents.PlayerState, callback)
   }
 }
