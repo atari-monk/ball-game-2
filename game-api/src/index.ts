@@ -16,7 +16,5 @@ export { IPlayerAction } from './player/IPlayerAction'
 export { IPlayerModel } from './player/IPlayerModel'
 //state
 export { IPlayerState } from './player/state/IPlayerState'
-export { PlayerState } from './player/state/PlayerState'
-export { PlayerStateType } from './player/state/PlayerStateType'
 //utils
 export { INameGenerator } from './utils/INameGenerator'
