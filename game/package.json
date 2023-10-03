@@ -12,7 +12,8 @@
   "license": "ISC",
   "dependencies": {
     "dtos": "file:dtos-1.0.0.tgz",
-    "game-api": "file:game-api-1.0.0.tgz"
+    "game-api": "file:game-api-1.0.0.tgz",
+    "shared-api": "file:shared-api-1.0.0.tgz"
   },
   "devDependencies": {
     "typescript": "^5.2.2"

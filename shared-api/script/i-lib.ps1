@@ -19,6 +19,11 @@ $server = $proj + "server\"
 Copy-Item $api $server
 Set-Location $server
 npm i (Get-Item $pack).Name
+#install in game
+$game = $proj + "game\"
+Copy-Item $api $game
+Set-Location $game
+npm i (Get-Item $pack).Name
 #clean files
 #Remove-Item $shared-api
 #Remove-Item ($client + $pack)

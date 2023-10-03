@@ -1,7 +1,7 @@
 import { Server } from 'socket.io'
 import { IPlayer, IPlayerState, PlayerStateType } from 'game-api'
 import { PlayerStateDto } from 'dtos'
-import { ServerOutEvents } from './ServerOutEvents'
+import { SocketEvents } from 'shared-api'
 
 export class IdleState implements IPlayerState {
   constructor(private readonly player: IPlayer, private readonly io: Server) {}
@@ -9,7 +9,7 @@ export class IdleState implements IPlayerState {
   enter() {
     this.player.state = { type: PlayerStateType.Idle }
     this.io.emit(
-      ServerOutEvents.PlayerState,
+      SocketEvents.PlayerState,
       new PlayerStateDto(this.player.id, this.player.state)
     )
   }
