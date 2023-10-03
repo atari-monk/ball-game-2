@@ -22,7 +22,7 @@ import { BallGateCollider } from '../collision/BallGateCollider'
 import { DateUtil } from '../utils/DateUtil'
 import { IMatch } from './IMatch'
 import { MatchDto, PlayerDto, TeamDto } from 'dtos'
-import { Player } from '../player2/Player'
+import { Player } from '../player/Player'
 
 export class Game implements IMatch {
   private readonly frictionCoefficient: number = 0.99
