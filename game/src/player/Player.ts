@@ -1,9 +1,9 @@
 import { Server } from 'socket.io'
 import { PlayerBuilder } from './PlayerBuilder'
-import { PlayerState } from './PlayerState'
-import { INameGenerator } from 'game-api'
+import { INameGenerator, IPlayer } from 'game-api'
+import { PlayerMovement } from './PlayerMovement'
 
-export class Player extends PlayerState {
+export class Player extends PlayerMovement implements IPlayer {
   static getDefaultPlayer(
     io: Server,
     id: string,

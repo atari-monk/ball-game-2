@@ -1,4 +1,7 @@
-import { IPlayerModel, ITeam, PlayerState, PlayerStateType } from 'game-api'
+import { IPlayerModel, ITeam } from 'game-api'
+import { PlayerStateContext } from './state/PlayerStateContext'
+import { Server } from 'socket.io'
+import { PlayerState, PlayerStateType } from 'shared-api'
 
 export class PlayerModel implements IPlayerModel {
   private _id: string = ''
@@ -20,6 +23,7 @@ export class PlayerModel implements IPlayerModel {
   private _team: ITeam | null = null
   private _score: number = 0
   private _state: PlayerState = { type: PlayerStateType.Idle }
+  protected stateContext: PlayerStateContext
 
   public get id(): string {
     return this._id
@@ -172,5 +176,9 @@ export class PlayerModel implements IPlayerModel {
 
   set state(state: PlayerState) {
     this._state = state
+  }
+
+  constructor(protected readonly io: Server) {
+    this.stateContext = new PlayerStateContext(this, io)
   }
 }

@@ -1,35 +1,7 @@
-import { IField, IGates, IPlayerAction, IPlayerModel, ITeam } from 'game-api'
-import { IPlayerController } from '../player/movement/IPlayerController'
-import { SoccerPlayerController } from '../player/movement/SoccerPlayerController'
+import { IField, IGates, IPlayerAction, ITeam } from 'game-api'
 import { PlayerModel } from './PlayerModel'
 
 export class PlayerAction extends PlayerModel implements IPlayerAction {
-  private controller: IPlayerController = new SoccerPlayerController(this)
-
-  onUp(): void {
-    this.controller.onUp()
-  }
-
-  onDown(): void {
-    this.controller.onDown()
-  }
-
-  onLeft(): void {
-    this.controller.onLeft()
-  }
-
-  onRight(): void {
-    this.controller.onRight()
-  }
-
-  onInactive(): void {
-    this.controller.onInactive()
-  }
-
-  update(deltaTime: number) {
-    this.controller.update(deltaTime)
-  }
-
   scorePoint(): void {
     this.score++
     if (this.team) this.team.score++
