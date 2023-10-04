@@ -19,8 +19,9 @@ import { MySocketIo } from './socket/MySocketIo'
 import { SocketOutManager } from './socket/SocketOutManager'
 import { ISocketIo, ISocketInManager, ISocketOutManager } from 'client-api'
 import { Player } from './player/Player'
-import { PlayerStateType } from 'game-api'
 import { IdleState } from './player/state/IdleState'
+import { PlayerStateType } from 'shared-api'
+import { WalkState } from './player/state/WalkState'
 
 export class GameClient {
   private mysocket: ISocketIo
@@ -86,6 +87,8 @@ export class GameClient {
     if (!player) return
     if (dto.state.type === PlayerStateType.Idle)
       player.setState(new IdleState(player))
+    if (dto.state.type === PlayerStateType.Walk)
+      player.setState(new WalkState(player))
   }
 
   private handleMapUpdate(dto: MapDto) {

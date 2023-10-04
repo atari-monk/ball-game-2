@@ -1,5 +1,5 @@
 import { PlayerDto } from 'dtos'
-import { PlayerState, PlayerStateType } from 'game-api'
+import { PlayerState, PlayerStateType } from 'shared-api'
 
 export class PlayerModel {
   private _id: string = ''
