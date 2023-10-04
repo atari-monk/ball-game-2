@@ -24,7 +24,7 @@ import { PlayerStateType } from 'shared-api'
 import { WalkState } from './player/state/WalkState'
 import { CanvasInfoProvider } from './canvas/CanvasInfoProvider'
 import { CanvasDrawer } from './canvas/CanvasDrawer'
-import { redAnimations } from './player/playerData'
+import { blueAnimations, redAnimations } from './player/playerData'
 
 export class GameClient {
   private mysocket: ISocketIo
@@ -87,7 +87,7 @@ export class GameClient {
 
   private onNewPlayer(dto: PlayerDto) {
     if (!this.players.find((p) => p.id === dto.id)) {
-      const newPlayer = new Player(this.canvasDrawer, redAnimations)
+      const newPlayer = new Player()
       newPlayer.id = dto.id
       newPlayer.radius = dto.radius
       this.players.push(newPlayer)
@@ -115,6 +115,10 @@ export class GameClient {
       if (!player.teamColor) {
         if (dto.playerIds.find((id) => id === player.id)) {
           player.teamColor = dto.color
+          if (player.teamColor === 'blue')
+            player.createRenderer(this.canvasDrawer, blueAnimations)
+          if (player.teamColor === 'red')
+            player.createRenderer(this.canvasDrawer, redAnimations)
         }
       }
     })

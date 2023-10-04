@@ -7,13 +7,12 @@ import { AnimationConfig } from 'client-api'
 
 export class PlayerStateContext extends PlayerModel {
   private currentState: IPlayerState
-  renderer: PlayerRenderer
+  renderer?: PlayerRenderer
 
-  constructor(drawer: CanvasDrawer, animations: AnimationConfig[]) {
+  constructor() {
     super()
     this.currentState = new IdleState(this)
     this.currentState.enter()
-    this.renderer = new PlayerRenderer(drawer, animations)
   }
 
   setState(newState: IPlayerState): void {
@@ -23,7 +22,11 @@ export class PlayerStateContext extends PlayerModel {
   }
 
   render(dt: number) {
-    this.renderer.update(dt)
-    this.renderer.draw(this)
+    this.renderer?.update(dt)
+    this.renderer?.draw(this)
+  }
+
+  createRenderer(drawer: CanvasDrawer, animations: AnimationConfig[]) {
+    this.renderer = new PlayerRenderer(drawer, animations)
   }
 }
