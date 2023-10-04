@@ -14,6 +14,7 @@ export { MsgFlag } from './messanger/MsgFlag'
 export { IPlayer } from './player/IPlayer'
 export { IPlayerAction } from './player/IPlayerAction'
 export { IPlayerModel } from './player/IPlayerModel'
+export { IPlayerMovement } from './player/IPlayerMovement'
 //state
 export { IPlayerState } from './player/state/IPlayerState'
 //utils

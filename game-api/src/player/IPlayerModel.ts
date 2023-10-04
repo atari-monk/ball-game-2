@@ -1,5 +1,5 @@
+import { PlayerState } from 'shared-api'
 import { ITeam } from '../ITeam'
-import { PlayerState } from './state/PlayerState'
 
 export interface IPlayerModel {
   id: string
