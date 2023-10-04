@@ -7,6 +7,7 @@ export class IdleState implements IPlayerState {
 
   enter() {
     this.player.state = { type: PlayerStateType.Idle }
+    this.player.renderer?.switchAnimation(0)
     console.log('idle');
   }
 

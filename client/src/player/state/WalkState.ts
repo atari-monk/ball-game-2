@@ -7,6 +7,7 @@ export class WalkState implements IPlayerState {
 
   enter() {
     this.player.state = { type: PlayerStateType.Walk }
+    this.player.renderer?.switchAnimation(1)
     console.log('walk')
   }
 

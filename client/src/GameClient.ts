@@ -22,6 +22,9 @@ import { Player } from './player/Player'
 import { IdleState } from './player/state/IdleState'
 import { PlayerStateType } from 'shared-api'
 import { WalkState } from './player/state/WalkState'
+import { CanvasInfoProvider } from './canvas/CanvasInfoProvider'
+import { CanvasDrawer } from './canvas/CanvasDrawer'
+import { redAnimations } from './player/playerData'
 
 export class GameClient {
   private mysocket: ISocketIo
@@ -35,18 +38,27 @@ export class GameClient {
   private field: FieldDto | null = null
   private players: Player[] = []
   private ball: BallDto | null = null
+  private canvasDrawer: CanvasDrawer
 
   constructor() {
     this.mysocket = new MySocketIo(hostConfig.selectedHost)
     this.socketInManager = new SocketInManager(this.mysocket)
     this.socketOutManager = new SocketOutManager(this.mysocket)
-    this.canvasRenderer = new CanvasRenderer()
+    this.canvasDrawer = this.getCanvasDrawer()
+    this.canvasRenderer = new CanvasRenderer(this.canvasDrawer)
     this.logManager = new LogManager()
     this.animationLoop = new AnimationLoop(this.render.bind(this))
     new InputHandler(this.socketOutManager)
 
     this.initializeSocketListeners()
     this.animationLoop.start()
+  }
+
+  private getCanvasDrawer() {
+    const canvasInfoProvider = new CanvasInfoProvider()
+    const canvasInfo = canvasInfoProvider.getCanvasInfo('canvas')
+    const ctx = canvasInfo.ctx
+    return new CanvasDrawer(ctx)
   }
 
   private initializeSocketListeners() {
@@ -75,7 +87,7 @@ export class GameClient {
 
   private onNewPlayer(dto: PlayerDto) {
     if (!this.players.find((p) => p.id === dto.id)) {
-      const newPlayer = new Player()
+      const newPlayer = new Player(this.canvasDrawer, redAnimations)
       newPlayer.id = dto.id
       newPlayer.radius = dto.radius
       this.players.push(newPlayer)
