@@ -14,6 +14,7 @@
     "typescript": "^5.2.2"
   },
   "dependencies": {
-    "game-api": "file:game-api-1.0.0.tgz"
+    "game-api": "file:game-api-1.0.0.tgz",
+    "shared-api": "file:shared-api-1.0.0.tgz"
   }
 }
