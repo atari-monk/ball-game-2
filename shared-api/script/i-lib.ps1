@@ -8,6 +8,11 @@ npm run build
 Set-Location build
 npm pack
 
+$dtos = $proj + "dtos\"
+Copy-Item $api $dtos
+Set-Location $dtos
+npm i (Get-Item $pack).Name
+
 $clientApi = $proj + "client-api\"
 Copy-Item $api $clientApi
 Set-Location $clientApi
