@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>ball-game-2</title>
+    <link rel="stylesheet" type="text/css" href="./styles.css" />
+  </head>
+  <body>
+    <div id="container">
+      <div id="canvas-container">
+        <canvas id="canvas" width="800" height="600"></canvas>
+      </div>
+      <div id="message-board" class="hide">
+        <textarea id="log" rows="10" cols="40"></textarea>
+        <div>
+          <label for="log-filter" id="log-filter-label">Filter Logs:</label>
+          <select id="log-filter">
+            <option value="All">all</option>
+            <option value="ServerState">srv state</option>
+            <option value="Text">text</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <script src="./../../build/client.js"></script>
+  </body>
+</html>

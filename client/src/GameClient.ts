@@ -4,7 +4,6 @@ import {
   IGateDtos,
   MapDto,
   MatchDto,
-  MessageDto,
   PlayerDto,
   PlayerStateDto,
   TeamDto,
@@ -12,7 +11,6 @@ import {
 import { hostConfig } from './config/config'
 import { CanvasRenderer } from './canvas/CanvasRenderer'
 import { SocketInManager } from './socket/SocketInManager'
-import { LogManager } from './logger/LogManager'
 import { AnimationLoop } from './canvas/AnimationLoop'
 import { InputHandler } from './input/InputHandler'
 import { MySocketIo } from './socket/MySocketIo'
@@ -25,13 +23,13 @@ import { WalkState } from './player/state/WalkState'
 import { CanvasInfoProvider } from './canvas/CanvasInfoProvider'
 import { CanvasDrawer } from './canvas/CanvasDrawer'
 import { blueAnimations, redAnimations } from './player/playerData'
+import { LogClient } from './logger/LogClient'
 
 export class GameClient {
   private mysocket: ISocketIo
   private socketInManager: ISocketInManager
   private socketOutManager: ISocketOutManager
   private canvasRenderer: CanvasRenderer
-  private logManager: LogManager
   private teams: TeamDto[] = []
   private animationLoop: AnimationLoop
   private gates: IGateDtos | null = null
@@ -39,6 +37,8 @@ export class GameClient {
   private players: Player[] = []
   private ball: BallDto | null = null
   private canvasDrawer: CanvasDrawer
+  private logClient?: LogClient
+  private isLogOn: boolean = false
 
   constructor() {
     this.mysocket = new MySocketIo(hostConfig.selectedHost)
@@ -46,12 +46,12 @@ export class GameClient {
     this.socketOutManager = new SocketOutManager(this.mysocket)
     this.canvasDrawer = this.getCanvasDrawer()
     this.canvasRenderer = new CanvasRenderer(this.canvasDrawer)
-    this.logManager = new LogManager()
     this.animationLoop = new AnimationLoop(this.render.bind(this))
     new InputHandler(this.socketOutManager)
 
     this.initializeSocketListeners()
     this.animationLoop.start()
+    if (this.isLogOn) this.logClient = new LogClient(this.socketInManager)
   }
 
   private getCanvasDrawer() {
@@ -70,8 +70,6 @@ export class GameClient {
     this.socketInManager.handleNewPlayer(this.onNewPlayer.bind(this))
     this.socketInManager.handleMapUpdate(this.handleMapUpdate.bind(this))
     this.socketInManager.handleTeamUpdate(this.handleTeamUpdate.bind(this))
-    this.socketInManager.handleLogMessage(this.handleLogMessage.bind(this))
-    this.socketInManager.handleLogReset(this.handleLogReset.bind(this))
     this.socketInManager.handleMatchUpdate(this.handleMatchUpdate.bind(this))
     this.socketInManager.handlePlayerSate(this.handlePlayerState.bind(this))
   }
@@ -133,14 +131,6 @@ export class GameClient {
         player.moveDto = playerDto
       }
     })
-  }
-
-  private handleLogMessage(dto: MessageDto) {
-    this.logManager.logMessage(dto)
-  }
-
-  private handleLogReset() {
-    this.logManager.clearTextArea()
   }
 
   private render(dt: number) {
