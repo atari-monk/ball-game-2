@@ -9,7 +9,7 @@ export default function initializeSocketIO(io: Server, game: Game) {
   const playerActivity = new Map()
 
   io.on(SocketEvents.Connect, (socket: Socket) => {
-    if (game.players.length > 14) {
+    if (game.gameData.players.length > 14) {
       game.messenger.sendTextToOne(socket, 'Server is at capacity')
     }
     game.messenger.clearLogOne(socket)
@@ -23,7 +23,7 @@ export default function initializeSocketIO(io: Server, game: Game) {
       let player: IPlayer | undefined
 
       if (playerId) {
-        player = game.players.find((p) => p.id === playerId)
+        player = game.gameData.players.find((p) => p.id === playerId)
         if (!player) {
           player = game.addPlayer(playerId)
         }
@@ -66,14 +66,16 @@ export default function initializeSocketIO(io: Server, game: Game) {
             )
             if (player) {
               const id = player.id
-              game.players = game.players.filter((p) => p.id !== id)
+              game.gameData.players = game.gameData.players.filter(
+                (p) => p.id !== id
+              )
               game.messenger.sendText(
                 `${player.team?.name}'s ${player.name} ran away`
               )
               game.resetGame()
               io.emit(
                 SocketEvents.MatchUpdate,
-                new MatchDto(game.players, game.ball, 16)
+                new MatchDto(game.gameData.players, game.gameData.ball, 16)
               )
               game.stateManager.transitionToMatchMaking()
             }
@@ -81,10 +83,13 @@ export default function initializeSocketIO(io: Server, game: Game) {
         }, 2000)
       })
 
-      socket.emit(SocketEvents.Map, new MapDto(game.gates, game.field))
+      socket.emit(
+        SocketEvents.Map,
+        new MapDto(game.gameData.gates, game.gameData.field)
+      )
       io.emit(
         SocketEvents.MatchUpdate,
-        new MatchDto(game.players, game.ball, 16)
+        new MatchDto(game.gameData.players, game.gameData.ball, 16)
       )
     })
   })

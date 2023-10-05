@@ -70,7 +70,7 @@ export class GameStateManager {
     this.startCounter(
       () => {
         this.game.resetGame()
-        if (this.game.players.length === 2) {
+        if (this.game.gameData.players.length === 2) {
           this.transitionToStartGame()
         } else {
           this.transitionToMatchMaking()
