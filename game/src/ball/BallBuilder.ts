@@ -6,8 +6,8 @@ export class BallBuilder {
   private y: number = 0
   private velocityX: number = 0
   private velocityY: number = 0
-  private radius: number = 5
-  private mass: number = 5
+  private radius: number = 0
+  private mass: number = 0
   private lastHit: IPlayer | null = null
 
   constructor() {}

@@ -30,8 +30,8 @@ export class Game implements IMatch {
   ball: IBall = new BallBuilder()
     .withPosition(400, 300)
     .withVelocity(0, 0)
-    .withRadius(5)
-    .withMass(5)
+    .withRadius(20)
+    .withMass(0.6)
     .withLastHit(null)
     .build()
   field: IField = { width: 800, height: 600 }
@@ -83,13 +83,13 @@ export class Game implements IMatch {
     this.gates = {
       left: new GateBuilder()
         .withPosition(0, this.field.height / 2 - 50)
-        .withWidth(5)
+        .withWidth(20)
         .withHeight(100)
         .withTeam(this.teams[0])
         .build(),
       right: new GateBuilder()
-        .withPosition(this.field.width - 5, this.field.height / 2 - 50)
-        .withWidth(5)
+        .withPosition(this.field.width - 20, this.field.height / 2 - 50)
+        .withWidth(20)
         .withHeight(100)
         .withTeam(this.teams[1])
         .build(),

@@ -24,19 +24,19 @@ export class SoccerPlayerController implements IPlayerController {
   }
 
   onLeft(): void {
-    this.p.velocityX = -0.04
+    this.p.velocityX = -this.p.maxSpeedForward
   }
 
   onRight(): void {
-    this.p.velocityX = 0.04
+    this.p.velocityX = this.p.maxSpeedForward
   }
 
   onUp(): void {
-    this.p.velocityY = -0.04
+    this.p.velocityY = -this.p.maxSpeedForward
   }
 
   onDown(): void {
-    this.p.velocityY = 0.04
+    this.p.velocityY = this.p.maxSpeedForward
   }
 
   onInactive(): void {
