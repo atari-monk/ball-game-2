@@ -10,10 +10,11 @@ import { BallGateCollider } from '../collision/BallGateCollider'
 import { DateUtil } from '../utils/DateUtil'
 import { IMatch } from './IMatch'
 import { MatchDto, PlayerDto, TeamDto } from 'dtos'
-import { GameData } from './GameData'
+import { IGameData } from './IGameData'
+import { GameDataForMobileLandscape } from './GameDataForMobileLandscape'
 
 export class Game implements IMatch {
-  private readonly _gameData: GameData
+  private readonly _gameData: IGameData
   private readonly frictionCoefficient: number = 0.99
   matchDuration: number = 5 * 60 * 1000
   matchStartTime: number | null = null
@@ -30,7 +31,7 @@ export class Game implements IMatch {
   private _messenger: IMessenger
   private _stateManager: IGameStateManager
 
-  get gameData(): GameData {
+  get gameData(): IGameData {
     return this._gameData
   }
 
@@ -43,10 +44,9 @@ export class Game implements IMatch {
   }
 
   constructor(private readonly io: Server) {
-    this._gameData = new GameData()
+    this._gameData = new GameDataForMobileLandscape()
     this._messenger = new Messenger(io)
     this._stateManager = new GameStateManager(this._messenger, this)
-
     this._stateManager.transitionToMatchMaking()
   }
 

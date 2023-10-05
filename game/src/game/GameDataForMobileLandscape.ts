@@ -8,7 +8,7 @@ import { TeamNameGenerator } from '../team/TeamNameGenerator'
 import { Player } from '../player/Player'
 import { IGameData } from './IGameData'
 
-export class GameData implements IGameData {
+export class GameDataForMobileLandscape implements IGameData {
   private _field: IField
   private _teams: ITeam[]
   private _gates: IGates
@@ -48,7 +48,7 @@ export class GameData implements IGameData {
   }
 
   private getField() {
-    return { width: 800, height: 600 }
+    return { width: 740, height: 360 }
   }
 
   private getTeams() {
@@ -90,7 +90,7 @@ export class GameData implements IGameData {
 
   private getBall() {
     return new BallBuilder()
-      .withPosition(400, 300)
+      .withPosition(this._field.width / 2, this._field.height / 2)
       .withVelocity(0, 0)
       .withRadius(20)
       .withMass(0.6)
