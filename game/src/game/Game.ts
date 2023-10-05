@@ -24,7 +24,73 @@ import { IMatch } from './IMatch'
 import { MatchDto, PlayerDto, TeamDto } from 'dtos'
 import { Player } from '../player/Player'
 
+export class GameData {
+  private _field: IField
+  private _teams: ITeam[]
+  private _gates: IGates
+
+  get field(): IField {
+    return this._field
+  }
+
+  get teams(): ITeam[] {
+    return this._teams
+  }
+
+  get gates(): IGates {
+    return this._gates
+  }
+
+  constructor() {
+    this._field = this.getField()
+    this._teams = this.getTeams()
+    this._gates = this.getGates()
+  }
+
+  private getField() {
+    return { width: 800, height: 600 }
+  }
+
+  private getTeams() {
+    const teamNameGenerator = new TeamNameGenerator()
+    const [nameA, nameB] = teamNameGenerator.getRandomAnimalTeams()
+    const teamA = Team.builder()
+      .withName(nameA)
+      .withColor('red')
+      .withScore(0)
+      .build()
+    const teamB = Team.builder()
+      .withName(nameB)
+      .withColor('blue')
+      .withScore(0)
+      .build()
+    const teams: ITeam[] = []
+    teams.push(teamA)
+    teams.push(teamB)
+    return teams
+  }
+
+  private getGates() {
+    const gates: IGates = {
+      left: new GateBuilder()
+        .withPosition(0, this._field.height / 2 - 50)
+        .withWidth(20)
+        .withHeight(100)
+        .withTeam(this._teams[0])
+        .build(),
+      right: new GateBuilder()
+        .withPosition(this._field.width - 20, this._field.height / 2 - 50)
+        .withWidth(20)
+        .withHeight(100)
+        .withTeam(this._teams[1])
+        .build(),
+    }
+    return gates
+  }
+}
+
 export class Game implements IMatch {
+  private readonly gameData: GameData
   private readonly frictionCoefficient: number = 0.99
   players: IPlayer[] = []
   ball: IBall = new BallBuilder()
@@ -34,9 +100,6 @@ export class Game implements IMatch {
     .withMass(0.6)
     .withLastHit(null)
     .build()
-  field: IField = { width: 800, height: 600 }
-  gates: IGates
-  teams: ITeam[] = []
   matchDuration: number = 5 * 60 * 1000
   matchStartTime: number | null = null
   private nameGenerator = new NameGenerator()
@@ -51,7 +114,6 @@ export class Game implements IMatch {
   private ballGateCollider = new BallGateCollider()
   private _messenger: IMessenger
   private _stateManager: IGameStateManager
-  private teamNameGenerator: TeamNameGenerator
 
   get messenger(): IMessenger {
     return this._messenger
@@ -62,38 +124,9 @@ export class Game implements IMatch {
   }
 
   constructor(private readonly io: Server) {
+    this.gameData = new GameData()
     this._messenger = new Messenger(io)
     this._stateManager = new GameStateManager(this._messenger, this)
-
-    this.teamNameGenerator = new TeamNameGenerator()
-    const [nameA, nameB] = this.teamNameGenerator.getRandomAnimalTeams()
-    const teamA = Team.builder()
-      .withName(nameA)
-      .withColor('red')
-      .withScore(0)
-      .build()
-    const teamB = Team.builder()
-      .withName(nameB)
-      .withColor('blue')
-      .withScore(0)
-      .build()
-    this.teams.push(teamA)
-    this.teams.push(teamB)
-
-    this.gates = {
-      left: new GateBuilder()
-        .withPosition(0, this.field.height / 2 - 50)
-        .withWidth(20)
-        .withHeight(100)
-        .withTeam(this.teams[0])
-        .build(),
-      right: new GateBuilder()
-        .withPosition(this.field.width - 20, this.field.height / 2 - 50)
-        .withWidth(20)
-        .withHeight(100)
-        .withTeam(this.teams[1])
-        .build(),
-    }
 
     this._stateManager.transitionToMatchMaking()
   }
@@ -121,7 +154,9 @@ export class Game implements IMatch {
         'newPlayer',
         new PlayerDto(p.id, p.x, p.y, p.radius, p.directionX, p.directionY)
       )
-      const team = this.teams.find((t) => t.playerIds.find((id) => id === p.id))
+      const team = this.gameData.teams.find((t) =>
+        t.playerIds.find((id) => id === p.id)
+      )
       if (team) this.io.emit('team', new TeamDto(team))
     })
   }
@@ -134,14 +169,14 @@ export class Game implements IMatch {
     this.messenger.clearLogAll()
 
     // Reset the ball position
-    this.ball.x = this.field.width / 2
-    this.ball.y = this.field.height / 2
+    this.ball.x = this.gameData.field.width / 2
+    this.ball.y = this.gameData.field.height / 2
     this.ball.velocityX = 0
     this.ball.velocityY = 0
     this.ball.lastHit = null
 
     // Reset team scores
-    for (const team of this.teams) {
+    for (const team of this.gameData.teams) {
       team.score = 0
       team.playerIds = []
     }
@@ -150,8 +185,12 @@ export class Game implements IMatch {
 
     for (const player of this.players) {
       player.resetAfterMatch()
-      player.assignToTeam(this.teams)
-      player.positionInLine(this.teams, this.gates, this.field)
+      player.assignToTeam(this.gameData.teams)
+      player.positionInLine(
+        this.gameData.teams,
+        this.gameData.gates,
+        this.gameData.field
+      )
     }
 
     this.lastLogMinute = -1
@@ -159,22 +198,26 @@ export class Game implements IMatch {
 
   resetAfterGoal() {
     // Reposition the ball to the center of the field
-    this.ball.x = this.field.width / 2
-    this.ball.y = this.field.height / 2
+    this.ball.x = this.gameData.field.width / 2
+    this.ball.y = this.gameData.field.height / 2
     this.ball.velocityX = 0
     this.ball.velocityY = 0
     this.ball.lastHit = null
 
     for (const player of this.players) {
       player.resetAfterGoal()
-      player.positionInLine(this.teams, this.gates, this.field)
+      player.positionInLine(
+        this.gameData.teams,
+        this.gameData.gates,
+        this.gameData.field
+      )
     }
   }
 
   pointScored() {
     this.ball.lastHit?.scorePoint()
     this._messenger.sendText(
-      `Goal by ${this.ball.lastHit?.name}, ${this.teams[0].name} (${this.teams[0].color}): ${this.teams[0].score} - ${this.teams[1].name}: ${this.teams[1].score}`
+      `Goal by ${this.ball.lastHit?.name}, ${this.gameData.teams[0].name} (${this.gameData.teams[0].color}): ${this.gameData.teams[0].score} - ${this.gameData.teams[1].name}: ${this.gameData.teams[1].score}`
     )
     this.resetAfterGoal()
   }
@@ -185,9 +228,13 @@ export class Game implements IMatch {
       id,
       this.nameGenerator
     )
-    newPlayer.assignToTeam(this.teams)
+    newPlayer.assignToTeam(this.gameData.teams)
     this.players.push(newPlayer)
-    newPlayer.positionInLine(this.teams, this.gates, this.field)
+    newPlayer.positionInLine(
+      this.gameData.teams,
+      this.gameData.gates,
+      this.gameData.field
+    )
     this._messenger.sendText(
       `${newPlayer.name} joins team ${newPlayer.team?.name} (${newPlayer.team?.color})`
     )
@@ -238,18 +285,25 @@ export class Game implements IMatch {
 
     this.playerWallCollider.checkWallCollision(
       this.players,
-      this.field,
+      this.gameData.field,
       deltaTime
     )
 
-    this.ballWallCollider.checkWallCollisionForBall(this.ball, this.field)
+    this.ballWallCollider.checkWallCollisionForBall(
+      this.ball,
+      this.gameData.field
+    )
 
-    this.ballGateCollider.checkGateCollision(this.ball, this.gates, this)
+    this.ballGateCollider.checkGateCollision(
+      this.ball,
+      this.gameData.gates,
+      this
+    )
   }
 
   getGameResult() {
-    const teamA = this.teams[0]
-    const teamB = this.teams[1]
+    const teamA = this.gameData.teams[0]
+    const teamB = this.gameData.teams[1]
 
     if (teamA.score > teamB.score) {
       return `Team ${teamA.name} (${teamA.color}) wins ${teamA.score}-${teamB.score}!`
