@@ -400,4 +400,4 @@ FodyWeavers.xsd
 build
 *.env
 *.zip
-*tgz
+#*tgz
