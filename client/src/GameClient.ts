@@ -24,6 +24,7 @@ import { CanvasInfoProvider } from './canvas/CanvasInfoProvider'
 import { CanvasDrawer } from './canvas/CanvasDrawer'
 import { blueAnimations, redAnimations } from './player/playerData'
 import { LogClient } from './logger/LogClient'
+import { MobileInputHandler } from './input/MobileInputHandler'
 
 export class GameClient {
   private mysocket: ISocketIo
@@ -48,6 +49,7 @@ export class GameClient {
     this.canvasRenderer = new CanvasRenderer(this.canvasDrawer)
     this.animationLoop = new AnimationLoop(this.render.bind(this))
     new InputHandler(this.socketOutManager)
+    new MobileInputHandler(this.socketOutManager)
 
     this.initializeSocketListeners()
     this.animationLoop.start()
