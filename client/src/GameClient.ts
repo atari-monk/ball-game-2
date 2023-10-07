@@ -40,6 +40,7 @@ export class GameClient {
   private canvasDrawer: CanvasDrawer
   private logClient?: LogClient
   private isLogOn: boolean = false
+  private mobileInputHandler: MobileInputHandler
 
   constructor() {
     this.mysocket = new MySocketIo(hostConfig.selectedHost)
@@ -49,7 +50,7 @@ export class GameClient {
     this.canvasRenderer = new CanvasRenderer(this.canvasDrawer)
     this.animationLoop = new AnimationLoop(this.render.bind(this))
     new InputHandler(this.socketOutManager)
-    new MobileInputHandler(this.socketOutManager)
+    this.mobileInputHandler = new MobileInputHandler(this.socketOutManager)
 
     this.initializeSocketListeners()
     this.animationLoop.start()
@@ -131,6 +132,7 @@ export class GameClient {
       const playerDto = players.find((p) => p.id === player.id)
       if (playerDto) {
         player.moveDto = playerDto
+        this.mobileInputHandler.setPlayerPosition(playerDto.x, playerDto.y)
       }
     })
   }

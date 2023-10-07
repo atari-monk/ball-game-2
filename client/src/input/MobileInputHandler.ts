@@ -8,8 +8,8 @@ export class MobileInputHandler {
     right: false,
   }
 
-  private touchStartX: number | null = null
-  private touchStartY: number | null = null
+  private playerX: number = 0 // Initial player X position
+  private playerY: number = 0 // Initial player Y position
 
   constructor(private readonly socketOutManager: ISocketOutManager) {
     // Add touch event listeners to handle mobile input
@@ -21,44 +21,99 @@ export class MobileInputHandler {
     })
   }
 
+  // Method to set the player's position
+  public setPlayerPosition(x: number, y: number) {
+    this.playerX = x
+    this.playerY = y
+  }
+
   private handleTouchStart(event: TouchEvent) {
     event.preventDefault() // Prevent default touch behavior (e.g., scrolling)
     const touch = event.touches[0]
-    this.touchStartX = touch.clientX
-    this.touchStartY = touch.clientY
+
+    // Calculate the touch position relative to the player's position
+    const relativeX = touch.clientX - this.playerX
+    const relativeY = touch.clientY - this.playerY
+
+    console.log('playerX', this.playerX)
+    console.log('playerY', this.playerY)
+    console.log('touch.clientX', touch.clientX)
+    console.log('touch.clientY', touch.clientY)
+    console.log('relativeX', relativeX)
+    console.log('relativeY', relativeY)
+
+    if (relativeX > 0 && Math.abs(relativeY) < 21) {
+      // Moving right when relativeX is positive and |relativeY| is less than 21
+      this.input.right = true
+    }
+
+    if (
+      relativeX > 0 &&
+      relativeY < 0 &&
+      Math.abs(Math.abs(relativeX) - Math.abs(relativeY)) < 31
+    ) {
+      // Moving right when relativeX is positive and |relativeY| is less than 21
+      this.input.right = true
+      this.input.up = true
+    }
+
+    if (relativeX < 0 && Math.abs(relativeY) < 21) {
+      // Moving right when relativeX is positive and |relativeY| is less than 21
+      this.input.left = true
+    }
+
+    if (
+      relativeX < 0 &&
+      relativeY < 0 &&
+      Math.abs(Math.abs(relativeX) - Math.abs(relativeY)) < 31
+    ) {
+      // Moving right when relativeX is positive and |relativeY| is less than 21
+      this.input.left = true
+      this.input.up = true
+    }
+
+    if (relativeY < 0 && Math.abs(relativeX) < 21) {
+      // Moving right when relativeX is positive and |relativeY| is less than 21
+      this.input.up = true
+    }
+
+    if (
+      relativeX < 0 &&
+      relativeY > 0 &&
+      Math.abs(Math.abs(relativeX) - Math.abs(relativeY)) < 31
+    ) {
+      // Moving right when relativeX is positive and |relativeY| is less than 21
+      this.input.left = true
+      this.input.down = true
+    }
+
+    if (relativeY > 0 && Math.abs(relativeX) < 21) {
+      // Moving right when relativeX is positive and |relativeY| is less than 21
+      this.input.down = true
+    }
+
+    if (
+      relativeX > 0 &&
+      relativeY > 0 &&
+      Math.abs(Math.abs(relativeX) - Math.abs(relativeY)) < 31
+    ) {
+      // Moving right when relativeX is positive and |relativeY| is less than 21
+      this.input.right = true
+      this.input.down = true
+    }
+
+    // Send the initial input state to the socket manager
+    this.socketOutManager.sendPlayerInput(this.input)
   }
 
   private handleTouchEnd(event: TouchEvent) {
     event.preventDefault() // Prevent default touch behavior (e.g., zooming)
-    if (this.touchStartX === null || this.touchStartY === null) {
-      return // Touch start data is missing
-    }
 
-    const touch = event.changedTouches[0]
-    const touchEndX = touch.clientX
-    const touchEndY = touch.clientY
-
-    const deltaX = touchEndX - this.touchStartX
-    const deltaY = touchEndY - this.touchStartY
-
-    // Reset touch start data
-    this.touchStartX = null
-    this.touchStartY = null
-
-    // Determine the dominant direction of the swipe
-    if (Math.abs(deltaX) > Math.abs(deltaY)) {
-      // Horizontal swipe
-      this.input.left = deltaX < 0
-      this.input.right = deltaX > 0
-      this.input.up = false
-      this.input.down = false
-    } else {
-      // Vertical swipe
-      this.input.up = deltaY < 0
-      this.input.down = deltaY > 0
-      this.input.left = false
-      this.input.right = false
-    }
+    // Reset all input directions to stop the player's movement
+    this.input.up = false
+    this.input.down = false
+    this.input.left = false
+    this.input.right = false
 
     // Send the updated input state to the socket manager
     this.socketOutManager.sendPlayerInput(this.input)
