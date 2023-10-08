@@ -1,4 +1,5 @@
 import { IInput, ISocketOutManager } from 'client-api'
+import { Vector2 } from '../utils/Vector2'
 
 export class MobileInputHandler {
   private input: IInput = {
@@ -8,8 +9,8 @@ export class MobileInputHandler {
     right: false,
   }
 
-  private playerX: number = 0 // Initial player X position
-  private playerY: number = 0 // Initial player Y position
+  private playerPosition: Vector2
+  private isTouching: boolean = false
 
   constructor(private readonly socketOutManager: ISocketOutManager) {
     // Add touch event listeners to handle mobile input
@@ -19,96 +20,74 @@ export class MobileInputHandler {
     document.addEventListener('touchend', this.handleTouchEnd.bind(this), {
       passive: false,
     })
+    document.addEventListener('touchmove', this.handleTouchMove.bind(this), {
+      passive: false,
+    })
+    this.playerPosition = new Vector2(0, 0)
   }
 
   // Method to set the player's position
   public setPlayerPosition(x: number, y: number) {
-    this.playerX = x
-    this.playerY = y
+    this.playerPosition.x = x
+    this.playerPosition.y = y
   }
 
-  private handleTouchStart(event: TouchEvent) {
-    event.preventDefault() // Prevent default touch behavior (e.g., scrolling)
+  private determineDirection(directionVector: Vector2): void {
+    this.input.up = false
+    this.input.down = false
+    this.input.left = false
+    this.input.right = false
+
+    const threshold = 0.3 // Adjust this threshold for sensitivity
+
+    if (directionVector.x > threshold) {
+      this.input.right = true
+    } else if (directionVector.x < -threshold) {
+      this.input.left = true
+    }
+
+    if (directionVector.y > threshold) {
+      this.input.down = true
+    } else if (directionVector.y < -threshold) {
+      this.input.up = true
+    }
+  }
+
+  private handleTouchStart(event: TouchEvent): void {
+    event.preventDefault()
+    this.isTouching = true
+
     const touch = event.touches[0]
+    const touchPosition = new Vector2(touch.clientX, touch.clientY)
+    const directionVector = touchPosition
+      .subtract(this.playerPosition)
+      .normalize()
 
-    // Calculate the touch position relative to the player's position
-    const relativeX = touch.clientX - this.playerX
-    const relativeY = touch.clientY - this.playerY
+    this.determineDirection(directionVector)
 
-    console.log('playerX', this.playerX)
-    console.log('playerY', this.playerY)
-    console.log('touch.clientX', touch.clientX)
-    console.log('touch.clientY', touch.clientY)
-    console.log('relativeX', relativeX)
-    console.log('relativeY', relativeY)
+    this.socketOutManager.sendPlayerInput(this.input)
+  }
 
-    if (relativeX > 0 && Math.abs(relativeY) < 21) {
-      // Moving right when relativeX is positive and |relativeY| is less than 21
-      this.input.right = true
-    }
+  private handleTouchMove(event: TouchEvent): void {
+    if (!this.isTouching) return
 
-    if (
-      relativeX > 0 &&
-      relativeY < 0 &&
-      Math.abs(Math.abs(relativeX) - Math.abs(relativeY)) < 31
-    ) {
-      // Moving right when relativeX is positive and |relativeY| is less than 21
-      this.input.right = true
-      this.input.up = true
-    }
+    event.preventDefault()
 
-    if (relativeX < 0 && Math.abs(relativeY) < 21) {
-      // Moving right when relativeX is positive and |relativeY| is less than 21
-      this.input.left = true
-    }
+    const touch = event.touches[0]
+    const touchPosition = new Vector2(touch.clientX, touch.clientY)
+    const directionVector = touchPosition
+      .subtract(this.playerPosition)
+      .normalize()
 
-    if (
-      relativeX < 0 &&
-      relativeY < 0 &&
-      Math.abs(Math.abs(relativeX) - Math.abs(relativeY)) < 31
-    ) {
-      // Moving right when relativeX is positive and |relativeY| is less than 21
-      this.input.left = true
-      this.input.up = true
-    }
+    this.determineDirection(directionVector)
 
-    if (relativeY < 0 && Math.abs(relativeX) < 21) {
-      // Moving right when relativeX is positive and |relativeY| is less than 21
-      this.input.up = true
-    }
-
-    if (
-      relativeX < 0 &&
-      relativeY > 0 &&
-      Math.abs(Math.abs(relativeX) - Math.abs(relativeY)) < 31
-    ) {
-      // Moving right when relativeX is positive and |relativeY| is less than 21
-      this.input.left = true
-      this.input.down = true
-    }
-
-    if (relativeY > 0 && Math.abs(relativeX) < 21) {
-      // Moving right when relativeX is positive and |relativeY| is less than 21
-      this.input.down = true
-    }
-
-    if (
-      relativeX > 0 &&
-      relativeY > 0 &&
-      Math.abs(Math.abs(relativeX) - Math.abs(relativeY)) < 31
-    ) {
-      // Moving right when relativeX is positive and |relativeY| is less than 21
-      this.input.right = true
-      this.input.down = true
-    }
-
-    // Send the initial input state to the socket manager
     this.socketOutManager.sendPlayerInput(this.input)
   }
 
   private handleTouchEnd(event: TouchEvent) {
     event.preventDefault() // Prevent default touch behavior (e.g., zooming)
-
+    this.isTouching = false
+    
     // Reset all input directions to stop the player's movement
     this.input.up = false
     this.input.down = false
