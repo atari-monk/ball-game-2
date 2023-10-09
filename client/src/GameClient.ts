@@ -79,12 +79,14 @@ export class GameClient {
     const fullscreenButton = document.getElementById(
       'fullscreen-button'
     ) as HTMLButtonElement
+    if (!fullscreenButton) return
 
-    if (fullscreenButton) {
-      fullscreenButton.addEventListener('click', () => {
-        this.fullScreen.enterFullscreen()
-      })
-    }
+    fullscreenButton.addEventListener('click', () => {
+      this.fullScreen.enterFullscreen()
+    })
+    fullscreenButton.addEventListener('touchstart', () => {
+      this.fullScreen.enterFullscreen()
+    })
   }
 
   private initializeSocketListeners() {
