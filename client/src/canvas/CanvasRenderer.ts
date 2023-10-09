@@ -1,33 +1,9 @@
 import { FieldDto, IGateDtos, BallDto } from 'dtos'
-import { CanvasInfoProvider } from './CanvasInfoProvider'
 import { CanvasDrawer } from './CanvasDrawer'
-import { PlayerModel } from '../player/PlayerModel'
-import { PlayerRenderer } from '../player/PlayerRenderer'
-import { blueAnimations, redAnimations } from '../player/playerData'
 import { Player } from '../player/Player'
 
 export class CanvasRenderer {
-  //private ctx: CanvasRenderingContext2D
-  //private canvasDrawer: CanvasDrawer
-  //private redplayerRenderer: PlayerRenderer
-  //private blueplayerRenderer: PlayerRenderer
-
-  constructor(private readonly canvasDrawer: CanvasDrawer) {
-    // const canvasInfoProvider = new CanvasInfoProvider()
-    // const canvasInfo = canvasInfoProvider.getCanvasInfo('canvas')
-    // this.ctx = canvasInfo.ctx
-    // this.canvasDrawer = new CanvasDrawer(this.ctx)
-    // this.redplayerRenderer = new PlayerRenderer(
-    //   this.canvasDrawer,
-    //   redAnimations
-    // )
-    // this.blueplayerRenderer = new PlayerRenderer(
-    //   this.canvasDrawer,
-    //   blueAnimations
-    // )
-    // this.redplayerRenderer.switchAnimation(0)
-    // this.blueplayerRenderer.switchAnimation(0)
-  }
+  constructor(private readonly canvasDrawer: CanvasDrawer) {}
 
   clearCanvas() {
     this.canvasDrawer.clearCanvas()
@@ -57,14 +33,6 @@ export class CanvasRenderer {
   }
 
   drawPlayer(player: Player, dt: number) {
-    // if (player.teamColor === 'red') {
-    //   this.redplayerRenderer.update(dt)
-    //   this.redplayerRenderer.draw(player)
-    // }
-    // if (player.teamColor === 'blue') {
-    //   this.blueplayerRenderer.update(dt)
-    //   this.blueplayerRenderer.draw(player)
-    // }
     player.render(dt)
   }
 

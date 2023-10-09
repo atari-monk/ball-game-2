@@ -22,3 +22,18 @@ canvas {
   height: auto;
   display: block;
 }
+
+button#fullscreen-button {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  padding: 10px 20px;
+  background-color: #3498db;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+}
+
+button#fullscreen-button:hover {
+  background-color: #2980b9;
+}

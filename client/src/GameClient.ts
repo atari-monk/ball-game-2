@@ -15,7 +15,12 @@ import { AnimationLoop } from './canvas/AnimationLoop'
 import { InputHandler } from './input/InputHandler'
 import { MySocketIo } from './socket/MySocketIo'
 import { SocketOutManager } from './socket/SocketOutManager'
-import { ISocketIo, ISocketInManager, ISocketOutManager } from 'client-api'
+import {
+  ISocketIo,
+  ISocketInManager,
+  ISocketOutManager,
+  ICanvasInfo,
+} from 'client-api'
 import { Player } from './player/Player'
 import { IdleState } from './player/state/IdleState'
 import { PlayerStateType } from 'shared-api'
@@ -25,6 +30,7 @@ import { CanvasDrawer } from './canvas/CanvasDrawer'
 import { blueAnimations, redAnimations } from './player/playerData'
 import { LogClient } from './logger/LogClient'
 import { MobileInputHandler } from './input/MobileInputHandler'
+import { FullscreenManager } from './canvas/FullscreenManager'
 
 export class GameClient {
   private mysocket: ISocketIo
@@ -42,12 +48,15 @@ export class GameClient {
   private isLogOn: boolean = false
   private mobileInputHandler: MobileInputHandler
   private playerId: string
+  private fullScreen: FullscreenManager
+  private canvasInfo: ICanvasInfo
 
   constructor() {
     this.mysocket = new MySocketIo(hostConfig.selectedHost)
     this.socketInManager = new SocketInManager(this.mysocket)
     this.socketOutManager = new SocketOutManager(this.mysocket)
-    this.canvasDrawer = this.getCanvasDrawer()
+    this.canvasInfo = this.getCanvasInfo()
+    this.canvasDrawer = new CanvasDrawer(this.canvasInfo.ctx)
     this.canvasRenderer = new CanvasRenderer(this.canvasDrawer)
     this.animationLoop = new AnimationLoop(this.render.bind(this))
     new InputHandler(this.socketOutManager)
@@ -57,13 +66,25 @@ export class GameClient {
     this.animationLoop.start()
     if (this.isLogOn) this.logClient = new LogClient(this.socketInManager)
     this.playerId = ''
+    this.fullScreen = new FullscreenManager(this.canvasInfo.canvas)
+    this.setFullscreenButton()
   }
 
-  private getCanvasDrawer() {
+  private getCanvasInfo() {
     const canvasInfoProvider = new CanvasInfoProvider()
-    const canvasInfo = canvasInfoProvider.getCanvasInfo('canvas')
-    const ctx = canvasInfo.ctx
-    return new CanvasDrawer(ctx)
+    return canvasInfoProvider.getCanvasInfo('canvas')
+  }
+
+  private setFullscreenButton() {
+    const fullscreenButton = document.getElementById(
+      'fullscreen-button'
+    ) as HTMLButtonElement
+
+    if (fullscreenButton) {
+      fullscreenButton.addEventListener('click', () => {
+        this.fullScreen.enterFullscreen()
+      })
+    }
   }
 
   private initializeSocketListeners() {
