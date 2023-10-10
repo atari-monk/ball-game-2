@@ -2,7 +2,7 @@ import { DOMUtils } from '../utils/DOMUtils'
 
 export class LogInfoProvider {
   private textArea: HTMLTextAreaElement
-  private logFilterOption: string = 'Text'
+  private logFilterOption: string = 'All'
 
   constructor(textAreaId: string, logFilterId: string) {
     this.textArea = DOMUtils.getElementByIdOrThrow(

@@ -64,7 +64,10 @@ export class GameClient {
 
     this.initializeSocketListeners()
     this.animationLoop.start()
-    if (this.isLogOn) this.logClient = new LogClient(this.socketInManager)
+    if (this.isLogOn) {
+      this.logClient = new LogClient(this.socketInManager)
+      this.setLogButton()
+    }
     this.playerId = ''
     this.fullScreen = new FullscreenManager(this.canvasInfo.canvas)
     this.setFullscreenButton()
@@ -77,7 +80,7 @@ export class GameClient {
 
   private setFullscreenButton() {
     const fullscreenButton = document.getElementById(
-      'fullscreen-button'
+      'fullscreen_button'
     ) as HTMLButtonElement
     if (!fullscreenButton) return
 
@@ -87,6 +90,22 @@ export class GameClient {
     fullscreenButton.addEventListener('touchstart', () => {
       this.fullScreen.enterFullscreen()
     })
+  }
+
+  private setLogButton() {
+    const logButton = document.getElementById('log_button') as HTMLButtonElement
+    if (!logButton) return
+    logButton.style.display = 'flex'
+    const handleLog = () => {
+      const logboard = document.getElementById(
+        'message_board_container'
+      ) as HTMLButtonElement
+      if (!logboard) return
+      if (logboard.style.display === 'none') logboard.style.display = 'block'
+      else logboard.style.display = 'none'
+    }
+    logButton.addEventListener('click', handleLog)
+    logButton.addEventListener('touchstart', handleLog)
   }
 
   private initializeSocketListeners() {

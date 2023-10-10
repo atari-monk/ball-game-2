@@ -7,7 +7,10 @@ export class LogManager {
   private logFilterOption: string = 'Text'
 
   constructor() {
-    const logInfoProvider = new LogInfoProvider('log', 'log-filter')
+    const logInfoProvider = new LogInfoProvider(
+      'log_textarea',
+      'log_filter_select'
+    )
     this.textArea = logInfoProvider.getTextArea()
     this.logFilterOption = logInfoProvider.getLogFilterOption()
   }
