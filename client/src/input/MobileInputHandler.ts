@@ -11,6 +11,8 @@ export class MobileInputHandler {
 
   private playerPosition: Vector2
   private isTouching: boolean = false
+  private smoothedDirection: Vector2 = new Vector2(0, 0)
+  private dampingFactor: number = 0.9
 
   constructor(private readonly socketOutManager: ISocketOutManager) {
     // Add touch event listeners to handle mobile input
@@ -79,7 +81,13 @@ export class MobileInputHandler {
       .subtract(this.playerPosition)
       .normalize()
 
-    this.determineDirection(directionVector)
+    this.smoothedDirection = this.smoothedDirection.add(
+      directionVector
+        .subtract(this.smoothedDirection)
+        .multiply(this.dampingFactor)
+    )
+
+    this.determineDirection(this.smoothedDirection)
 
     this.socketOutManager.sendPlayerInput(this.input)
   }
@@ -87,7 +95,7 @@ export class MobileInputHandler {
   private handleTouchEnd(event: TouchEvent) {
     event.preventDefault() // Prevent default touch behavior (e.g., zooming)
     this.isTouching = false
-    
+
     // Reset all input directions to stop the player's movement
     this.input.up = false
     this.input.down = false
