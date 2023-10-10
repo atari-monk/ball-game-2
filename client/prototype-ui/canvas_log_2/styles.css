@@ -2,12 +2,12 @@ html {
   background-color: black;
 }
 
-#container {
+#all_container {
   display: flex;
   justify-content: space-between;
 }
 
-#canvas-container {
+#canvas_container {
   flex: 1;
 }
 
@@ -15,12 +15,12 @@ html {
   width: 100%;
 }
 
-#message-board {
-  flex: 1;
+#message_board {
+  flex: .6;
   margin-left: 20px;
 }
 
-#log {
+#log_textarea {
   width: 500px;
   height: 300px;
   background-color: lightblue;
@@ -31,7 +31,7 @@ html {
   font-weight: bold;
 }
 
-#log-filter-label {
+#log_filter_label {
   font-size: 16px; /* Adjust the font size as needed */
   color: white; /* Adjust the font color as needed */
   font-weight: normal;
