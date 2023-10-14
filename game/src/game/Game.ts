@@ -140,29 +140,27 @@ export class Game implements IMatch {
   }
 
   findPlayerTeam(player: IPlayer): string {
-    console.log('teams', this._gameData.teams)
-    console.log('player', player)
-    this._gameData.teams.forEach((team) => {
-      const found = team.playerIds.find((id) => id === player.id)
-      if (found) return team.color
+    let playerTeamColor = ''
+    this._gameData.teams.some((team) => {
+      if (team.playerIds.includes(player.id)) {
+        playerTeamColor = team.color
+        return true
+      }
     })
-    return ''
+    return playerTeamColor
   }
 
   pointScored() {
     if (!this._gameData.ball.lastHit) return
-    console.log('point scored!')
     const playerThatScored = this._gameData.ball.lastHit
     playerThatScored.scorePoint()
     this._messenger.sendText(
       `Goal by ${playerThatScored.name}, ${this._gameData.teams[0].name} (${this._gameData.teams[0].color}): ${this._gameData.teams[0].score} - ${this._gameData.teams[1].name}: ${this._gameData.teams[1].score}`
     )
     const team = this.findPlayerTeam(playerThatScored)
-    //console.log('team:', team)
-    //if (team === 'red') {
+    if (team === 'red') {
       this.io.emit(SocketEvents.Point, new PointDto(TeamEnum.Red))
-      console.log('emit red pont')
-    //}
+    }
     if (team === 'blue')
       this.io.emit(SocketEvents.Point, new PointDto(TeamEnum.Blue))
     this.resetAfterGoal()
