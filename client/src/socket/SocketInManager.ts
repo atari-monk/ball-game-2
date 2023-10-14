@@ -1,5 +1,13 @@
 import { ISocketInManager, ISocketIo } from 'client-api'
-import { MapDto, MatchDto, MessageDto, PlayerDto, PlayerStateDto, TeamDto } from 'dtos'
+import {
+  MapDto,
+  MatchDto,
+  MessageDto,
+  PlayerDto,
+  PlayerStateDto,
+  PointDto,
+  TeamDto,
+} from 'dtos'
 import { SocketEvents } from 'shared-api'
 import { Socket } from 'socket.io-client'
 
@@ -48,5 +56,9 @@ export class SocketInManager implements ISocketInManager {
 
   handlePlayerSate(callback: (playerStateData: PlayerStateDto) => void) {
     this.socket.on(SocketEvents.PlayerState, callback)
+  }
+
+  handlePoint(callback: (data: PointDto) => void): void {
+    this.socket.on(SocketEvents.Point, callback)
   }
 }

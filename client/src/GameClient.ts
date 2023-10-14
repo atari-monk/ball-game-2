@@ -31,6 +31,7 @@ import { blueAnimations, redAnimations } from './player/playerData'
 import { LogClient } from './logger/LogClient'
 import { MobileInputHandler } from './input/MobileInputHandler'
 import { FullscreenManager } from './canvas/FullscreenManager'
+import { Scoreboard } from './score/Scoreboard'
 
 export class GameClient {
   private mysocket: ISocketIo
@@ -45,11 +46,12 @@ export class GameClient {
   private ball: BallDto | null = null
   private canvasDrawer: CanvasDrawer
   private logClient?: LogClient
-  private isLogOn: boolean = false
+  private isLogOn: boolean = true
   private mobileInputHandler: MobileInputHandler
   private playerId: string
   private fullScreen: FullscreenManager
   private canvasInfo: ICanvasInfo
+  private scoreboard: Scoreboard
 
   constructor() {
     this.mysocket = new MySocketIo(hostConfig.selectedHost)
@@ -71,6 +73,7 @@ export class GameClient {
     this.playerId = ''
     this.fullScreen = new FullscreenManager(this.canvasInfo.canvas)
     this.setFullscreenButton()
+    this.scoreboard = new Scoreboard(this.socketInManager, this.canvasDrawer)
   }
 
   private getCanvasInfo() {
@@ -191,6 +194,7 @@ export class GameClient {
       this.canvasRenderer.drawPlayer(player, dt)
     })
     if (this.ball) this.canvasRenderer.drawBall(this.ball)
+    this.scoreboard.draw()
   }
 
   public stopGame() {

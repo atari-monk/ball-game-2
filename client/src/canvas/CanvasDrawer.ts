@@ -1,3 +1,5 @@
+import { ITextInfo } from './ITextInfo'
+
 export class CanvasDrawer {
   private ctx: CanvasRenderingContext2D
 
@@ -37,5 +39,11 @@ export class CanvasDrawer {
     this.ctx.moveTo(x1, y1)
     this.ctx.lineTo(x2, y2)
     this.ctx.stroke()
+  }
+
+  drawText(text: string, x: number, y: number, data: ITextInfo) {
+    this.ctx.font = data.font
+    this.ctx.fillStyle = data.color
+    this.ctx.fillText(text, x, y)
   }
 }
