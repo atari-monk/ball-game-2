@@ -1,4 +1,4 @@
-import { PlayerState } from 'game-api'
+import { PlayerState } from 'shared-api'
 
 export class PlayerStateDto {
   id: string
