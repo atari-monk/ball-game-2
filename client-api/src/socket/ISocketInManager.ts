@@ -4,6 +4,7 @@ import {
   MessageDto,
   PlayerDto,
   PlayerStateDto,
+  PointDto,
   TeamDto,
 } from 'dtos'
 
@@ -18,4 +19,5 @@ export interface ISocketInManager {
   handleLogReset(callback: () => void): void
   handleMatchUpdate(callback: (matchData: MatchDto) => void): void
   handlePlayerSate(callback: (playerStateData: PlayerStateDto) => void): void
+  handlePoint(callback: (data: PointDto) => void): void
 }
