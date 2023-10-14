@@ -9,9 +9,12 @@ import { GameStateManager } from './GameStateManager'
 import { BallGateCollider } from '../collision/BallGateCollider'
 import { DateUtil } from '../utils/DateUtil'
 import { IMatch } from './IMatch'
-import { MatchDto, PlayerDto, TeamDto } from 'dtos'
+import { MatchDto, PlayerDto, PointDto, TeamDto } from 'dtos'
 import { IGameData } from './IGameData'
 import { GameDataForMobileLandscape } from './GameDataForMobileLandscape'
+import { SocketEvents } from 'shared-api'
+import { Team } from '../team/Team'
+import { Team as TeamEnum } from 'shared-api'
 
 export class Game implements IMatch {
   private readonly _gameData: IGameData
@@ -136,11 +139,32 @@ export class Game implements IMatch {
     }
   }
 
+  findPlayerTeam(player: IPlayer): string {
+    console.log('teams', this._gameData.teams)
+    console.log('player', player)
+    this._gameData.teams.forEach((team) => {
+      const found = team.playerIds.find((id) => id === player.id)
+      if (found) return team.color
+    })
+    return ''
+  }
+
   pointScored() {
-    this._gameData.ball.lastHit?.scorePoint()
+    if (!this._gameData.ball.lastHit) return
+    console.log('point scored!')
+    const playerThatScored = this._gameData.ball.lastHit
+    playerThatScored.scorePoint()
     this._messenger.sendText(
-      `Goal by ${this._gameData.ball.lastHit?.name}, ${this._gameData.teams[0].name} (${this._gameData.teams[0].color}): ${this._gameData.teams[0].score} - ${this._gameData.teams[1].name}: ${this._gameData.teams[1].score}`
+      `Goal by ${playerThatScored.name}, ${this._gameData.teams[0].name} (${this._gameData.teams[0].color}): ${this._gameData.teams[0].score} - ${this._gameData.teams[1].name}: ${this._gameData.teams[1].score}`
     )
+    const team = this.findPlayerTeam(playerThatScored)
+    //console.log('team:', team)
+    //if (team === 'red') {
+      this.io.emit(SocketEvents.Point, new PointDto(TeamEnum.Red))
+      console.log('emit red pont')
+    //}
+    if (team === 'blue')
+      this.io.emit(SocketEvents.Point, new PointDto(TeamEnum.Blue))
     this.resetAfterGoal()
   }
 
