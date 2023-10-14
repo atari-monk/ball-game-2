@@ -1,4 +1,5 @@
-export { SocketEvents } from './SocketEvents'
-export { SocketEvent } from './SocketEvents'
 export { PlayerState } from './PlayerState'
 export { PlayerStateType } from './PlayerStateType'
+export { SocketEvents } from './SocketEvents'
+export { SocketEvent } from './SocketEvents'
+export { Team } from './Team'
