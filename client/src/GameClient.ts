@@ -51,7 +51,7 @@ export class GameClient {
   private playerId: string
   private fullScreen: FullscreenManager
   private canvasInfo: ICanvasInfo
-  private scoreboard: Scoreboard
+  private scoreboard: Scoreboard | null = null
 
   constructor() {
     this.mysocket = new MySocketIo(hostConfig.selectedHost)
@@ -73,7 +73,6 @@ export class GameClient {
     this.playerId = ''
     this.fullScreen = new FullscreenManager(this.canvasInfo.canvas)
     this.setFullscreenButton()
-    this.scoreboard = new Scoreboard(this.socketInManager, this.canvasDrawer)
   }
 
   private getCanvasInfo() {
@@ -156,6 +155,11 @@ export class GameClient {
     const { gates, field } = dto
     this.gates = gates
     this.field = field
+    this.scoreboard = new Scoreboard(
+      this.socketInManager,
+      this.canvasDrawer,
+      this.field
+    )
   }
 
   private handleTeamUpdate(dto: TeamDto) {
@@ -194,7 +198,7 @@ export class GameClient {
       this.canvasRenderer.drawPlayer(player, dt)
     })
     if (this.ball) this.canvasRenderer.drawBall(this.ball)
-    this.scoreboard.draw()
+    this.scoreboard?.draw()
   }
 
   public stopGame() {
