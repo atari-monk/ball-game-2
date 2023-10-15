@@ -46,9 +46,13 @@ export class Game implements IMatch {
     return this._stateManager
   }
 
-  constructor(private readonly io: Server) {
+  get io(): Server {
+    return this._io
+  }
+
+  constructor(private readonly _io: Server) {
     this._gameData = new GameDataForMobileLandscape()
-    this._messenger = new Messenger(io)
+    this._messenger = new Messenger(_io)
     this._stateManager = new GameStateManager(this._messenger, this)
     this._stateManager.transitionToMatchMaking()
   }
@@ -60,7 +64,7 @@ export class Game implements IMatch {
       const deltaTime = currentTime - this.lastFrameTime
 
       this.update(deltaTime)
-      this.io.emit(
+      this._io.emit(
         'update',
         new MatchDto(this._gameData.players, this._gameData.ball, deltaTime)
       )
@@ -75,14 +79,14 @@ export class Game implements IMatch {
       `${DateUtil.formatTime(this.matchStartTime)} Begin`
     )
     this._gameData.players.forEach((p) => {
-      this.io.emit(
+      this._io.emit(
         'newPlayer',
         new PlayerDto(p.id, p.x, p.y, p.radius, p.directionX, p.directionY)
       )
       const team = this._gameData.teams.find((t) =>
         t.playerIds.find((id) => id === p.id)
       )
-      if (team) this.io.emit('team', new TeamDto(team))
+      if (team) this._io.emit('team', new TeamDto(team))
     })
   }
 
@@ -159,17 +163,17 @@ export class Game implements IMatch {
     )
     const team = this.findPlayerTeam(playerThatScored)
     if (team === 'red') {
-      this.io.emit(SocketEvents.Point, new PointDto(TeamEnum.Red))
+      this._io.emit(SocketEvents.Point, new PointDto(TeamEnum.Red))
     }
     if (team === 'blue')
-      this.io.emit(SocketEvents.Point, new PointDto(TeamEnum.Blue))
+      this._io.emit(SocketEvents.Point, new PointDto(TeamEnum.Blue))
     this.resetAfterGoal()
   }
 
   public addPlayer(id: string): IPlayer {
     const newPlayer: IPlayer = this._gameData.getPlayer(
       id,
-      this.io,
+      this._io,
       this.nameGenerator
     )
     this._messenger.sendText(

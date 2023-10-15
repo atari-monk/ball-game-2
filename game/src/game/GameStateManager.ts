@@ -1,5 +1,7 @@
 import { GameState, IMessenger, MsgFlag } from 'game-api'
 import { Game } from './Game'
+import { CounterEvent, SocketEvents } from 'shared-api'
+import { CounterDto } from 'dtos'
 
 export class GameStateManager {
   private _currentState: GameState
@@ -41,14 +43,22 @@ export class GameStateManager {
 
   public transitionToStartGame() {
     this.setGameState(GameState.Start)
-    this.messenger.sendText('Starting Game')
     this.startCounter(() => this.transitionToProgress())
   }
 
-  private startCounter(fn: () => void, sec: number = 3, inf: number = 1) {
+  private startCounter(fn: () => void, sec: number = 4, inf: number = 1) {
     let timer = sec
     const intervalId = setInterval(() => {
-      if (timer % inf === 0) this.messenger.sendText(`In ${timer}`)
+      if (timer % inf === 0) {
+        this.game.io.emit(
+          SocketEvents.Counter,
+          new CounterDto(
+            CounterEvent.StartGame,
+            timer - 1,
+            timer - 1 === 0 ? 'GO !' : ''
+          )
+        )
+      }
       timer--
       if (timer === 0) {
         clearInterval(intervalId)
