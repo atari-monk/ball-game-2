@@ -46,7 +46,7 @@ export class GameClient {
   private ball: BallDto | null = null
   private canvasDrawer: CanvasDrawer
   private logClient?: LogClient
-  private isLogOn: boolean = true
+  private isLogOn: boolean = false
   private mobileInputHandler: MobileInputHandler
   private playerId: string
   private fullScreen: FullscreenManager
