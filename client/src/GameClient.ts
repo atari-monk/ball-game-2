@@ -95,19 +95,19 @@ export class GameClient {
   }
 
   private setLogButton() {
-    const logButton = document.getElementById('log_button') as HTMLButtonElement
+    const logButton = document.getElementById('log_button')
     if (!logButton) return
-    logButton.style.display = 'flex'
-    const handleLog = () => {
-      const logboard = document.getElementById(
-        'message_board_container'
-      ) as HTMLButtonElement
-      if (!logboard) return
-      if (logboard.style.display === 'none') logboard.style.display = 'block'
-      else logboard.style.display = 'none'
+    logButton.classList.toggle('hidden')
+
+    const logboard = document.getElementById('message_board_container')
+    if (!logboard) return
+
+    const toggleLogboard = () => {
+      logboard.classList.toggle('hidden')
     }
-    logButton.addEventListener('click', handleLog)
-    logButton.addEventListener('touchstart', handleLog)
+
+    logButton.addEventListener('click', toggleLogboard)
+    logButton.addEventListener('touchstart', toggleLogboard)
   }
 
   private initializeSocketListeners() {
