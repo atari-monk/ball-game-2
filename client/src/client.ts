@@ -5,5 +5,5 @@ import './../assets/blue-player.png'
 import { CssManager } from './cssbycode/CssManager'
 
 const cssManager = new CssManager()
-cssManager.scaledCanvas()
+cssManager.unscaledCanvas()
 new GameClient()

@@ -1,5 +1,5 @@
 export class CssManager {
-  scaledCanvas() {
+  unscaledCanvas() {
     this.setStyles('canvas_container', {
       width: '100%',
       height: '100%',
@@ -29,7 +29,7 @@ export class CssManager {
     }
   }
 
-  unscaledCanvas() {
+  scaledCanvas() {
     this.setStyles('canvas_container', {
       position: 'fixed',
       top: '0',
