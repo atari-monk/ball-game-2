@@ -1,5 +1,6 @@
 import { ISocketInManager, ISocketIo } from 'client-api'
 import {
+  CounterDto,
   MapDto,
   MatchDto,
   MessageDto,
@@ -60,5 +61,9 @@ export class SocketInManager implements ISocketInManager {
 
   handlePoint(callback: (data: PointDto) => void): void {
     this.socket.on(SocketEvents.Point, callback)
+  }
+
+  handleCounter(callback: (data: CounterDto) => void): void {
+    this.socket.on(SocketEvents.Counter, callback)
   }
 }

@@ -32,6 +32,7 @@ import { LogClient } from './logger/LogClient'
 import { MobileInputHandler } from './input/MobileInputHandler'
 import { FullscreenManager } from './canvas/FullscreenManager'
 import { Scoreboard } from './score/Scoreboard'
+import { Counter } from './counter/Counter'
 
 export class GameClient {
   private mysocket: ISocketIo
@@ -52,6 +53,7 @@ export class GameClient {
   private fullScreen: FullscreenManager
   private canvasInfo: ICanvasInfo
   private scoreboard: Scoreboard | null = null
+  private counter: Counter | null = null
 
   constructor() {
     this.mysocket = new MySocketIo(hostConfig.selectedHost)
@@ -160,6 +162,11 @@ export class GameClient {
       this.canvasDrawer,
       this.field
     )
+    this.counter = new Counter(
+      this.socketInManager,
+      this.canvasDrawer,
+      this.field
+    )
   }
 
   private handleTeamUpdate(dto: TeamDto) {
@@ -199,6 +206,7 @@ export class GameClient {
     })
     if (this.ball) this.canvasRenderer.drawBall(this.ball)
     this.scoreboard?.draw()
+    this.counter?.draw()
   }
 
   public stopGame() {
