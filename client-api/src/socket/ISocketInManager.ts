@@ -1,4 +1,5 @@
 import {
+  CounterDto,
   MapDto,
   MatchDto,
   MessageDto,
@@ -20,4 +21,5 @@ export interface ISocketInManager {
   handleMatchUpdate(callback: (matchData: MatchDto) => void): void
   handlePlayerSate(callback: (playerStateData: PlayerStateDto) => void): void
   handlePoint(callback: (data: PointDto) => void): void
+  handleCounter(callback: (data: CounterDto) => void): void
 }
