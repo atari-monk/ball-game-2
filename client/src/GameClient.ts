@@ -12,7 +12,6 @@ import { hostConfig } from './config/config'
 import { CanvasRenderer } from './canvas/CanvasRenderer'
 import { SocketInManager } from './socket/SocketInManager'
 import { AnimationLoop } from './canvas/AnimationLoop'
-import { InputHandler } from './input/InputHandler'
 import { MySocketIo } from './socket/MySocketIo'
 import { SocketOutManager } from './socket/SocketOutManager'
 import {
@@ -29,10 +28,10 @@ import { CanvasInfoProvider } from './canvas/CanvasInfoProvider'
 import { CanvasDrawer } from './canvas/CanvasDrawer'
 import { blueAnimations, redAnimations } from './player/playerData'
 import { LogClient } from './logger/LogClient'
-import { MobileInputHandler } from './input/MobileInputHandler'
 import { FullscreenManager } from './canvas/FullscreenManager'
 import { Scoreboard } from './score/Scoreboard'
 import { Counter } from './counter/Counter'
+import { InputManager } from './input/InputManager'
 
 export class GameClient {
   private mysocket: ISocketIo
@@ -48,12 +47,12 @@ export class GameClient {
   private canvasDrawer: CanvasDrawer
   private logClient?: LogClient
   private isLogOn: boolean = false
-  private mobileInputHandler: MobileInputHandler
   private playerId: string
   private fullScreen: FullscreenManager
   private canvasInfo: ICanvasInfo
   private scoreboard: Scoreboard | null = null
   private counter: Counter | null = null
+  private inputManager: InputManager
 
   constructor() {
     this.mysocket = new MySocketIo(hostConfig.selectedHost)
@@ -63,8 +62,6 @@ export class GameClient {
     this.canvasDrawer = new CanvasDrawer(this.canvasInfo.ctx)
     this.canvasRenderer = new CanvasRenderer(this.canvasDrawer)
     this.animationLoop = new AnimationLoop(this.render.bind(this))
-    new InputHandler(this.socketOutManager)
-    this.mobileInputHandler = new MobileInputHandler(this.socketOutManager)
 
     this.initializeSocketListeners()
     this.animationLoop.start()
@@ -75,6 +72,11 @@ export class GameClient {
     this.playerId = ''
     this.fullScreen = new FullscreenManager(this.canvasInfo.canvas)
     this.setFullscreenButton()
+    this.inputManager = new InputManager(this.socketOutManager, {
+      isKeyboard: true,
+      isMobileInput: false,
+      isJoystic: true,
+    })
   }
 
   private getCanvasInfo() {
@@ -191,8 +193,14 @@ export class GameClient {
       const playerDto = players.find((p) => p.id === player.id)
       if (playerDto) {
         player.moveDto = playerDto
-        if (this.playerId === player.id)
-          this.mobileInputHandler.setPlayerPosition(playerDto.x, playerDto.y)
+        if (
+          this.inputManager.config.isMobileInput &&
+          this.playerId === player.id
+        )
+          this.inputManager.mobileInputHandler?.setPlayerPosition(
+            playerDto.x,
+            playerDto.y
+          )
       }
     })
   }

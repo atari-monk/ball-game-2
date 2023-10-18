@@ -2,20 +2,22 @@ import { IInput, ISocketOutManager } from 'client-api'
 import { Vector2 } from '../utils/Vector2'
 
 export class MobileInputHandler {
-  private input: IInput = {
+  private _input: IInput = {
     up: false,
     down: false,
     left: false,
     right: false,
   }
-
   private playerPosition: Vector2
   private isTouching: boolean = false
   private smoothedDirection: Vector2 = new Vector2(0, 0)
   private dampingFactor: number = 0.9
 
+  get input(): IInput {
+    return this._input
+  }
+
   constructor(private readonly socketOutManager: ISocketOutManager) {
-    // Add touch event listeners to handle mobile input
     document.addEventListener('touchstart', this.handleTouchStart.bind(this), {
       passive: false,
     })
@@ -28,30 +30,29 @@ export class MobileInputHandler {
     this.playerPosition = new Vector2(0, 0)
   }
 
-  // Method to set the player's position
-  public setPlayerPosition(x: number, y: number) {
+  setPlayerPosition(x: number, y: number) {
     this.playerPosition.x = x
     this.playerPosition.y = y
   }
 
   private determineDirection(directionVector: Vector2): void {
-    this.input.up = false
-    this.input.down = false
-    this.input.left = false
-    this.input.right = false
+    this._input.up = false
+    this._input.down = false
+    this._input.left = false
+    this._input.right = false
 
-    const threshold = 0.3 // Adjust this threshold for sensitivity
+    const threshold = 0.3
 
     if (directionVector.x > threshold) {
-      this.input.right = true
+      this._input.right = true
     } else if (directionVector.x < -threshold) {
-      this.input.left = true
+      this._input.left = true
     }
 
     if (directionVector.y > threshold) {
-      this.input.down = true
+      this._input.down = true
     } else if (directionVector.y < -threshold) {
-      this.input.up = true
+      this._input.up = true
     }
   }
 
@@ -67,7 +68,7 @@ export class MobileInputHandler {
 
     this.determineDirection(directionVector)
 
-    this.socketOutManager.sendPlayerInput(this.input)
+    this.socketOutManager.sendPlayerInput(this._input)
   }
 
   private handleTouchMove(event: TouchEvent): void {
@@ -89,24 +90,18 @@ export class MobileInputHandler {
 
     this.determineDirection(this.smoothedDirection)
 
-    this.socketOutManager.sendPlayerInput(this.input)
+    this.socketOutManager.sendPlayerInput(this._input)
   }
 
   private handleTouchEnd(event: TouchEvent) {
-    event.preventDefault() // Prevent default touch behavior (e.g., zooming)
+    event.preventDefault()
     this.isTouching = false
 
-    // Reset all input directions to stop the player's movement
-    this.input.up = false
-    this.input.down = false
-    this.input.left = false
-    this.input.right = false
+    this._input.up = false
+    this._input.down = false
+    this._input.left = false
+    this._input.right = false
 
-    // Send the updated input state to the socket manager
-    this.socketOutManager.sendPlayerInput(this.input)
-  }
-
-  public getInput(): IInput {
-    return this.input
+    this.socketOutManager.sendPlayerInput(this._input)
   }
 }

@@ -16,6 +16,7 @@
     "client-api": "file:client-api-1.0.0.tgz",
     "dtos": "file:dtos-1.0.0.tgz",
     "game-api": "file:game-api-1.0.0.tgz",
+    "nipplejs": "^0.10.1",
     "shared-api": "file:shared-api-1.0.0.tgz",
     "socket.io-client": "^4.7.2"
   },
