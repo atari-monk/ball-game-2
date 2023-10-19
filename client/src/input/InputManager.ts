@@ -37,8 +37,8 @@ export class InputManager {
   }
 
   private createJoystic(): StaticJoystick | null {
-    const staticZone = document.querySelector('.zone.static') as HTMLElement
-    if (!staticZone) throw new Error('No class .zone.static element')
+    const staticZone = document.querySelector('.joystick_static') as HTMLElement
+    if (!staticZone) throw new Error('No element with class joystick_static!')
     return new StaticJoystick(
       staticZone,
       { left: '50%', top: '85%' },
