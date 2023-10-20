@@ -1,0 +1,13 @@
+{
+  "name": "client-prototype-ui",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {},
+  "keywords": [],
+  "author": "atari-monk",
+  "license": "ISC",
+  "dependencies": {
+    "dom-lib": "file:dom-lib-1.0.0.tgz"
+  }
+}

@@ -1,4 +1,4 @@
-. "C:\atari-monk\Code\ball-game-2\ps1\CommonFunctions.ps1"
+. "C:\atari-monk\Code\ball-game-2\ps1_script\CommonFunctions.ps1"
 
 $libName = "client-api"
 $build = $libName + "\build\"

@@ -4,7 +4,7 @@ const path = require('path')
 function copyFileToBuild(sourceFile, targetDir) {
   const scriptDir = __dirname
   const projectRootDir = path.resolve(scriptDir, '.')
-  console.log('projectRootDir:', projectRootDir)
+  console.log('scriptDir:', projectRootDir)
   const sourcePath = path.join(projectRootDir, sourceFile)
   const targetPath = path.join(
     projectRootDir,
