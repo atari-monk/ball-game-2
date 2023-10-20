@@ -1,16 +1,10 @@
-#run from npm run
-#build phase
-npm i
-npm run build
-Set-Location build
-npm pack
-#paths
-$proj = "C:\atari-monk\Code\ball-game-2\"
-$pack = "game-1.0.0.tgz"
-$folder = "game\build\"
-$api = $proj + $folder + $pack
-#install in server
-$server = $proj + "server\"
-Copy-Item $api $server
-Set-Location $server
-npm i (Get-Item $pack).Name
+. "C:\atari-monk\Code\ball-game-2\ps1_script\CommonFunctions.ps1"
+
+$libName = "game"
+$build = $libName + "\build\"
+$pack = $libName + "-1.0.0.tgz"
+$lib = $RepoPath + $build + $pack
+$targetProj1 = $RepoPath + "server\"
+
+Build-Lib
+Copy-And-Install-Pack -packPath $lib -projDir $targetProj1 -packName $pack
