@@ -1,33 +1,49 @@
-function getById(id) {
+export function getById(id: string): HTMLElement {
   const el = document.getElementById(id)
-  if (!el) throw new Error(`No element wtith id ${id} !`)
+  if (!el) throw new Error(`No element with id ${id}!`)
   return el
 }
 
-function get2D(canvasId = 'canvas') {
-  const canvas = getById(canvasId)
-  const context = canvas.getContext('2d')
+export function get2D(canvasId: string = 'canvas'): {
+  canvas: HTMLCanvasElement
+  context: CanvasRenderingContext2D
+} {
+  const canvas = getById(canvasId) as HTMLCanvasElement
+  const context = canvas.getContext('2d') as CanvasRenderingContext2D
   return { canvas, context }
 }
 
-function setCanvasColor(canvas, context, color = 'green') {
+export function setCanvasColor(
+  canvas: HTMLCanvasElement,
+  context: CanvasRenderingContext2D,
+  color: string = 'green'
+): void {
   context.fillStyle = color
   context.fillRect(0, 0, canvas.width, canvas.height)
 }
 
-function unhide(el, hiddenClassName = 'hidden') {
+export function unhide(
+  el: HTMLElement,
+  hiddenClassName: string = 'hidden'
+): void {
   el.classList.toggle(hiddenClassName)
 }
 
-function setClick(el, fn) {
+export function setClick(
+  el: HTMLElement,
+  fn: EventListenerOrEventListenerObject
+): void {
   el.addEventListener('click', fn)
 }
 
-function setTouch(el, fn) {
+export function setTouch(
+  el: HTMLElement,
+  fn: EventListenerOrEventListenerObject
+): void {
   el.addEventListener('touchstart', fn)
 }
 
-function logScreenInfo() {
+export function logScreenInfo(): void {
   const screenWidth =
     window.innerWidth ||
     document.documentElement.clientWidth ||
@@ -42,7 +58,7 @@ function logScreenInfo() {
   console.log('aspectRatio', aspectRatio)
 }
 
-function detectMobileOrientation() {
+export function detectMobileOrientation(): string {
   const screenWidth =
     window.innerWidth ||
     document.documentElement.clientWidth ||
@@ -65,23 +81,14 @@ function detectMobileOrientation() {
   }
 }
 
-const { canvas, context } = get2D()
-const logButton = getById('log_button')
-const logboard = getById('message_board_container')
+export function setTextContent(element: HTMLElement, text: string): void {
+  element.textContent = text
+}
 
-logScreenInfo()
-setCanvasColor(canvas, context)
-const toogleLogboard = () => {
-  logboard.classList.toggle('hidden')
-  console.log('toogleLogboard')
+export function setAttribute(
+  element: HTMLElement,
+  name: string,
+  value: string
+): void {
+  element.setAttribute(name, value)
 }
-const mode = detectMobileOrientation()
-console.log('mode:', mode)
-if (mode === 'portrait') {
-  setTouch(logButton, toogleLogboard)
-} else if (mode === 'landscape') {
-  setTouch(logButton, toogleLogboard)
-} else if (mode === 'desktop' || mode === 'unknown') {
-  setClick(logButton, toogleLogboard)
-}
-unhide(logButton)

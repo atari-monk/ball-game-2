@@ -3,11 +3,25 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-  "scripts": {},
+  "scripts": {
+    "build-ts": "tsc",
+    "build": "npx webpack --config webpack.config.js"
+  },
   "keywords": [],
   "author": "atari-monk",
   "license": "ISC",
   "dependencies": {
     "dom-lib": "file:dom-lib-1.0.0.tgz"
+  },
+  "devDependencies": {
+    "copy-webpack-plugin": "^11.0.0",
+    "css-loader": "^6.8.1",
+    "file-loader": "^6.2.0",
+    "glob": "^10.3.10",
+    "mini-css-extract-plugin": "^2.7.6",
+    "ts-loader": "^9.4.4",
+    "typescript": "^5.2.2",
+    "webpack": "^5.88.2",
+    "webpack-cli": "^5.1.4"
   }
 }
