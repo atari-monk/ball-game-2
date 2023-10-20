@@ -1,19 +1,10 @@
-#run from npm run
-#build phase
-npm i
-npm run build
-Set-Location build
-npm pack
-#paths
-$proj = "C:\atari-monk\Code\ball-game-2\"
-$pack = "client-api-1.0.0.tgz"
-$folder = "client-api\build\"
-$api = $proj + $folder + $pack
-#install in client
-$client = $proj + "client\"
-Copy-Item $api $client
-Set-Location $client
-npm i (Get-Item $pack).Name
-#clean files
-#Remove-Item $client-api
-#Remove-Item ($client + $pack)
+. "C:\atari-monk\Code\ball-game-2\ps1\CommonFunctions.ps1"
+
+$libName = "client-api"
+$build = $libName + "\build\"
+$pack = $libName + "-1.0.0.tgz"
+$lib = $RepoPath + $build + $pack
+$targetProj1 = $RepoPath + "client\"
+
+Build-Lib
+Copy-And-Install-Pack -packPath $lib -projDir $targetProj1 -packName $pack
