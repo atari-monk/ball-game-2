@@ -7,8 +7,14 @@ module.exports = () => {
     mode: 'development',
     devtool: false,
     entry: {
-      'stacked-ui': './src/stacked-ui/index.ts',
-      'stacked-ui-2': './src/stacked-ui-2/index.ts',
+      '1_stacked_ui': './src/1_stacked_ui/index.ts',
+      '2_stacked_ui': './src/2_stacked_ui/index.ts',
+      '3_canvas-only': './src/3_canvas-only/index.ts',
+      '4_mobile': './src/4_mobile/index.ts',
+      '5_mobile': './src/5_mobile/index.ts',
+      '6_mobile': './src/6_mobile/index.ts',
+      '7_mobile': './src/7_mobile/index.ts',
+      '8_mobile': './src/8_mobile/index.ts',
     },
     output: {
       filename: '[name]/index.js',
@@ -44,10 +50,37 @@ module.exports = () => {
     plugins: [
       new CopyWebpackPlugin({
         patterns: [
-          { from: 'src/stacked-ui/index.html', to: 'stacked-ui/index.html' },
           {
-            from: 'src/stacked-ui-2/index.html',
-            to: 'stacked-ui-2/index.html',
+            from: 'src/1_stacked_ui/index.html',
+            to: '1_stacked_ui/index.html',
+          },
+          {
+            from: 'src/2_stacked_ui/index.html',
+            to: '2_stacked_ui/index.html',
+          },
+          {
+            from: 'src/3_canvas-only/index.html',
+            to: '3_canvas-only/index.html',
+          },
+          {
+            from: 'src/4_mobile/index.html',
+            to: '4_mobile/index.html',
+          },
+          {
+            from: 'src/5_mobile/index.html',
+            to: '5_mobile/index.html',
+          },
+          {
+            from: 'src/6_mobile/index.html',
+            to: '6_mobile/index.html',
+          },
+          {
+            from: 'src/7_mobile/index.html',
+            to: '7_mobile/index.html',
+          },
+          {
+            from: 'src/8_mobile/index.html',
+            to: '8_mobile/index.html',
           },
         ],
       }),

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>ball-game-2</title>
+    <link rel="stylesheet" type="text/css" href="styles.css" />
+  </head>
+  <body>
+    <div id="canvas_container">
+      <canvas id="canvas" width="740" height="360"></canvas>
+      <div id="menu_container">
+        <button id="log_button">Log</button>
+        <button id="fullscreen_button">Fullscreen</button>
+      </div>
+      <div id="message_board_container">
+        <div id="log_container">
+          <textarea id="log_textarea" rows="10" cols="40" readonly></textarea>
+        </div>
+        <div id="filter_container">
+          <label for="log_filter_select" id="log_filter_label"
+            >Filter Logs:</label
+          >
+          <select id="log_filter_select">
+            <option value="All">all</option>
+            <option value="ServerState">srv state</option>
+            <option value="Text">text</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <script src="index.js"></script>
+  </body>
+</html>
