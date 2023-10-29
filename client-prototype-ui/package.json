@@ -2,7 +2,6 @@
   "name": "client-prototype-ui",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
   "scripts": {
     "build-ts": "tsc",
     "build": "npx webpack --config webpack.config.js"

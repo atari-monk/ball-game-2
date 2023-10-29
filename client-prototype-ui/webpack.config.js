@@ -6,9 +6,12 @@ module.exports = () => {
   return {
     mode: 'development',
     devtool: false,
-    entry: './src/index.ts',
+    entry: {
+      'stacked-ui': './src/stacked-ui/index.ts',
+      'stacked-ui-2': './src/stacked-ui-2/index.ts',
+    },
     output: {
-      filename: 'index.js',
+      filename: '[name]/index.js',
       path: path.resolve(__dirname, 'build'),
     },
     resolve: {
@@ -31,7 +34,7 @@ module.exports = () => {
             {
               loader: 'file-loader',
               options: {
-                name: 'assets/[name].[ext]',
+                name: '[name]/assets/[name].[ext]',
               },
             },
           ],
@@ -40,10 +43,16 @@ module.exports = () => {
     },
     plugins: [
       new CopyWebpackPlugin({
-        patterns: [{ from: 'src/index.html', to: 'index.html' }],
+        patterns: [
+          { from: 'src/stacked-ui/index.html', to: 'stacked-ui/index.html' },
+          {
+            from: 'src/stacked-ui-2/index.html',
+            to: 'stacked-ui-2/index.html',
+          },
+        ],
       }),
       new MiniCssExtractPlugin({
-        filename: 'styles.css',
+        filename: '[name]/styles.css',
       }),
     ],
   }
