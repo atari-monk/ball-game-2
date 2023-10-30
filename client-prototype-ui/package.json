@@ -10,7 +10,8 @@
   "author": "atari-monk",
   "license": "ISC",
   "dependencies": {
-    "dom-lib": "file:dom-lib-1.0.0.tgz"
+    "dom-lib": "file:dom-lib-1.0.0.tgz",
+    "nipplejs": "^0.10.1"
   },
   "devDependencies": {
     "copy-webpack-plugin": "^11.0.0",

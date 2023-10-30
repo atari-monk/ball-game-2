@@ -13,8 +13,7 @@ module.exports = () => {
       '4_mobile': './src/4_mobile/index.ts',
       '5_mobile': './src/5_mobile/index.ts',
       '6_mobile': './src/6_mobile/index.ts',
-      '7_mobile': './src/7_mobile/index.ts',
-      '8_mobile': './src/8_mobile/index.ts',
+      '7_mobile': './src/7_mobile/index.ts'
     },
     output: {
       filename: '[name]/index.js',
@@ -77,11 +76,7 @@ module.exports = () => {
           {
             from: 'src/7_mobile/index.html',
             to: '7_mobile/index.html',
-          },
-          {
-            from: 'src/8_mobile/index.html',
-            to: '8_mobile/index.html',
-          },
+          }
         ],
       }),
       new MiniCssExtractPlugin({

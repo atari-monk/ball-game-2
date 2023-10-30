@@ -6,11 +6,11 @@
 html,
 body {
   height: 100%;
+  background-color: black;
 }
 
 button {
   margin-left: 10px;
-
   padding: 10px 20px;
   border: none;
   background-color: transparent;
@@ -32,8 +32,14 @@ button:hover {
 }
 
 .joystick_static {
-  position: relative;
-  z-index: 9999;
+  position: absolute;
+  width: 100px;
+  height: 100px;
+  background: none;
+  left: 50%;
+  top: 75%;
+  transform: translate(-50%, -50%);
+  z-index: 1;
 }
 
 #canvas_container {
@@ -52,9 +58,9 @@ button:hover {
   max-height: 100%;
   width: auto;
   height: auto;
-  display: block;
   /* border: 1px solid red; */
   box-sizing: border-box;
+  flex: 100%;
 }
 
 #menu_container {
