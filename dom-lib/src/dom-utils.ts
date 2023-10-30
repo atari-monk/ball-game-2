@@ -22,7 +22,7 @@ export function setCanvasColor(
   context.fillRect(0, 0, canvas.width, canvas.height)
 }
 
-export function unhide(
+export function toggle(
   el: HTMLElement,
   hiddenClassName: string = 'hidden'
 ): void {

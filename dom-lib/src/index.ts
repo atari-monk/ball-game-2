@@ -2,7 +2,7 @@ export {
   getById,
   get2D,
   setCanvasColor,
-  unhide,
+  toggle,
   setClick,
   setTouch,
   logScreenInfo,
