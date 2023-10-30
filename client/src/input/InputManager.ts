@@ -41,7 +41,7 @@ export class InputManager {
     if (!staticZone) throw new Error('No element with class joystick_static!')
     return new StaticJoystick(
       staticZone,
-      { left: '50%', top: '85%' },
+      { left: '50%', top: '80%' },
       'white',
       this.socketOutManager
     )

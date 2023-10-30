@@ -23,4 +23,14 @@ export class FullscreenManager {
       console.error('Invalid element provided.')
     }
   }
+
+  toggleFullscreen() {
+    if (document.fullscreenElement === this.element) {
+      // If the element is already in fullscreen, exit fullscreen.
+      document.exitFullscreen()
+    } else {
+      // If the element is not in fullscreen, enter fullscreen.
+      this.enterFullscreen()
+    }
+  }
 }

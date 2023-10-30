@@ -32,6 +32,7 @@ import { FullscreenManager } from './canvas/FullscreenManager'
 import { Scoreboard } from './score/Scoreboard'
 import { Counter } from './counter/Counter'
 import { InputManager } from './input/InputManager'
+import { getById, toggle } from 'dom-lib'
 
 export class GameClient {
   private mysocket: ISocketIo
@@ -70,7 +71,7 @@ export class GameClient {
       this.setLogButton()
     }
     this.playerId = ''
-    this.fullScreen = new FullscreenManager(this.canvasInfo.canvas)
+    this.fullScreen = new FullscreenManager(getById('canvas_container'))
     this.setFullscreenButton()
     this.inputManager = new InputManager(this.socketOutManager, {
       isKeyboard: true,
@@ -90,11 +91,14 @@ export class GameClient {
     ) as HTMLButtonElement
     if (!fullscreenButton) return
 
-    fullscreenButton.addEventListener('click', () => {
-      this.fullScreen.enterFullscreen()
-    })
+    // fullscreenButton.addEventListener('click', () => {
+    //   this.fullScreen.enterFullscreen()
+    //   toggle(fullscreenButton)
+    //   console.log('enter fullscreeen')
+    // })
     fullscreenButton.addEventListener('touchstart', () => {
-      this.fullScreen.enterFullscreen()
+      this.fullScreen.toggleFullscreen()
+      //toggle(fullscreenButton)
     })
   }
 

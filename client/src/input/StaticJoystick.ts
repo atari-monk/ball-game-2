@@ -37,7 +37,7 @@ export class StaticJoystick {
       mode: 'static',
       position: this.position,
       color: this.color,
-      size: 100,
+      size: 90,
     })
 
     this.bindNipple()
