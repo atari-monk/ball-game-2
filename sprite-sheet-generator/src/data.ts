@@ -1,6 +1,7 @@
 const folders = {
   character: 'C:/atari-monk/pixel-art/character/',
   character_test: 'C:/atari-monk/pixel-art/character-test/',
+  ball: 'C:/atari-monk/pixel-art/ball/',
 }
 
 export const sprites = {
@@ -15,5 +16,10 @@ export const sprites = {
     folder: folders.character_test,
     idle_red: folders.character_test + 'red-idle',
     walk_red: folders.character_test + 'red-walk',
+  },
+  ball: {
+    folder: folders.ball,
+    idle: folders.ball + 'idle',
+    rotate: folders.ball + 'rotate',
   },
 }
