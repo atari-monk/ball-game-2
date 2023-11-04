@@ -1,5 +1,4 @@
 import {
-  BallDto,
   FieldDto,
   IGateDtos,
   MapDto,
@@ -33,6 +32,8 @@ import { Scoreboard } from './score/Scoreboard'
 import { Counter } from './counter/Counter'
 import { InputManager } from './input/InputManager'
 import { getById } from 'dom-lib'
+import { Ball } from './ball/Ball'
+import { ballAnimations } from './ball/ballData'
 
 export class GameClient {
   private mysocket: ISocketIo
@@ -44,7 +45,7 @@ export class GameClient {
   private gates: IGateDtos | null = null
   private field: FieldDto | null = null
   private players: Player[] = []
-  private ball: BallDto | null = null
+  private ball: Ball | null = null
   private canvasDrawer: CanvasDrawer
   private logClient?: LogClient
   private isLogOn: boolean = false
@@ -170,6 +171,9 @@ export class GameClient {
       this.canvasDrawer,
       this.field
     )
+    if (this.ball) return
+    this.ball = new Ball()
+    this.ball.createRenderer(this.canvasDrawer, ballAnimations)
   }
 
   private handleTeamUpdate(dto: TeamDto) {
@@ -189,7 +193,7 @@ export class GameClient {
 
   private handleMatchUpdate(dto: MatchDto) {
     const { players, ball } = dto
-    this.ball = ball
+    if (this.ball) this.ball.moveDto = ball
     this.players.forEach((player) => {
       const playerDto = players.find((p) => p.id === player.id)
       if (playerDto) {
@@ -213,7 +217,7 @@ export class GameClient {
     this.players.forEach((player) => {
       this.canvasRenderer.drawPlayer(player, dt)
     })
-    if (this.ball) this.canvasRenderer.drawBall(this.ball)
+    if (this.ball) this.canvasRenderer.drawBall(this.ball, dt)
     this.scoreboard?.draw()
     this.counter?.draw()
   }

@@ -1,6 +1,6 @@
 $script = 'C:\atari-monk\Code\ball-game-2\client\script'
 $server = 'C:\atari-monk\Code\ball-game-2\server\build\'
-$port = '3000'
+$port = '3002'
 $domain = 'http://127.0.0.1:' 
 $client = '/client/build/index.html'
 $url = $domain + $port + $client

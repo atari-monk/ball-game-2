@@ -1,6 +1,7 @@
 import { FieldDto, IGateDtos, BallDto } from 'dtos'
 import { CanvasDrawer } from './CanvasDrawer'
 import { Player } from '../player/Player'
+import { Ball } from '../ball/Ball'
 
 export class CanvasRenderer {
   constructor(private readonly canvasDrawer: CanvasDrawer) {}
@@ -36,8 +37,7 @@ export class CanvasRenderer {
     player.render(dt)
   }
 
-  drawBall(ball: BallDto) {
-    this.canvasDrawer.setFillStyle('yellow')
-    this.canvasDrawer.drawCircle(ball.x, ball.y, ball.radius)
+  drawBall(ball: Ball, dt: number) {
+    ball.render(dt)
   }
 }

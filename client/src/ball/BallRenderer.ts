@@ -20,9 +20,10 @@ export class BallRenderer {
   draw(ball: BallModel) {
     const b = ball.moveDto
     if (!b) return
-    this.sprite.draw(this.canvasDrawer.cctx, b.x, b.y)
+    this.sprite.draw(this.canvasDrawer.cctx, b.x - 34, b.y - 18)
 
-    
+    this.canvasDrawer.setFillStyle('yellow')
+    this.canvasDrawer.drawCircle(b.x, b.y, b.radius)
   }
 
   switchAnimation(animationIndex: number) {
