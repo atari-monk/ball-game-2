@@ -7,7 +7,9 @@
     "build-ts": "tsc",
     "build": "npx webpack --config webpack.config.js",
     "local": "powershell.exe -ExecutionPolicy Bypass -File ./script/local.ps1",
-    "server": "powershell.exe -ExecutionPolicy Bypass -File ./script/server.ps1"
+    "server": "powershell.exe -ExecutionPolicy Bypass -File ./script/server.ps1",
+    "turnoff": "powershell -ExecutionPolicy Bypass -File ./script/turnoff.ps1",
+    "bringback": "powershell -ExecutionPolicy Bypass -File ./script/bringback.ps1"
   },
   "keywords": [],
   "author": "",
