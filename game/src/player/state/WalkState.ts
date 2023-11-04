@@ -1,9 +1,9 @@
 import { Server } from 'socket.io'
-import { IPlayerModel, IPlayerState } from 'game-api'
+import { IPlayerModel, IState } from 'game-api'
 import { PlayerStateDto } from 'dtos'
 import { PlayerStateType, SocketEvents } from 'shared-api'
 
-export class WalkState implements IPlayerState {
+export class WalkState implements IState {
   constructor(
     private readonly player: IPlayerModel,
     private readonly io: Server
