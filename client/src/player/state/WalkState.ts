@@ -1,8 +1,8 @@
-import { IPlayerState } from 'game-api'
+import { IState } from 'game-api'
 import { PlayerStateContext } from '../PlayerStateContext'
 import { PlayerStateType } from 'shared-api'
 
-export class WalkState implements IPlayerState {
+export class WalkState implements IState {
   constructor(private readonly player: PlayerStateContext) {}
 
   enter() {

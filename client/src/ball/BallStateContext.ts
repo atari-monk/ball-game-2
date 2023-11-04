@@ -1,13 +1,13 @@
 import { IState } from 'game-api'
-import { PlayerModel } from './PlayerModel'
+import { BallModel } from './BallModel'
 import { IdleState } from './state/IdleState'
-import { PlayerRenderer } from './PlayerRenderer'
+import { BallRenderer } from './BallRenderer'
 import { CanvasDrawer } from '../canvas/CanvasDrawer'
 import { AnimationConfig } from 'client-api'
 
-export class PlayerStateContext extends PlayerModel {
+export class BallStateContext extends BallModel {
   private currentState: IState
-  renderer?: PlayerRenderer
+  renderer?: BallRenderer
 
   constructor() {
     super()
@@ -27,6 +27,6 @@ export class PlayerStateContext extends PlayerModel {
   }
 
   createRenderer(drawer: CanvasDrawer, animations: AnimationConfig[]) {
-    this.renderer = new PlayerRenderer(drawer, animations)
+    this.renderer = new BallRenderer(drawer, animations)
   }
 }
