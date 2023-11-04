@@ -32,7 +32,7 @@ import { FullscreenManager } from './canvas/FullscreenManager'
 import { Scoreboard } from './score/Scoreboard'
 import { Counter } from './counter/Counter'
 import { InputManager } from './input/InputManager'
-import { getById, toggle } from 'dom-lib'
+import { getById } from 'dom-lib'
 
 export class GameClient {
   private mysocket: ISocketIo
