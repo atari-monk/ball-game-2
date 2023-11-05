@@ -1,9 +1,6 @@
-export { GameState } from './GameState'
-export { IBall } from './IBall'
-export { IField } from './IField'
-export { IGate } from './IGate'
-export { IGates } from './IGates'
-export { ITeam } from './ITeam'
+//ball
+export { IBall } from './ball/IBall'
+export { IBallModel } from './ball/IBallModel'
 //game
 export { IGameStateManager } from './game/IGameStateManager'
 //Messenger
@@ -19,3 +16,9 @@ export { IPlayerMovement } from './player/IPlayerMovement'
 export { IState } from './state/IState'
 //utils
 export { INameGenerator } from './utils/INameGenerator'
+//
+export { GameState } from './GameState'
+export { IField } from './IField'
+export { IGate } from './IGate'
+export { IGates } from './IGates'
+export { ITeam } from './ITeam'

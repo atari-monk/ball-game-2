@@ -4,5 +4,4 @@ export interface IPlayerMovement {
   onLeft(): void
   onRight(): void
   onInactive(): void
-  update(deltaTime: number): void
 }

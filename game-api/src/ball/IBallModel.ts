@@ -1,6 +1,6 @@
-import { IPlayer } from './player/IPlayer'
+import { IPlayer } from '../player/IPlayer'
 
-export interface IBall {
+export interface IBallModel {
   x: number
   y: number
   velocityX: number
