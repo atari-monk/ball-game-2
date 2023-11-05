@@ -15,6 +15,7 @@ export const SocketEvents = {
   PlayerState: 'playerState',
   Point: 'point',
   Counter: 'counter',
+  BallState: 'ballState',
 } as const
 
 export type SocketEvent = keyof typeof SocketEvents
