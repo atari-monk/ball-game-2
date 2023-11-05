@@ -1,8 +1,11 @@
 //ball
 export { IBall } from './ball/IBall'
+export { IBallAction } from './ball/IBallAction'
 export { IBallModel } from './ball/IBallModel'
 //game
 export { IGameStateManager } from './game/IGameStateManager'
+//game_object
+export { IUpdate } from './game_object/IUpdate'
 //Messenger
 export { IMessage } from './messanger/IMessage'
 export { IMessenger } from './messanger/IMessenger'
