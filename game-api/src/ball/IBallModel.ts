@@ -1,3 +1,4 @@
+import { BallState } from 'shared-api'
 import { IPlayer } from '../player/IPlayer'
 
 export interface IBallModel {
@@ -7,5 +8,8 @@ export interface IBallModel {
   velocityY: number
   radius: number
   mass: number
+
   lastHit: IPlayer | null
+
+  state: BallState
 }

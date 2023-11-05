@@ -18,7 +18,9 @@ export interface IPlayerModel {
   maxSpeedForward: number
   maxSpeedBackward: number
   turnSpeed: number
-  team: ITeam | null
   score: number
+
+  team: ITeam | null
+
   state: PlayerState
 }
