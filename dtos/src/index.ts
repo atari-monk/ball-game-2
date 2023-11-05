@@ -1,8 +1,10 @@
+//ball
+export { BallDto } from './ball/BallDto'
+export { BallStateDto } from './ball/BallStateDto'
 //player
 export { PlayerDto } from './player/PlayerDto'
 export { PlayerStateDto } from './player/PlayerStateDto'
 //dtos
-export { BallDto } from './BallDto'
 export { CounterDto } from './CounterDto'
 export { FieldDto } from './FieldDto'
 export { GateDto } from './GateDto'

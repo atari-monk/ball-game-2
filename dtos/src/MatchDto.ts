@@ -1,5 +1,5 @@
 import { IBall, IPlayer } from 'game-api'
-import { BallDto } from './BallDto'
+import { BallDto } from './ball/BallDto'
 import { PlayerDto } from './player/PlayerDto'
 
 export class MatchDto {
