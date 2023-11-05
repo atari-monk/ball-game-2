@@ -13,12 +13,10 @@ import { MatchDto, PlayerDto, PointDto, TeamDto } from 'dtos'
 import { IGameData } from './IGameData'
 import { GameDataForMobileLandscape } from './GameDataForMobileLandscape'
 import { SocketEvents } from 'shared-api'
-import { Team } from '../team/Team'
 import { Team as TeamEnum } from 'shared-api'
 
 export class Game implements IMatch {
   private readonly _gameData: IGameData
-  private readonly frictionCoefficient: number = 0.99
   matchDuration: number = 5 * 60 * 1000
   matchStartTime: number | null = null
   private nameGenerator = new NameGenerator()
@@ -217,7 +215,7 @@ export class Game implements IMatch {
     if (this._stateManager.isNotInProgressState()) return
 
     // Update ball position based on its velocity
-    this.updateBallPosition(deltaTime)
+    this._gameData.ball.update(deltaTime)
 
     // Update player positions based on their velocity
     this.updatePlayerPositions(deltaTime)
@@ -256,20 +254,6 @@ export class Game implements IMatch {
     } else {
       return `It's a tie! ${teamA.score}-${teamB.score}`
     }
-  }
-
-  updateBallPosition(deltaTime: number) {
-    // Apply friction to the ball's velocity
-    this._gameData.ball.velocityX *= this.frictionCoefficient
-    this._gameData.ball.velocityY *= this.frictionCoefficient
-
-    // Calculate the displacement based on velocity and deltaTime
-    const displacementX = this._gameData.ball.velocityX * deltaTime
-    const displacementY = this._gameData.ball.velocityY * deltaTime
-
-    // Update the ball's position
-    this._gameData.ball.x += displacementX
-    this._gameData.ball.y += displacementY
   }
 
   updatePlayerPositions(deltaTime: number) {
