@@ -20,8 +20,10 @@ export class PlayerModel implements IPlayerModel {
   private _maxSpeedForward: number = 0
   private _maxSpeedBackward: number = 0
   private _turnSpeed: number = 0
-  private _team: ITeam | null = null
   private _score: number = 0
+
+  private _team: ITeam | null = null
+
   private _state: PlayerState = { type: PlayerStateType.Idle }
   protected stateContext: PlayerStateContext
 

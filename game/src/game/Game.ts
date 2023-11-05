@@ -51,7 +51,7 @@ export class Game implements IMatch {
   }
 
   constructor(private readonly _io: Server) {
-    this._gameData = new GameDataForMobileLandscape()
+    this._gameData = new GameDataForMobileLandscape(_io)
     this._messenger = new Messenger(_io)
     this._stateManager = new GameStateManager(this._messenger, this)
     this._stateManager.transitionToMatchMaking()

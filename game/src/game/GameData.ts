@@ -39,11 +39,11 @@ export class GameData implements IGameData {
     this._players = players
   }
 
-  constructor() {
+  constructor(io: Server) {
     this._field = this.getField()
     this._teams = this.getTeams()
     this._gates = this.getGates()
-    this._ball = this.getBall()
+    this._ball = this.getBall(io)
     this._players = []
   }
 
@@ -88,8 +88,8 @@ export class GameData implements IGameData {
     return gates
   }
 
-  private getBall() {
-    return new BallBuilder()
+  private getBall(io: Server) {
+    return new BallBuilder(io)
       .withPosition(this._field.width / 2, this._field.height / 2)
       .withVelocity(0, 0)
       .withRadius(20)

@@ -1,7 +1,15 @@
 import { IField, IGates, IPlayerAction, ITeam } from 'game-api'
 import { PlayerModel } from './PlayerModel'
+import { SoccerPlayerController } from './movement/SoccerPlayerController'
+import { IPlayerController } from './movement/IPlayerController'
 
 export class PlayerAction extends PlayerModel implements IPlayerAction {
+  protected controller: IPlayerController = new SoccerPlayerController(this)
+
+  update(deltaTime: number) {
+    this.controller.update(deltaTime)
+  }
+
   scorePoint(): void {
     this.score++
     if (this.team) this.team.score++

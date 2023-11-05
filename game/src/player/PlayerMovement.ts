@@ -1,15 +1,11 @@
 import { Server } from 'socket.io'
 import { PlayerAction } from './PlayerAction'
-import { IPlayerController } from './movement/IPlayerController'
-import { SoccerPlayerController } from './movement/SoccerPlayerController'
 import { WalkState } from './state/WalkState'
 import { IPlayerMovement } from 'game-api'
 import { IdleState } from './state/IdleState'
 import { PlayerStateType } from 'shared-api'
 
 export class PlayerMovement extends PlayerAction implements IPlayerMovement {
-  private controller: IPlayerController = new SoccerPlayerController(this)
-
   constructor(io: Server) {
     super(io)
   }
@@ -47,9 +43,5 @@ export class PlayerMovement extends PlayerAction implements IPlayerMovement {
   private switchToIdleState() {
     if (this.state.type !== PlayerStateType.Idle)
       this.stateContext.setState(new IdleState(this, this.io))
-  }
-
-  update(deltaTime: number) {
-    this.controller.update(deltaTime)
   }
 }

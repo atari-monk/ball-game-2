@@ -1,53 +1,42 @@
-import { IPlayer } from 'game-api'
+import { Server } from 'socket.io'
+import { IBall, IPlayer } from 'game-api'
 import { Ball } from './Ball'
 
 export class BallBuilder {
-  private x: number = 0
-  private y: number = 0
-  private velocityX: number = 0
-  private velocityY: number = 0
-  private radius: number = 0
-  private mass: number = 0
-  private lastHit: IPlayer | null = null
+  private _ball: IBall
 
-  constructor() {}
+  constructor(io: Server) {
+    this._ball = new Ball(io)
+  }
 
   withPosition(x: number, y: number): BallBuilder {
-    this.x = x
-    this.y = y
+    this._ball.x = x
+    this._ball.y = y
     return this
   }
 
   withVelocity(velocityX: number, velocityY: number): BallBuilder {
-    this.velocityX = velocityX
-    this.velocityY = velocityY
+    this._ball.velocityX = velocityX
+    this._ball.velocityY = velocityY
     return this
   }
 
   withRadius(radius: number): BallBuilder {
-    this.radius = radius
+    this._ball.radius = radius
     return this
   }
 
   withMass(mass: number): BallBuilder {
-    this.mass = mass
+    this._ball.mass = mass
     return this
   }
 
   withLastHit(lastHit: IPlayer | null): BallBuilder {
-    this.lastHit = lastHit
+    this._ball.lastHit = lastHit
     return this
   }
 
-  build(): Ball {
-    return Ball.create(
-      this.x,
-      this.y,
-      this.velocityX,
-      this.velocityY,
-      this.radius,
-      this.mass,
-      this.lastHit
-    )
+  build(): IBall {
+    return this._ball
   }
 }
