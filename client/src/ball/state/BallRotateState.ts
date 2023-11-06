@@ -2,7 +2,7 @@ import { IState } from 'game-api'
 import { BallStateContext } from '../BallStateContext'
 import { BallStateType } from 'shared-api'
 
-export class RotateState implements IState {
+export class BallRotateState implements IState {
   constructor(private readonly ball: BallStateContext) {}
 
   enter() {

@@ -1,5 +1,6 @@
 import { ISocketInManager, ISocketIo } from 'client-api'
 import {
+  BallStateDto,
   CounterDto,
   MapDto,
   MatchDto,
@@ -65,5 +66,9 @@ export class SocketInManager implements ISocketInManager {
 
   handleCounter(callback: (data: CounterDto) => void): void {
     this.socket.on(SocketEvents.Counter, callback)
+  }
+
+  handleBallSate(callback: (ballStateData: BallStateDto) => void): void {
+    this.socket.on(SocketEvents.BallState, callback)
   }
 }

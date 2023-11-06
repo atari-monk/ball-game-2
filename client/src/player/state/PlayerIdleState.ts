@@ -2,7 +2,7 @@ import { IState } from 'game-api'
 import { PlayerStateContext } from '../PlayerStateContext'
 import { PlayerStateType } from 'shared-api'
 
-export class IdleState implements IState {
+export class PlayerIdleState implements IState {
   constructor(private readonly player: PlayerStateContext) {}
 
   enter() {

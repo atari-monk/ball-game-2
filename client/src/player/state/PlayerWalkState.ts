@@ -2,7 +2,7 @@ import { IState } from 'game-api'
 import { PlayerStateContext } from '../PlayerStateContext'
 import { PlayerStateType } from 'shared-api'
 
-export class WalkState implements IState {
+export class PlayerWalkState implements IState {
   constructor(private readonly player: PlayerStateContext) {}
 
   enter() {

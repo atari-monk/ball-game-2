@@ -1,6 +1,6 @@
 import { IState } from 'game-api'
 import { BallModel } from './BallModel'
-import { IdleState } from './state/IdleState'
+import { BallIdleState } from './state/BallIdleState'
 import { BallRenderer } from './BallRenderer'
 import { CanvasDrawer } from '../canvas/CanvasDrawer'
 import { AnimationConfig } from 'client-api'
@@ -11,7 +11,7 @@ export class BallStateContext extends BallModel {
 
   constructor() {
     super()
-    this.currentState = new IdleState(this)
+    this.currentState = new BallIdleState(this)
     this.currentState.enter()
   }
 

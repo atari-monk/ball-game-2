@@ -1,4 +1,5 @@
 import {
+  BallStateDto,
   FieldDto,
   IGateDtos,
   MapDto,
@@ -20,9 +21,9 @@ import {
   ICanvasInfo,
 } from 'client-api'
 import { Player } from './player/Player'
-import { IdleState } from './player/state/IdleState'
-import { PlayerStateType } from 'shared-api'
-import { WalkState } from './player/state/WalkState'
+import { PlayerIdleState } from './player/state/PlayerIdleState'
+import { BallStateType, PlayerStateType } from 'shared-api'
+import { PlayerWalkState } from './player/state/PlayerWalkState'
 import { CanvasInfoProvider } from './canvas/CanvasInfoProvider'
 import { CanvasDrawer } from './canvas/CanvasDrawer'
 import { blueAnimations, redAnimations } from './player/playerData'
@@ -34,6 +35,8 @@ import { InputManager } from './input/InputManager'
 import { getById } from 'dom-lib'
 import { Ball } from './ball/Ball'
 import { ballAnimations } from './ball/ballData'
+import { BallRotateState } from './ball/state/BallRotateState'
+import { BallIdleState } from './ball/state/BallIdleState'
 
 export class GameClient {
   private mysocket: ISocketIo
@@ -127,6 +130,7 @@ export class GameClient {
     this.socketInManager.handleTeamUpdate(this.handleTeamUpdate.bind(this))
     this.socketInManager.handleMatchUpdate(this.handleMatchUpdate.bind(this))
     this.socketInManager.handlePlayerSate(this.handlePlayerState.bind(this))
+    this.socketInManager.handleBallSate(this.handleBallState.bind(this))
   }
 
   private onConnect() {
@@ -152,9 +156,17 @@ export class GameClient {
     const player = this.players.find((p) => p.id === dto.id)
     if (!player) return
     if (dto.state.type === PlayerStateType.Idle)
-      player.setState(new IdleState(player))
+      player.setState(new PlayerIdleState(player))
     if (dto.state.type === PlayerStateType.Walk)
-      player.setState(new WalkState(player))
+      player.setState(new PlayerWalkState(player))
+  }
+
+  private handleBallState(dto: BallStateDto) {
+    if (!this.ball) return
+    if (dto.state.type === BallStateType.Idle)
+      this.ball.setState(new BallIdleState(this.ball))
+    if (dto.state.type === BallStateType.Rotate)
+      this.ball.setState(new BallRotateState(this.ball))
   }
 
   private handleMapUpdate(dto: MapDto) {

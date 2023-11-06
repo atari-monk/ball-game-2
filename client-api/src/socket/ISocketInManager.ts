@@ -1,4 +1,5 @@
 import {
+  BallStateDto,
   CounterDto,
   MapDto,
   MatchDto,
@@ -22,4 +23,5 @@ export interface ISocketInManager {
   handlePlayerSate(callback: (playerStateData: PlayerStateDto) => void): void
   handlePoint(callback: (data: PointDto) => void): void
   handleCounter(callback: (data: CounterDto) => void): void
+  handleBallSate(callback: (ballStateData: BallStateDto) => void): void
 }
