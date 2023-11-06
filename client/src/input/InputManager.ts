@@ -23,7 +23,7 @@ export class InputManager {
     config: IInputConfig = {
       isKeyboard: true,
       isMobileInput: false,
-      isJoystic: true,
+      isJoystick: true,
     }
   ) {
     this._config = config
@@ -31,7 +31,7 @@ export class InputManager {
       this._keyboradInput = new InputHandler(this.socketOutManager)
     if (this._config.isMobileInput)
       this._mobileInputHandler = new MobileInputHandler(this.socketOutManager)
-    if (this._config.isJoystic) {
+    if (this._config.isJoystick) {
       this._joysticFactory = this.createJoystic()
     }
   }

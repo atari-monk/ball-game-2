@@ -52,12 +52,12 @@ export class GameClient {
   private canvasDrawer: CanvasDrawer
   private logClient?: LogClient
   private isLogOn: boolean = false
-  private playerId: string
-  private fullScreen: FullscreenManager
+  private playerId: string = ''
+  private fullScreen: FullscreenManager | null = null
   private canvasInfo: ICanvasInfo
   private scoreboard: Scoreboard | null = null
   private counter: Counter | null = null
-  private inputManager: InputManager
+  private inputManager: InputManager | null = null
 
   constructor() {
     this.mysocket = new MySocketIo(hostConfig.selectedHost)
@@ -67,21 +67,29 @@ export class GameClient {
     this.canvasDrawer = new CanvasDrawer(this.canvasInfo.ctx)
     this.canvasRenderer = new CanvasRenderer(this.canvasDrawer)
     this.animationLoop = new AnimationLoop(this.render.bind(this))
+  }
 
-    this.initializeSocketListeners()
-    this.animationLoop.start()
-    if (this.isLogOn) {
-      this.logClient = new LogClient(this.socketInManager)
-      this.setLogButton()
+  async initializeGame() {
+    try {
+      await this.canvasRenderer.initialize()
+
+      this.initializeSocketListeners()
+      this.animationLoop.start()
+      if (this.isLogOn) {
+        this.logClient = new LogClient(this.socketInManager)
+        this.setLogButton()
+      }
+      this.playerId = ''
+      this.fullScreen = new FullscreenManager(getById('canvas_container'))
+      this.setFullscreenButton()
+      this.inputManager = new InputManager(this.socketOutManager, {
+        isKeyboard: true,
+        isMobileInput: false,
+        isJoystick: true,
+      })
+    } catch (error: any) {
+      console.error('Failed to initialize game:', error.message)
     }
-    this.playerId = ''
-    this.fullScreen = new FullscreenManager(getById('canvas_container'))
-    this.setFullscreenButton()
-    this.inputManager = new InputManager(this.socketOutManager, {
-      isKeyboard: true,
-      isMobileInput: false,
-      isJoystic: true,
-    })
   }
 
   private getCanvasInfo() {
@@ -96,10 +104,10 @@ export class GameClient {
     if (!fullscreenButton) return
 
     fullscreenButton.addEventListener('click', () => {
-      this.fullScreen.toggleFullscreen()
+      this.fullScreen?.toggleFullscreen()
     })
     fullscreenButton.addEventListener('touchstart', () => {
-      this.fullScreen.toggleFullscreen()
+      this.fullScreen?.toggleFullscreen()
     })
   }
 
@@ -211,10 +219,10 @@ export class GameClient {
       if (playerDto) {
         player.moveDto = playerDto
         if (
-          this.inputManager.config.isMobileInput &&
+          this.inputManager!.config.isMobileInput &&
           this.playerId === player.id
         )
-          this.inputManager.mobileInputHandler?.setPlayerPosition(
+          this.inputManager!.mobileInputHandler!.setPlayerPosition(
             playerDto.x,
             playerDto.y
           )

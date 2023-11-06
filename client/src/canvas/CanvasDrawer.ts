@@ -46,4 +46,29 @@ export class CanvasDrawer {
     this.ctx.fillStyle = data.color
     this.ctx.fillText(text, x, y)
   }
+
+  async loadImage(imgAssetPath: string): Promise<HTMLImageElement> {
+    return new Promise((resolve, reject) => {
+      const image = new Image()
+      image.src = imgAssetPath
+
+      image.onload = () => {
+        resolve(image)
+      }
+
+      image.onerror = () => {
+        reject(new Error('Failed to load the image.'))
+      }
+    })
+  }
+
+  drawImage(
+    image: HTMLImageElement,
+    x: number,
+    y: number,
+    width: number,
+    height: number
+  ) {
+    this.ctx.drawImage(image, x, y, width, height)
+  }
 }

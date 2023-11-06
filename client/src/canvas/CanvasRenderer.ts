@@ -4,15 +4,33 @@ import { Player } from '../player/Player'
 import { Ball } from '../ball/Ball'
 
 export class CanvasRenderer {
-  constructor(private readonly canvasDrawer: CanvasDrawer) {}
+  private fieldImg: HTMLImageElement | null
+
+  constructor(private readonly canvasDrawer: CanvasDrawer) {
+    this.fieldImg = null
+  }
+
+  async loadImageAndInitialize() {
+    try {
+      this.fieldImg = await this.canvasDrawer.loadImage('../assets/grass.png')
+    } catch (error: any) {
+      console.error(error.message)
+    }
+  }
+
+  async initialize() {
+    await this.loadImageAndInitialize()
+  }
 
   clearCanvas() {
     this.canvasDrawer.clearCanvas()
   }
 
   drawField(field: FieldDto) {
-    this.canvasDrawer.setFillStyle('green')
-    this.canvasDrawer.drawRectangle(0, 0, field.width, field.height)
+    //this.canvasDrawer.setFillStyle('green')
+    //this.canvasDrawer.drawRectangle(0, 0, field.width, field.height)
+    if (!this.fieldImg) return
+    this.canvasDrawer.drawImage(this.fieldImg, 0, 0, field.width, field.height)
   }
 
   drawGates(gates: IGateDtos) {
