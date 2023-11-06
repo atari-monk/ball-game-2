@@ -1,8 +1,8 @@
 import { Server } from 'socket.io'
 import { PlayerAction } from './PlayerAction'
-import { WalkState } from './state/WalkState'
+import { PlayerWalkState } from './state/PlayerWalkState'
 import { IPlayerMovement } from 'game-api'
-import { IdleState } from './state/IdleState'
+import { PlayerIdleState } from './state/PlayerIdleState'
 import { PlayerStateType } from 'shared-api'
 
 export class PlayerMovement extends PlayerAction implements IPlayerMovement {
@@ -17,7 +17,7 @@ export class PlayerMovement extends PlayerAction implements IPlayerMovement {
 
   private switchToWalkState() {
     if (this.state.type !== PlayerStateType.Walk)
-      this.stateContext.setState(new WalkState(this, this.io))
+      this.stateContext.setState(new PlayerWalkState(this, this.io))
   }
 
   onDown(): void {
@@ -42,6 +42,6 @@ export class PlayerMovement extends PlayerAction implements IPlayerMovement {
 
   private switchToIdleState() {
     if (this.state.type !== PlayerStateType.Idle)
-      this.stateContext.setState(new IdleState(this, this.io))
+      this.stateContext.setState(new PlayerIdleState(this, this.io))
   }
 }

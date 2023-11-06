@@ -1,12 +1,12 @@
 import { Server } from 'socket.io'
 import { IPlayerModel, IState } from 'game-api'
-import { IdleState } from './IdleState'
+import { PlayerIdleState } from './PlayerIdleState'
 
 export class PlayerStateContext {
   private currentState: IState
 
   constructor(player: IPlayerModel, io: Server) {
-    this.currentState = new IdleState(player, io)
+    this.currentState = new PlayerIdleState(player, io)
   }
 
   setState(newState: IState): void {
