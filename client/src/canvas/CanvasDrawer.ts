@@ -71,4 +71,17 @@ export class CanvasDrawer {
   ) {
     this.ctx.drawImage(image, x, y, width, height)
   }
+
+  drawImageFlippedHorizontally(
+    image: HTMLImageElement,
+    x: number,
+    y: number,
+    width: number,
+    height: number
+  ) {
+    this.ctx.save() // Save the current canvas state
+    this.ctx.scale(-1, 1) // Flip the canvas horizontally
+    this.ctx.drawImage(image, -x - width, y, width, height) // Draw the image (flipped)
+    this.ctx.restore() // Restore the canvas state
+  }
 }

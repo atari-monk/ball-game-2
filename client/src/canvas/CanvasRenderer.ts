@@ -5,14 +5,19 @@ import { Ball } from '../ball/Ball'
 
 export class CanvasRenderer {
   private fieldImg: HTMLImageElement | null
+  private goalPostImg: HTMLImageElement | null
 
   constructor(private readonly canvasDrawer: CanvasDrawer) {
     this.fieldImg = null
+    this.goalPostImg = null
   }
 
   async loadImageAndInitialize() {
     try {
       this.fieldImg = await this.canvasDrawer.loadImage('../assets/grass.png')
+      this.goalPostImg = await this.canvasDrawer.loadImage(
+        '../assets/goalPost.png'
+      )
     } catch (error: any) {
       console.error(error.message)
     }
@@ -49,6 +54,16 @@ export class CanvasRenderer {
       gates.right.width,
       gates.right.height
     )
+
+    if (!this.goalPostImg) return
+    this.canvasDrawer.drawImageFlippedHorizontally(
+      this.goalPostImg,
+      -85,
+      90,
+      260,
+      170
+    )
+    this.canvasDrawer.drawImage(this.goalPostImg, 565, 90, 260, 170)
   }
 
   drawPlayer(player: Player, dt: number) {
