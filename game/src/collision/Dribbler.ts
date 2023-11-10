@@ -18,15 +18,21 @@ export class Dribbler {
 
   dribble(players: IPlayer[], ball: IBall, dt: number) {
     for (const player of players) {
+      if (!player.ballCollision) {
+        this.dribbleAction(player, ball)
+      }
       const distanceSquared = this.getDistanceSquared(ball, player)
       const playerId = player.id
       const playerTimer = this.timers[playerId] || 0
 
       if (distanceSquared < this.sumRadiiSquared) {
+        if (this.isDribbleOn(players)) {
+          this.resetDribble(players)
+          console.log('dribble reset')
+        }
         if (playerTimer >= 1000) {
-          //console.log('drible')
           player.ballCollision = false
-          this.dribbleAction(player, ball)
+          console.log('dribble on');
         } else {
           this.timers[playerId] = playerTimer + dt
         }
@@ -34,6 +40,19 @@ export class Dribbler {
         this.timers[playerId] = 0
         player.ballCollision = true
       }
+    }
+  }
+
+  private isDribbleOn(players: IPlayer[]) {
+    for (const player of players) {
+      if (player.ballCollision) return true
+    }
+    return false
+  }
+
+  private resetDribble(players: IPlayer[]) {
+    for (const player of players) {
+      player.ballCollision = true
     }
   }
 
