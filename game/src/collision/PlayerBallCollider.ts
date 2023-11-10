@@ -2,6 +2,9 @@ import { IBall, IPlayer } from 'game-api'
 import { Vector2 } from '../utils/Vector2'
 
 export class PlayerBallCollider {
+  //coefficient of restitution (COR) for a soccer ball
+  private ballCOR: number = 0.7
+
   checkPlayerBallCollision(players: IPlayer[], ball: IBall) {
     for (const player of players) {
       const dx = ball.x - player.x
@@ -33,7 +36,7 @@ export class PlayerBallCollider {
     ball.y += collisionVectorY * adjustedOverlap
   }
 
-  private handleCollision(player: IPlayer, ball: IBall, e: number = 0.9) {
+  private handleCollision(player: IPlayer, ball: IBall) {
     const playerVelocity = new Vector2(player.velocityX, player.velocityY)
     const ballVelocity = new Vector2(ball.velocityX, ball.velocityY)
 
@@ -44,11 +47,11 @@ export class PlayerBallCollider {
 
     const newPlayerVelocity = playerVelocity
       .add(relativeVelocity.multiply(playerMassFactor))
-      .multiply(e)
+      .multiply(this.ballCOR)
 
     const newBallVelocity = ballVelocity
       .subtract(relativeVelocity.multiply(ballMassFactor))
-      .multiply(e)
+      .multiply(this.ballCOR)
 
     player.velocityX = newPlayerVelocity.x
     player.velocityY = newPlayerVelocity.y
