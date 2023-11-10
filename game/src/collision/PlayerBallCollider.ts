@@ -26,8 +26,11 @@ export class PlayerBallCollider {
     const overlap = player.radius + ball.radius - distance
     const collisionVectorX = dx / distance
     const collisionVectorY = dy / distance
-    ball.x += collisionVectorX * overlap
-    ball.y += collisionVectorY * overlap
+
+    const adjustedOverlap = overlap * 1.1
+
+    ball.x += collisionVectorX * adjustedOverlap
+    ball.y += collisionVectorY * adjustedOverlap
   }
 
   private handleCollision(player: IPlayer, ball: IBall, e: number = 0.9) {
