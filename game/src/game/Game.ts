@@ -14,6 +14,7 @@ import { IGameData } from './IGameData'
 import { GameDataForMobileLandscape } from './GameDataForMobileLandscape'
 import { SocketEvents } from 'shared-api'
 import { Team as TeamEnum } from 'shared-api'
+import { Dribbler } from '../collision/Dribbler'
 
 export class Game implements IMatch {
   private readonly _gameData: IGameData
@@ -29,6 +30,7 @@ export class Game implements IMatch {
   private playerWallCollider = new PlayerWallCollider()
   private ballWallCollider = new BallWallCollider()
   private ballGateCollider = new BallGateCollider()
+  private dribbler = new Dribbler()
   private _messenger: IMessenger
   private _stateManager: IGameStateManager
 
@@ -86,6 +88,7 @@ export class Game implements IMatch {
       )
       if (team) this._io.emit('team', new TeamDto(team))
     })
+    this.dribbler.init(this._gameData.players, this._gameData.ball)
   }
 
   public stopLoop() {
@@ -223,6 +226,12 @@ export class Game implements IMatch {
     this.playerBallCollider.checkPlayerBallCollision(
       this._gameData.players,
       this._gameData.ball
+    )
+
+    this.dribbler.dribble(
+      this._gameData.players,
+      this._gameData.ball,
+      deltaTime
     )
 
     this.playerWallCollider.checkWallCollision(

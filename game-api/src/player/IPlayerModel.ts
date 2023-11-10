@@ -19,6 +19,7 @@ export interface IPlayerModel {
   maxSpeedBackward: number
   turnSpeed: number
   score: number
+  ballCollision: boolean
 
   team: ITeam | null
 

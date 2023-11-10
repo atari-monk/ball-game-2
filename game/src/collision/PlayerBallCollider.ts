@@ -7,6 +7,7 @@ export class PlayerBallCollider {
 
   checkPlayerBallCollision(players: IPlayer[], ball: IBall) {
     for (const player of players) {
+      if (!player.ballCollision) continue
       const dx = ball.x - player.x
       const dy = ball.y - player.y
       const distance = Math.sqrt(dx * dx + dy * dy)

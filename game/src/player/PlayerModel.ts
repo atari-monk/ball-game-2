@@ -21,6 +21,7 @@ export class PlayerModel implements IPlayerModel {
   private _maxSpeedBackward: number = 0
   private _turnSpeed: number = 0
   private _score: number = 0
+  private _ballCollision: boolean = true
 
   private _team: ITeam | null = null
 
@@ -170,6 +171,14 @@ export class PlayerModel implements IPlayerModel {
 
   set score(s: number) {
     this._score = s
+  }
+
+  get ballCollision(): boolean {
+    return this._ballCollision
+  }
+
+  set ballCollision(s: boolean) {
+    this._ballCollision = s
   }
 
   get state(): PlayerState {
