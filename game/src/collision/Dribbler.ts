@@ -1,14 +1,8 @@
 import { IBall, IPlayer } from 'game-api'
-//import { Vector2 } from '../utils/Vector2'
 
 export class Dribbler {
   private sumRadiiSquared: number = 0
-  //private dr: Vector2
   private timers: { [playerId: string]: number } = {}
-
-  constructor() {
-    //this.dr = new Vector2(0, 0)
-  }
 
   init(players: IPlayer[], ball: IBall) {
     const rp = players[0].radius + 0.2 * players[0].radius
@@ -32,7 +26,7 @@ export class Dribbler {
         }
         if (playerTimer >= 1000) {
           player.ballCollision = false
-          console.log('dribble on');
+          console.log('dribble on')
         } else {
           this.timers[playerId] = playerTimer + dt
         }
