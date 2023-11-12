@@ -1,4 +1,4 @@
-import { ITextInfo } from './ITextInfo'
+import { ITextInfo, ITextInfo2 } from './ITextInfo'
 
 export class CanvasDrawer {
   private ctx: CanvasRenderingContext2D
@@ -41,10 +41,29 @@ export class CanvasDrawer {
     this.ctx.stroke()
   }
 
+  measureText(text: string, data: ITextInfo) {
+    this.ctx.font = data.font
+    return this.ctx.measureText(text).width
+  }
+
+  measureText2(info: ITextInfo2) {
+    this.ctx.font = info.font
+    const measures = this.ctx.measureText(info.text)
+    info.textWidth = measures.width
+    info.textHeigth =
+      measures.fontBoundingBoxAscent + measures.fontBoundingBoxDescent
+  }
+
   drawText(text: string, x: number, y: number, data: ITextInfo) {
     this.ctx.font = data.font
     this.ctx.fillStyle = data.color
     this.ctx.fillText(text, x, y)
+  }
+
+  drawText2(info: ITextInfo2) {
+    this.ctx.font = info.font
+    this.ctx.fillStyle = info.color
+    this.ctx.fillText(info.text, info.x, info.y)
   }
 
   async loadImage(imgAssetPath: string): Promise<HTMLImageElement> {

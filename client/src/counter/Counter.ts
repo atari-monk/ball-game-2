@@ -10,11 +10,13 @@ export class Counter {
   private yellowText: ITextInfo
   private data?: CounterDto
   private eventMap
+  private callback?: () => void
 
   constructor(
     private readonly socketInManager: ISocketInManager,
     private readonly drawer: CanvasDrawer,
-    private readonly field: FieldDto
+    private readonly field: FieldDto,
+    callback?: () => void
   ) {
     this.redText = { font: '30px Arial', color: 'red' }
     this.blueText = { font: '30px Arial', color: 'blue' }
@@ -23,6 +25,7 @@ export class Counter {
       [CounterEvent.StartGame]: 'PLAY IN',
     }
     this.initializeSocketListeners()
+    this.callback = callback
   }
 
   private initializeSocketListeners() {
@@ -35,7 +38,12 @@ export class Counter {
 
   draw() {
     if (!this.data) return
-    if (this.data.event === CounterEvent.StartGame) this.handleStart()
+    if (this.data.event === CounterEvent.StartGame) {
+      if (this.callback) {
+        this.callback()
+      }
+      this.handleStart()
+    }
     //this.debugStart()
   }
 

@@ -37,6 +37,7 @@ import { Ball } from './ball/Ball'
 import { ballAnimations } from './ball/ballData'
 import { BallRotateState } from './ball/state/BallRotateState'
 import { BallIdleState } from './ball/state/BallIdleState'
+import { WaitInfo } from './canvas/WaitInfo'
 
 export class GameClient {
   private mysocket: ISocketIo
@@ -58,6 +59,9 @@ export class GameClient {
   private scoreboard: Scoreboard | null = null
   private counter: Counter | null = null
   private inputManager: InputManager | null = null
+  private isWakingUp: boolean = true
+  private waitInfo: WaitInfo
+  private isWaitingForPlayer: boolean = false
 
   constructor() {
     this.mysocket = new MySocketIo(hostConfig.selectedHost)
@@ -67,6 +71,8 @@ export class GameClient {
     this.canvasDrawer = new CanvasDrawer(this.canvasInfo.ctx)
     this.canvasRenderer = new CanvasRenderer(this.canvasDrawer)
     this.animationLoop = new AnimationLoop(this.render.bind(this))
+
+    this.waitInfo = new WaitInfo(this.canvasDrawer, this.canvasInfo)
   }
 
   async initializeGame() {
@@ -145,6 +151,8 @@ export class GameClient {
     const playerId = localStorage.getItem('playerId')
     this.socketOutManager.sendPlayerId(playerId ?? '')
     this.playerId = playerId ?? ''
+
+    this.isWaitingForPlayer = true
   }
 
   onYourPlayerId(id: string) {
@@ -189,11 +197,16 @@ export class GameClient {
     this.counter = new Counter(
       this.socketInManager,
       this.canvasDrawer,
-      this.field
+      this.field,
+      () => {
+        this.isWaitingForPlayer = false
+      }
     )
     if (this.ball) return
     this.ball = new Ball()
     this.ball.createRenderer(this.canvasDrawer, ballAnimations)
+
+    this.isWakingUp = false
   }
 
   private handleTeamUpdate(dto: TeamDto) {
@@ -240,6 +253,7 @@ export class GameClient {
     if (this.ball) this.canvasRenderer.drawBall(this.ball, dt)
     this.scoreboard?.draw()
     this.counter?.draw()
+    this.waitInfo.draw(this.isWakingUp, this.isWaitingForPlayer)
   }
 
   public stopGame() {
