@@ -27,14 +27,11 @@ button:hover {
   color: #fff;
 }
 
-.hidden {
-  display: none;
-}
-
 #canvas_container {
   width: 100%;
   height: 100%;
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
   background-color: black;
@@ -50,6 +47,60 @@ button:hover {
   display: block;
   /* border: 1px solid red; */
   box-sizing: border-box;
+  margin: auto;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+#controls {
+  position: relative;
+  top: 30%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 10vh;
+  margin: auto;
+}
+
+.joystick_static {
+  position: absolute;
+  touch-action: none;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.buttons {
+  display: flex;
+  align-items: center;
+}
+
+.game_btn {
+  width: 50px;
+  height: 50px;
+  background-color: rgba(255, 255, 255, 0.3);
+  border: none;
+  border-radius: 50%;
+  color: #000;
+  font-size: 14px;
+  outline: none;
+  cursor: default;
+}
+
+.game_btn:hover {
+  background-color: rgba(255, 255, 255, 0.5);
+}
+
+#button1 {
+  margin: 0;
+  margin-right: 70px;
+}
+
+#button2 {
+  margin: 0;
+  margin-left: 70px;
 }
 
 #menu_container {
@@ -79,4 +130,8 @@ button:hover {
   width: 100%;
   height: 200px;
   resize: none;
+}
+
+.hidden {
+  display: none;
 }
