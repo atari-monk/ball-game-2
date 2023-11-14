@@ -1,5 +1,6 @@
 export interface IInputConfig {
-  isKeyboard: boolean
-  isMobileInput: boolean
-  isJoystick: boolean
+  isArrowsOn: boolean
+  isKeysOn: boolean
+  isJoystickOn: boolean
+  isMyMobileInputOn: boolean
 }

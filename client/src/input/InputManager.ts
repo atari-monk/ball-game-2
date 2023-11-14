@@ -3,15 +3,17 @@ import { InputHandler } from './InputHandler'
 import { MobileInputHandler } from './MobileInputHandler'
 import { StaticJoystick } from './StaticJoystick'
 import { IInputConfig } from './IInputConfig'
+import { KeyInputHandler } from './KeyInputHandler'
 
 export class InputManager {
-  private _keyboradInput: InputHandler | null = null
-  private _mobileInputHandler: MobileInputHandler | null = null
+  private _arrowsInput: InputHandler | null = null
+  private _keysInput: KeyInputHandler | null = null
   private _joysticFactory: StaticJoystick | null = null
+  private _myMobileInput: MobileInputHandler | null = null
   private _config: IInputConfig
 
   get mobileInputHandler() {
-    return this._mobileInputHandler
+    return this._myMobileInput
   }
 
   get config() {
@@ -21,19 +23,20 @@ export class InputManager {
   constructor(
     private readonly socketOutManager: ISocketOutManager,
     config: IInputConfig = {
-      isKeyboard: true,
-      isMobileInput: false,
-      isJoystick: true,
+      isArrowsOn: true,
+      isKeysOn: true,
+      isJoystickOn: true,
+      isMyMobileInputOn: false,
     }
   ) {
     this._config = config
-    if (this._config.isKeyboard)
-      this._keyboradInput = new InputHandler(this.socketOutManager)
-    if (this._config.isMobileInput)
-      this._mobileInputHandler = new MobileInputHandler(this.socketOutManager)
-    if (this._config.isJoystick) {
-      this._joysticFactory = this.createJoystic()
-    }
+    if (this._config.isArrowsOn)
+      this._arrowsInput = new InputHandler(this.socketOutManager)
+    if (this._config.isKeysOn)
+      this._keysInput = new KeyInputHandler(this.socketOutManager)
+    if (this._config.isJoystickOn) this._joysticFactory = this.createJoystic()
+    if (this._config.isMyMobileInputOn)
+      this._myMobileInput = new MobileInputHandler(this.socketOutManager)
   }
 
   private createJoystic(): StaticJoystick | null {

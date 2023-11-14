@@ -89,9 +89,10 @@ export class GameClient {
       this.fullScreen = new FullscreenManager(getById('canvas_container'))
       this.setFullscreenButton()
       this.inputManager = new InputManager(this.socketOutManager, {
-        isKeyboard: true,
-        isMobileInput: false,
-        isJoystick: true,
+        isArrowsOn: true,
+        isKeysOn: true,
+        isJoystickOn: true,
+        isMyMobileInputOn: false,
       })
     } catch (error: any) {
       console.error('Failed to initialize game:', error.message)
@@ -232,7 +233,7 @@ export class GameClient {
       if (playerDto) {
         player.moveDto = playerDto
         if (
-          this.inputManager!.config.isMobileInput &&
+          this.inputManager!.config.isMyMobileInputOn &&
           this.playerId === player.id
         )
           this.inputManager!.mobileInputHandler!.setPlayerPosition(

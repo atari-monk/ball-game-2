@@ -1,5 +1,5 @@
 import { Socket } from 'socket.io-client'
-import { IInput, ISocketIo, ISocketOutManager } from 'client-api'
+import { IInput, IKeyInput, ISocketIo, ISocketOutManager } from 'client-api'
 import { SocketEvents } from 'shared-api'
 
 export class SocketOutManager implements ISocketOutManager {
@@ -19,5 +19,9 @@ export class SocketOutManager implements ISocketOutManager {
 
   sendPong() {
     this.socket.emit(SocketEvents.Pong)
+  }
+
+  sendKeyInput(input: IKeyInput): void {
+    this.socket.emit(SocketEvents.Keys)
   }
 }
